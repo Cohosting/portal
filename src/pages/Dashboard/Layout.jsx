@@ -34,28 +34,33 @@ export const Layout = ({
 }) => {
 
   return (
-    <Flex  height={'100vh'} overflowY={'auto'}>
-        <Box bg={'#f8f9fb'} p={'4px'} height={'100%'} w={'200px'} pt={'15px'} >
-           <Flex alignItems={'center'} >
-                <Box  display={'flex'} alignItems={'center'}  fontSize={'12px'}  bg={'white'} borderRadius={'4px'} p={2} w={'25px'} h={'25px'} >
-                    <Text>
-
-                    H
-                    </Text>
-                </Box>
-                <Text ml={2} fontSize={'14px'}>
-                    {user?.name || 'Himel'}
-                </Text>
-           </Flex>
-           <Divider my={4} />
-           <NavItem icon={<AiOutlineUser />} >Client</NavItem>
-            <NavItem icon={<AiTwotoneSetting />} >Settings</NavItem>
-            <NavItem icon={<MdPayment />} >Pricing</NavItem>
-
-        </Box>
-        <Box p={'10px'} height={'100%'} flex={1}> 
-            {children}
-        </Box>
+    <Flex height={'100vh'} overflowY={'auto'}>
+      <Box bg={'#f8f9fb'} p={'4px'} height={'100%'} w={'200px'} pt={'15px'}>
+        <Flex alignItems={'center'}>
+          <Box
+            display={'flex'}
+            alignItems={'center'}
+            fontSize={'12px'}
+            bg={'white'}
+            borderRadius={'4px'}
+            p={2}
+            w={'25px'}
+            h={'25px'}
+          >
+            <Text>H</Text>
+          </Box>
+          <Text ml={2} fontSize={'14px'}>
+            {user?.name || 'Himel'}
+          </Text>
+        </Flex>
+        <Divider my={4} />
+        <NavItem icon={<AiOutlineUser />}>Client</NavItem>
+        <NavItem icon={<AiTwotoneSetting />}>Settings</NavItem>
+        <NavItem icon={<MdPayment />}>Pricing</NavItem>
+      </Box>
+      <Box height={'100%'} flex={1}>
+        {children}
+      </Box>
     </Flex>
-  )
+  );
 }

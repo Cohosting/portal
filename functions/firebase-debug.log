@@ -1,0 +1,26 @@
+[debug] [2023-05-13T06:18:22.464Z] ----------------------------------------------------------------------
+[debug] [2023-05-13T06:18:22.465Z] Command:       /usr/local/bin/node /usr/local/bin/firebase functions:shell
+[debug] [2023-05-13T06:18:22.465Z] CLI Version:   11.24.0
+[debug] [2023-05-13T06:18:22.465Z] Platform:      darwin
+[debug] [2023-05-13T06:18:22.465Z] Node Version:  v16.13.2
+[debug] [2023-05-13T06:18:22.468Z] Time:          Sat May 13 2023 12:18:22 GMT+0600 (Bangladesh Standard Time)
+[debug] [2023-05-13T06:18:22.468Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-05-13T06:18:22.499Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-05-13T06:18:22.500Z] > authorizing via signed-in user (asaduzzamanhimel12@gmail.com)
+[debug] [2023-05-13T06:18:22.500Z] [iam] checking project portal-a229a for permissions ["firebase.projects.get"]
+[debug] [2023-05-13T06:18:22.500Z] > refreshing access token with scopes: []
+[debug] [2023-05-13T06:18:22.501Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2023-05-13T06:18:22.501Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-05-13T06:18:22.977Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2023-05-13T06:18:22.977Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-05-13T06:18:22.997Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/portal-a229a:testIamPermissions [none]
+[debug] [2023-05-13T06:18:22.997Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/portal-a229a:testIamPermissions x-goog-quota-user=projects/portal-a229a
+[debug] [2023-05-13T06:18:22.997Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/portal-a229a:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2023-05-13T06:18:26.675Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/portal-a229a:testIamPermissions 200
+[debug] [2023-05-13T06:18:26.675Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/portal-a229a:testIamPermissions {"permissions":["firebase.projects.get"]}
+[warn] ⚠  functions: Functions Emulator unable to start on port 5000, starting on 5001 instead. {"metadata":{"emulator":{"name":"functions"},"message":"Functions Emulator unable to start on port 5000, starting on 5001 instead."}}
+[debug] [2023-05-13T06:18:26.794Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2023-05-13T06:18:26.795Z] defaultcredentials: writing to file /Users/himel/.config/firebase/asaduzzamanhimel12_gmail_com_application_default_credentials.json
+[debug] [2023-05-13T06:18:26.796Z] DEBUG: Setting GAC to /Users/himel/.config/firebase/asaduzzamanhimel12_gmail_com_application_default_credentials.json
+[debug] [2023-05-13T06:18:26.797Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/portal-a229a/adminSdkConfig [none]

@@ -10,20 +10,22 @@ import {
 } from '@chakra-ui/react';
 import {SignupContext} from './context/signupContext';
 import AuthContextProvider from './context/authContext';
+import { ClientAuthContextComponent } from './context/clientAuthContext';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
   <StrictMode>
-      <ChakraProvider>
-      <SignupContext>
-    <AuthContextProvider>
-          <App />
-    </AuthContextProvider>
-      </SignupContext>
-      </ChakraProvider  >
-
+    <ChakraProvider>
+      <ClientAuthContextComponent>
+        <SignupContext>
+          <AuthContextProvider>
+            <App />
+          </AuthContextProvider>
+        </SignupContext>
+      </ClientAuthContextComponent>
+    </ChakraProvider>
   </StrictMode>
 );
 

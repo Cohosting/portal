@@ -11,70 +11,80 @@ import { Settings } from '../../pages/Settings/Setting';
 import { Refresh } from '../../pages/Settings/Refresh';
 import { StripeReturn } from '../../pages/Settings/StripeReturn';
 import { Client } from '../../pages/Client/Client';
+import { ClientLogin } from '../../pages/Portal/Client/ClientLogin';
+import { ClientPortal } from '../../pages/Portal/Client/ClientPortal';
+import { ClientDetails } from '../../pages/Client/ClientDetails';
 
 const router = createBrowserRouter([
-    {
-        path: '/signup',
-        element: <Signup />
-    },
-    {
-        path: '/login',
-        element: <Login />
-    },
-    {
-        path: '/',
-        element: (
-            <ProtectedRoutes>
-                <Dashboard />
-            </ProtectedRoutes>
-        ) 
-    },
-    {
-        path: '/pricing',
-        element: (
-            <ProtectedRoutes>
-                <Pricing />
-            </ProtectedRoutes>
-        ) 
-    },
-    {
-        path: '/success',
-        element:   <Success  />
-    },
-    {
-        path: '/cancel',
-        element: <Failed />
-    },
-    {
-        path: '/settings',
-        element: <Settings />
-    },
-    {
-        path: '/client',
-        element: (
-            <ProtectedRoutes>
-                <Client />
-            </ProtectedRoutes>
-        )
-    },
-    {
-        path: '/reauth',
-        element: (
-            <ProtectedRoutes>
-                <Refresh />
-            </ProtectedRoutes>
-        )
-    },
-    {
-        path: '/return',
-        element: (
-            <ProtectedRoutes>
-                <StripeReturn />
-            </ProtectedRoutes>
-        )
-    }
-    
-    
-    ]);
+  {
+    path: '/signup',
+    element: <Signup />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/',
+    element: (
+      <ProtectedRoutes>
+        <Dashboard />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/pricing',
+    element: (
+      <ProtectedRoutes>
+        <Pricing />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/success',
+    element: <Success />,
+  },
+  {
+    path: '/cancel',
+    element: <Failed />,
+  },
+  {
+    path: '/settings',
+    element: <Settings />,
+  },
+  {
+    path: '/client',
+    element: (
+      <ProtectedRoutes>
+        <Client />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/reauth',
+    element: (
+      <ProtectedRoutes>
+        <Refresh />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/return',
+    element: (
+      <ProtectedRoutes>
+        <StripeReturn />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/portal',
+    element: <ClientPortal />,
+  },
+
+  {
+    path: '/client/details/:id',
+    element: <ClientDetails />,
+  },
+]);
     
     export { router };

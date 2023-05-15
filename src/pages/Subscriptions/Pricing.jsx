@@ -26,8 +26,6 @@ const PricingItem = ({title, price, features, priceId, email}) => {
     setIsLoading(false);
   };
 
-
-  
     return (
 
         <Box ml={3} bg={'white'} p={4} borderRadius={'4px'} boxShadow={'0px 0px 24px rgba(0, 0, 0, 0.07)'} >
