@@ -14,6 +14,8 @@ import { Client } from '../../pages/Client/Client';
 import { ClientLogin } from '../../pages/Portal/Client/ClientLogin';
 import { ClientPortal } from '../../pages/Portal/Client/ClientPortal';
 import { ClientDetails } from '../../pages/Client/ClientDetails';
+import { Invoices } from '../../pages/Invoices/Invoices';
+import { InvoiceForm } from '../../pages/Invoices/InvoiceForm';
 
 const router = createBrowserRouter([
   {
@@ -84,6 +86,22 @@ const router = createBrowserRouter([
   {
     path: '/client/details/:id',
     element: <ClientDetails />,
+  },
+  {
+    path: '/invoices',
+    element: (
+      <ProtectedRoutes>
+        <Invoices />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/invoices/create',
+    element: (
+      <ProtectedRoutes>
+        <InvoiceForm />
+      </ProtectedRoutes>
+    ),
   },
 ]);
     

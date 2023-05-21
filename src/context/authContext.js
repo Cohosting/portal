@@ -16,40 +16,30 @@ const AuthContextProvider = ({ children }) => {
 
 
 useEffect(() => {
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async user => {
     if (user) {
-      onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
-        let userData = {  ...snapshot.data() };
-        if(userData.isProfileCompleted === false)  {
+      onSnapshot(doc(db, 'users', user.uid), snapshot => {
+        let userData = { ...snapshot.data() };
+        if (userData.isProfileCompleted === false) {
           setStep(2);
-          setUserCredentials({  
+          setUserCredentials({
             ...userCredentials,
             email: userData.email,
             name: userData.name,
             uid: userData.uid,
-  
-          })
+          });
         }
         setUser(snapshot.data());
         setIsAuthenticated(true);
-
       });
-
-
-
     } else {
       setUser(null);
       setIsAuthenticated(false);
     }
-  }
-  );
-}, [])
+  });
+}, []);
 
 
-console.log({
-  user,
-})
- 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated }}>
       {children}

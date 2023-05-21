@@ -57,6 +57,7 @@ export const Layout = ({
         <NavItem icon={<AiOutlineUser />}>Client</NavItem>
         <NavItem icon={<AiTwotoneSetting />}>Settings</NavItem>
         <NavItem icon={<MdPayment />}>Pricing</NavItem>
+        <NavItem icon={<MdPayment />}>Invoices</NavItem>
       </Box>
       <Box height={'100%'} flex={1}>
         {children}

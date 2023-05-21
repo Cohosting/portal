@@ -22,9 +22,26 @@ export const ClientAuthContextComponent = ({ children }) => {
         token,
       });
 
-      console.log({ response });
       if (response.data.success) {
         const { user } = response.data;
+
+        if (!user.customerId) {
+          // create customer  using js fetch to /create-customer
+          const response = await fetch(
+            'http://localhost:9000/create-customer',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: user.email,
+                id: user.id,
+              }),
+            }
+          );
+          console.log({ response });
+        }
         setClientUser(user);
       } else {
         console.log('invalid token');

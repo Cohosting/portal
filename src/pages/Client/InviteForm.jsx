@@ -53,6 +53,7 @@ export const InviteForm = ({
         return;
       }
       const ref = doc(collection(db, 'portalMembers'));
+
       let member = {
         ...inviteState,
         addedBy: user.uid,
@@ -65,6 +66,20 @@ export const InviteForm = ({
       await updateDoc(doc(db, 'portals', user.portals[0]), {
         members: arrayUnion(ref.id),
       });
+             const response = await fetch(
+               'http://localhost:9000/create-customer',
+               {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({
+                   email: inviteState.email,
+                   id: ref.id,
+                   stripeConnectAccountId: user.stripeConnectAccountId,
+                 }),
+               }
+             );
       setTemporaryClient(member);
       onClose();
       onToggleSuccess();

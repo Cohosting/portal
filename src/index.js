@@ -11,6 +11,7 @@ import {
 import {SignupContext} from './context/signupContext';
 import AuthContextProvider from './context/authContext';
 import { ClientAuthContextComponent } from './context/clientAuthContext';
+import { PortalContextProvider } from './context/portalContext';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
@@ -21,7 +22,9 @@ root.render(
       <ClientAuthContextComponent>
         <SignupContext>
           <AuthContextProvider>
-            <App />
+            <PortalContextProvider>
+              <App />
+            </PortalContextProvider>
           </AuthContextProvider>
         </SignupContext>
       </ClientAuthContextComponent>

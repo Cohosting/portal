@@ -43,6 +43,11 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
       await setDoc(portalRef, {
         ...data,
         createdBy: user.uid,
+        settings: {
+          achDebit: true,
+          card: false,
+        },
+        id: portalRef.id,
       });
 
       await updateDoc(ref, {
