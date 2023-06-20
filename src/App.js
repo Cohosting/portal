@@ -9,7 +9,7 @@ import { Signup } from './pages/Auth/Signup';
 import PrivateRoute from './components/Route/ProtectedRoutes';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { router } from './components/Route/Router';
-
+import './index.css';
 
 function App() {
   return       <RouterProvider router={router}  />

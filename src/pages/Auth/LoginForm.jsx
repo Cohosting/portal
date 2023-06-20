@@ -5,9 +5,13 @@ import { CustomInput } from '../../components/CustomInput';
 import { AuthBox, Layout } from './Layout';
 import { useNavigate } from 'react-router-dom';
 import { useSubdomain } from '../../hooks/useSubdomain';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 
 export const LoginForm = () => {
   const d = useSubdomain();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [userCredentials, setUserCredentials] = useState({
     email: '',
     password: '',
@@ -26,6 +30,26 @@ export const LoginForm = () => {
       ...userCredentials,
       [name]: e.target.value,
     });
+  };
+
+  const handleEmailPasswordLogin = async () => {
+    const { email, password } = userCredentials;
+    if (email === '' || password === '') {
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      setIsLoading(false);
+      navigate('/');
+    } catch (error) {
+      console.log(error);
+      setError(error.message);
+      setIsLoading(false);
+    }
   };
   return (
     <>
@@ -62,7 +86,13 @@ export const LoginForm = () => {
               isInvalid={() => handleError('password')}
               type={'password'}
             />
+            {error && (
+              <Text color={'red'} fontSize={'13px'} mt={'1rem'}>
+                {error}
+              </Text>
+            )}
             <Button
+              isLoading={isLoading}
               width={'100%'}
               color={'#fff'}
               isDisabled={
@@ -76,6 +106,7 @@ export const LoginForm = () => {
               background={'#212B36'}
               boxShadow={'0px 1px 2px rgba(0, 0, 0, 0.07)'}
               onClick={() => {
+                handleEmailPasswordLogin();
                 // userCredentials.email !== '' &&
                 //   userCredentials.password !== '' &&
                 //   setStep(step + 1);

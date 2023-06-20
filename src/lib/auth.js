@@ -9,6 +9,7 @@ export const getOrCreateUser = async  (firebaseUser, userCredentials  =  {}) => 
     let userObject = {
             ...userCredentials
         }
+
     const  ref = doc(db, 'users',  firebaseUser.uid);
     const snapshot = await getDoc(ref);
 

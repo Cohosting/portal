@@ -1,71 +1,166 @@
-import { Box, Button, Divider, Flex, Text, useDisclosure } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Spinner,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { InviteForm } from './InviteForm';
-import { addMail } from '../../lib/email';
 import { InviteSuccessModal } from './InviteSuccessModal';
 import {
   collection,
-  getDocs,
+  doc,
   onSnapshot,
   query,
   where,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { AuthContext } from '../../context/authContext';
 import { useNavigate } from 'react-router-dom';
-
+import Table from './ClientTable';
+import { AddIcon } from '@chakra-ui/icons';
+import { PortalContext } from '../../context/portalContext';
+import { StripeConnectValidation } from './StripeConnectValidation';
+import { usePlanName } from '../../hooks/usePlanName';
+import { prices } from '../../utils/prices';
+import { ClientUsageLimit } from '../../components/UI/ClientUsageLimit';
 export const Client = () => {
+  const [shouldShowAddClient, setShouldShowAddClient] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { portal } = useContext(PortalContext);
+  const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
   const [temporaryClient, setTemporaryClient] = useState(null);
   const [clients, setClients] = useState([]);
   const { isOpen, onToggle } = useDisclosure();
   const { isOpen: isOpenSuccess, onToggle: onToggleSuccess } = useDisclosure();
-
+  const [shouldLimitAddingClient, setShouldLimitAddingClient] = useState(false);
+  const columns = ['Name', 'Status', 'Creation date', 'Email'];
+  let sortableColumns = [];
   useEffect(() => {
+    if (!portal) return;
     const collecRef = collection(db, 'portalMembers');
-    const q = query(collecRef, where('portalURL', '==', user.portalURL));
+    const q = query(collecRef, where('portalId', '==', portal.id));
     const unsubscribe = onSnapshot(q, querySnapshot => {
       const clients = querySnapshot.docs.map(doc => doc.data());
-      setClients(clients);
+      let data = [];
+      clients.forEach(el => {
+        data.push({
+          Name: (
+            <Flex alignItems={'center'}>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+                w={'30px'}
+                h={'30px'}
+                bg={'#7cae7a'}
+                color={'white'}
+                borderRadius={'4px'}
+              >
+                {' '}
+                {el.name[0]}
+              </Flex>
+              <Box ml={3}>
+                <Text>{el.name}</Text>
+                <Text fontSize={'12px'}>{el.email}</Text>
+              </Box>
+            </Flex>
+          ),
+          Email: el.email,
+          Status: el.status,
+          ['Creation date']: el.createdAt,
+        });
+      });
+
+      setClients(data);
     });
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [portal]);
+
+  /*   useEffect(() => {
+    if (!portal) return;
+    const createDemoSeats = async portalId => {
+      const batch = writeBatch(db);
+
+      // Create the seats subcollection reference
+      const portalRef = doc(db, 'portals', portalId);
+      const seatsCollectionRef = collection(portalRef, 'seats');
+
+      // Generate 5 demo seats
+      const demoSeats = [
+        { seatNumber: 'Seat 1', status: 'available' },
+        { seatNumber: 'Seat 2', status: 'available' },
+        { seatNumber: 'Seat 3', status: 'available' },
+        { seatNumber: 'Seat 4', status: 'available' },
+        { seatNumber: 'Seat 5', status: 'available' },
+      ];
+
+      // Add each demo seat to the batch
+      demoSeats.forEach(seat => {
+        const seatRef = doc(seatsCollectionRef);
+        batch.set(seatRef, seat);
+      });
+
+      // Commit the batch write
+      await batch.commit();
+
+      console.log('Demo seats created successfully!');
+    };
+    createDemoSeats(portal.id);
+  }, [portal]); */
 
   return (
     <Layout>
-      <Box p={4}>
-        <Box py={3}>
+      <StripeConnectValidation
+        setShouldShowAddClient={setShouldShowAddClient}
+      />
+      <ClientUsageLimit
+        portal={portal}
+        clients={clients}
+        setShouldLimitAddingClient={setShouldLimitAddingClient}
+      />
+      <Box>
+        <Box pt={3} px={'20px'}>
           <Flex alignItems={'center'} justifyContent={'space-between'}>
-            <Text>Client</Text>
-            <Button onClick={onToggle} mb={3}>
-              Add
-            </Button>
+            <Text fontSize={'14px'}>Client</Text>
+            {shouldShowAddClient && !shouldLimitAddingClient && (
+              <Button
+                size={'sm'}
+                bg={'black'}
+                color={'white'}
+                leftIcon={<AddIcon />}
+                onClick={onToggle}
+                mb={3}
+                fontSize={'14px'}
+              >
+                New client
+              </Button>
+            )}
           </Flex>
-          <Divider />
         </Box>
+
+        <Divider />
+
         <Box>
-          {clients.map(el => (
-            <Box
-              onClick={() => navigate(`/client/details/${el.id}`)}
-              border={'1px solid gray'}
-              borderRadius={'8px'}
-              p={2}
-              cursor={'pointer'}
-              _hover={{
-                bg: 'gray.200',
-              }}
-              my={3}
-            >
-              <Text>Name: {el.name}</Text>
-              <Text>Email: {el.email}</Text>
-              <Text>Status: {el.status}</Text>
-            </Box>
-          ))}
+          {!clients ? (
+            <Flex alignItems={'center'} justifyContent={'center'}>
+              <Spinner />
+            </Flex>
+          ) : (
+            <Table
+              columns={columns}
+              data={clients}
+              sortableColumns={sortableColumns}
+            />
+          )}
         </Box>
       </Box>
       <InviteForm

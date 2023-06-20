@@ -9,6 +9,7 @@ import {
 } from '../../context/portalContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { CustomDomainForm } from './CustomDomainForm';
 
 export const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -39,8 +40,9 @@ export const Settings = () => {
           isLoading={isLoading}
           onClick={() =>
             createStripeConnectAccount(
-              user.uid,
-              user.stripeConnectAccountId,
+              portal.createdBy,
+              portal.stripeConnectAccountId,
+              portal.id,
               setIsLoading
             )
           }
@@ -67,7 +69,7 @@ export const Settings = () => {
                 <Checkbox
                   onChange={() => updatePortalSetting('achDebit')}
                   colorScheme="green"
-                  isChecked={portal.settings.achDebit}
+                  isChecked={portal?.settings.achDebit}
                 />
               </Flex>
               <Flex
@@ -79,12 +81,31 @@ export const Settings = () => {
                 <Text fontSize={'17px'}>Card</Text>
                 <Checkbox
                   colorScheme="green"
-                  isChecked={portal.settings.card}
+                  isChecked={portal?.settings.card}
                   onChange={() => updatePortalSetting('card')}
                 />
               </Flex>
             </Box>
           )}
+        </Box>
+        <CustomDomainForm />
+        <Box mt={4}>
+          <Text my={2} color={'green.300'}>
+            Setting for importing invoice
+          </Text>
+          <Flex
+            py={1}
+            borderBottom={'1px solid #dfe9e6'}
+            alignItems={'center'}
+            justifyContent={'space-between'}
+          >
+            <Text fontSize={'17px'}>Auto-import</Text>
+            <Checkbox
+              colorScheme="green"
+              isChecked={portal?.settings.autoImport}
+              onChange={() => updatePortalSetting('autoImport')}
+            />
+          </Flex>
         </Box>
       </Box>
     </Layout>

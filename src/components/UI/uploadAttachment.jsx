@@ -3,12 +3,14 @@ import { Box, Button, Text } from '@chakra-ui/react';
 import { AuthContext } from '../../context/authContext';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../lib/firebase';
+import { PortalContext } from '../../context/portalContext';
 
 export const UploadAttachmentComponent = ({ setAttachments }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedPath, setUploadedPath] = useState('');
   const { user } = useContext(AuthContext);
+  const { portal } = useContext(PortalContext);
 
   const handleFileChange = event => {
     const selectedFile = event.target.files[0];
@@ -18,7 +20,7 @@ export const UploadAttachmentComponent = ({ setAttachments }) => {
     if (file) {
       setUploading(true);
 
-      const path = `porta/${user.portalURL}/${file.name}`;
+      const path = `porta/${portal.portalURL}/${file.name}`;
       const portalRef = ref(storage, path);
 
       uploadBytes(portalRef, file)

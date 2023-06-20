@@ -25,7 +25,6 @@ export const ClientDetails = () => {
   const handleCreateCustomProperties = el => {
     setCustomProperties([...customProperties, { ...el, id: Math.random() }]);
   };
-  console.log({ customProperties });
   return (
     <Layout>
       <Flex direction={'column'} h={'inherit'}>

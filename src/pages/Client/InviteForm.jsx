@@ -16,6 +16,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { PortalContext } from '../../context/portalContext';
 
 export const InviteForm = ({
   isOpen,
@@ -26,6 +27,7 @@ export const InviteForm = ({
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useContext(AuthContext);
+  const { portal } = useContext(PortalContext);
   const [inviteState, setInviteState] = useState({
     email: '',
     name: '',
@@ -42,8 +44,10 @@ export const InviteForm = ({
   const handleAddMember = async () => {
     try {
       setIsLoading(true);
+      // need to change
       const memberRef = query(
         collection(db, 'portalMembers'),
+        where('portalId', '==', portal.id),
         where('email', '==', inviteState.email)
       );
       const memberSnapshot = await getDocs(memberRef);
@@ -58,34 +62,32 @@ export const InviteForm = ({
         ...inviteState,
         addedBy: user.uid,
         status: 'restricted',
-        portalId: user.portals[0],
+        portalId: portal.id,
         id: ref.id,
-        portalURL: user.portalURL,
+        createdAt: new Date().toDateString(),
       };
       await setDoc(ref, member);
-      await updateDoc(doc(db, 'portals', user.portals[0]), {
+      await updateDoc(doc(db, 'portals', portal.id), {
+        // member or client
         members: arrayUnion(ref.id),
       });
-             const response = await fetch(
-               'http://localhost:9000/create-customer',
-               {
-                 method: 'POST',
-                 headers: {
-                   'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify({
-                   email: inviteState.email,
-                   id: ref.id,
-                   stripeConnectAccountId: user.stripeConnectAccountId,
-                 }),
-               }
-             );
+      await fetch('http://localhost:9000/connect/create-connected-customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: inviteState.email,
+          id: ref.id,
+          stripeConnectAccountId: portal.stripeConnectAccountId,
+        }),
+      });
       setTemporaryClient(member);
       onClose();
       onToggleSuccess();
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
       setIsLoading(false);
     }
   };
@@ -117,12 +119,11 @@ export const InviteForm = ({
             <Box>
               <Text mb={1}>Account type</Text>
               <Select
-                value={inviteState.accountType}
+                isReadOnly={true}
+                defaultValue={inviteState.accountType}
                 name="accountType"
                 placeholder="Select option"
-                onChange={handleChange}
               >
-                <option value="member">Member</option>
                 <option value="client">Client</option>
               </Select>
             </Box>

@@ -12,13 +12,14 @@ import {SignupContext} from './context/signupContext';
 import AuthContextProvider from './context/authContext';
 import { ClientAuthContextComponent } from './context/clientAuthContext';
 import { PortalContextProvider } from './context/portalContext';
+import { ClientPortalContextComponent } from './context/clientPortalContext';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
-  <StrictMode>
-    <ChakraProvider>
+  <ChakraProvider>
+    <ClientPortalContextComponent>
       <ClientAuthContextComponent>
         <SignupContext>
           <AuthContextProvider>
@@ -28,8 +29,8 @@ root.render(
           </AuthContextProvider>
         </SignupContext>
       </ClientAuthContextComponent>
-    </ChakraProvider>
-  </StrictMode>
+    </ClientPortalContextComponent>
+  </ChakraProvider>
 );
 
 // If you want your app to work offline and load faster, you can change

@@ -15,8 +15,10 @@ import { addMail } from './../../lib/email';
 import { db } from '../../lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { AuthContext } from '../../context/authContext';
+import { PortalContext } from '../../context/portalContext';
 export const InviteSuccessModal = ({ isOpen, onClose, temporaryClient }) => {
   const { user } = useContext(AuthContext);
+  const { portal } = useContext(PortalContext);
   const [isLoading, setIsLoading] = useState(false);
   const sentMail = async () => {
     try {
@@ -32,9 +34,12 @@ export const InviteSuccessModal = ({ isOpen, onClose, temporaryClient }) => {
       await addMail(
         temporaryClient.email,
         temporaryClient.name,
+        'Invitation to portal',
+        '',
+        portal.others.companyName,
         `
       <div>
-        <p>link: http://${user.portalURL}.localhost:3000/login</p>
+        <p>link: http://${portal.others.portalURL}.localhost:3000/login</p>
         password: ${password}
       </div>
       `

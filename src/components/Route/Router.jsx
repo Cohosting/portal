@@ -16,6 +16,13 @@ import { ClientPortal } from '../../pages/Portal/Client/ClientPortal';
 import { ClientDetails } from '../../pages/Client/ClientDetails';
 import { Invoices } from '../../pages/Invoices/Invoices';
 import { InvoiceForm } from '../../pages/Invoices/InvoiceForm';
+import { AddApp } from '../../pages/App Setup/addApp';
+import { Extentions } from '../../pages/App Setup/Extentions';
+import { AppSetup } from '../../pages/App Setup/appSetup';
+import { CustomizePortal } from '../../pages/Settings/CustomizePortal';
+import { Team } from '../../pages/Team/Team';
+import { AccountSettingsPage } from '../../pages/Settings/Profile/Profile';
+import { AcceptInvitationPage } from '../../pages/Team/AcceptInvitationPage';
 
 const router = createBrowserRouter([
   {
@@ -35,7 +42,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/pricing',
+    path: '/subscription',
     element: (
       <ProtectedRoutes>
         <Pricing />
@@ -52,7 +59,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/settings',
-    element: <Settings />,
+    element: (
+      <ProtectedRoutes>
+        <Settings />
+      </ProtectedRoutes>
+    ),
   },
   {
     path: '/client',
@@ -82,13 +93,17 @@ const router = createBrowserRouter([
     path: '/portal',
     element: <ClientPortal />,
   },
+  {
+    path: '/portal/:portalName',
+    element: <ClientPortal />,
+  },
 
   {
     path: '/client/details/:id',
     element: <ClientDetails />,
   },
   {
-    path: '/invoices',
+    path: '/billing',
     element: (
       <ProtectedRoutes>
         <Invoices />
@@ -96,12 +111,65 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/invoices/create',
+    path: '/billing/create',
     element: (
       <ProtectedRoutes>
         <InvoiceForm />
       </ProtectedRoutes>
     ),
+  },
+  {
+    path: '/customize',
+    element: (
+      <ProtectedRoutes>
+        <CustomizePortal />
+      </ProtectedRoutes>
+    ),
+  },
+
+  {
+    path: '/module-management',
+    element: (
+      <ProtectedRoutes>
+        <AppSetup />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/module-management/setup',
+    element: (
+      <ProtectedRoutes>
+        <AddApp />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/extentions',
+    element: (
+      <ProtectedRoutes>
+        <Extentions />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/team',
+    element: (
+      <ProtectedRoutes>
+        <Team />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/settings/me',
+    element: (
+      <ProtectedRoutes>
+        <AccountSettingsPage />
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/accept-team',
+    element: <AcceptInvitationPage />,
   },
 ]);
     

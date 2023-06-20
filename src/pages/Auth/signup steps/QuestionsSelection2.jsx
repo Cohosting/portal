@@ -3,11 +3,19 @@ import { useContext, useState } from "react";
 import CustomSelect from "../../../components/CustomSelect";
 import { clients, industries, sizes, types } from "../../../utils/config";
 import { boxStyle } from "../Signup";
-import { addDoc, collection, doc, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  arrayUnion,
+  collection,
+  doc,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore';
 import AuthContextProvider from '../../../context/signupContext';
 import { AuthContext } from '../../../context/authContext';
 import { db } from '../../../lib/firebase';
 import { useNavigate } from 'react-router-dom';
+import { defaultAppList } from '../../../utils';
+import { omit } from 'lodash';
 
 export const QuestionsSelection2 = ({ isLargerThan450 }) => {
   const navigate = useNavigate();
@@ -32,29 +40,73 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
   const persistOtherData = async () => {
     try {
       setIsLoading(true);
-      let data = { ...userCredentials };
 
-      delete data.name;
-      delete data.email;
-      delete data.password;
-
+      // Initializations
+      const batch = writeBatch(db);
       const ref = doc(db, 'users', user.uid);
       const portalRef = doc(collection(db, 'portals'));
-      await setDoc(portalRef, {
-        ...data,
+      const memberRef = doc(collection(db, 'teamMembers'));
+
+      // Portal Data Preparation
+      const trialStartDate = new Date();
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialStartDate.getDate() + 7);
+      const portalData = {
+        subscriptionType: 'freemium',
+        others: omit(userCredentials, ['name', 'email', 'password']),
+        portalURL: userCredentials.portalURL,
         createdBy: user.uid,
         settings: {
           achDebit: true,
           card: false,
+          autoImport: false,
         },
+        apps: defaultAppList,
         id: portalRef.id,
+        trialStartDate,
+        trialEndDate,
+        isSubscribed: false,
+        isExpiryCount: true,
+      };
+      batch.set(portalRef, portalData);
+
+      // Team Member Data Preparation
+      const [firstName, lastName] = userCredentials.name.split(' ');
+      let memberObject = {
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email: userCredentials.email,
+        uid: userCredentials.uid,
+        status: 'active',
+        role: 'owner',
+        portalId: portalRef.id,
+        id: memberRef.id,
+        createdAt: new Date().toLocaleString(),
+      };
+      batch.set(memberRef, memberObject);
+
+      // User Document Update
+      batch.update(ref, {
+        isProfileCompleted: true,
+        portals: arrayUnion(portalRef.id),
       });
 
-      await updateDoc(ref, {
-        isProfileCompleted: true,
-        ...data,
-        portals: [portalRef.id],
-      });
+      // Creating 5 default seats
+      for (let i = 0; i < 5; i++) {
+        const seatRef = doc(collection(db, 'seats'));
+        const seatData = {
+          id: seatRef.id,
+          portalId: portalRef.id,
+          status: i === 0 ? 'occupied' : 'available', // first seat is 'occupied' by the owner, rest are 'available'
+          userId: i === 0 ? userCredentials.uid : null, // first seat's userId is set to the owner's uid
+          createdAt: serverTimestamp(),
+          seatType: 'free',
+        };
+        batch.set(seatRef, seatData);
+      }
+
+      // Commit batch
+      await batch.commit();
 
       navigate('/');
     } catch (err) {

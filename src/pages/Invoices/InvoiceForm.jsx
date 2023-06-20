@@ -42,7 +42,7 @@ export const InvoiceForm = () => {
   useEffect(() => {
     if (!user) return;
     const collecRef = collection(db, 'portalMembers');
-    const q = query(collecRef, where('portalURL', '==', user.portalURL));
+    const q = query(collecRef, where('portalId', '==', portal.id));
     const unsubscribe = onSnapshot(q, querySnapshot => {
       const clients = querySnapshot.docs.map(doc => doc.data());
       setClients(clients);
@@ -57,23 +57,38 @@ export const InvoiceForm = () => {
     setStripeUser(user);
   };
 
-  const handleCreateInvoice = async () => {
+  /*   const handleCreateInvoice = async () => {
     if (!stripeUser.customerId) {
       return;
     }
 
+    let paymentMethodArray = [];
+    if (settings.achDebit) {
+      paymentMethodArray.push('ach_debit');
+    }
+    if (settings.card) {
+      paymentMethodArray.push('card');
+    }
+
     try {
-      const res = await fetch(`http://localhost:9000/create-connect-invoice`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          stripeConnectAccountId: user.stripeConnectAccountId,
-          line_items: lineItems,
-          customerId: stripeUser.customerId,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:9000/connect/create-connect-invoice`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            // replace with portal.stripeConnectAccountId
+            stripeConnectAccountId: user.stripeConnectAccountId,
+            line_items: lineItems,
+            customerId: stripeUser.customerId,
+            payment_settings: {
+              payment_method_types: paymentMethodArray,
+            },
+          }),
+        }
+      );
       const data = await res.json();
       console.log({
         data,
@@ -83,14 +98,13 @@ export const InvoiceForm = () => {
       console.log(`Error creating invoice: ${err}`);
       setIsLoading(false);
     }
-  };
+  }; */
 
   const saveFiretoreInvoice = async () => {
     try {
       setIsLoading(true);
       const ref = doc(collection(db, 'invoices'));
       await setDoc(ref, {
-        portalURL: user.portalURL,
         lineItems,
         memo: '',
         attachments: attachments,
@@ -101,11 +115,15 @@ export const InvoiceForm = () => {
         id: ref.id,
         invoiceNumber: generateInvoiceNumber(),
         settings,
+        portalId: portal.id,
+        customerId: stripeUser.customerId,
+        email: stripeUser.email,
+        userId: user.id,
       });
       setIsLoading(false);
 
       setTimeout(() => {
-        navigate('/invoices');
+        navigate('/billing');
       }, 900);
     } catch (err) {
       console.log(`Error creating invoice: ${err}`);

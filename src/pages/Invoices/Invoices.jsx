@@ -12,17 +12,20 @@ import {
 } from 'firebase/firestore';
 import { AuthContext } from '../../context/authContext';
 import { db } from '../../lib/firebase';
+import { PortalContext } from '../../context/portalContext';
 
 export const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const { user } = useContext(AuthContext);
+  const { portal } = useContext(PortalContext);
 
   // fetch invoices from firebase invoices collection
   useEffect(() => {
+    if (!portal) return;
     const collecRef = collection(db, 'invoices');
 
-    const q = query(collecRef, where('portalURL', '==', user.portalURL));
+    const q = query(collecRef, where('portalId', '==', portal.id));
     const unsubscribe = onSnapshot(q, querySnapshot => {
       const invoices = querySnapshot.docs.map(doc => doc.data());
       setInvoices(invoices);
@@ -31,28 +34,38 @@ export const Invoices = () => {
     return () => {
       unsubscribe();
     };
-  }, []);
-
-  const createCheckoutSession = async invoice => {
-    const res = await fetch(`http://localhost:9000/create-connect-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        customerId: invoice.client.customerId,
-        stripeConnectAccountId: user.stripeConnectAccountId,
-        line_items: invoice.lineItems,
-      }),
-    });
-    const { session } = await res.json();
-    console.log({
-      session,
-    });
-  };
+  }, [portal]);
 
   const updateInvoiceStatusFirebase = async invoice => {
+    let paymentMethodArray = [];
+    if (invoice.settings.achDebit) {
+      paymentMethodArray.push('us_bank_account');
+    }
+    if (invoice.settings.card) {
+      paymentMethodArray.push('card');
+    }
+    const res = await fetch(
+      'http://localhost:9000/connect/create-connect-invoice',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: invoice.client.customerId,
+          stripeConnectAccountId: portal.stripeConnectAccountId,
+          line_items: invoice.lineItems,
+          payment_settings: {
+            payment_method_types: paymentMethodArray,
+          },
+          invoiceId: invoice.id,
+          isFromApp: 'true',
+        }),
+      }
+    );
+    const data = await res.json();
     const ref = doc(db, 'invoices', invoice.id);
+
     await updateDoc(ref, {
       status: 'finalized',
     });
@@ -71,7 +84,6 @@ export const Invoices = () => {
                 p={2}
                 my={2}
                 borderRadius={'10px'}
-                onClick={() => createCheckoutSession(invoice)}
               >
                 <Box>
                   <Text>Name: {invoice.client.name}</Text>

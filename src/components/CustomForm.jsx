@@ -16,12 +16,23 @@ import {
     _invalid: { borderColor: '#FC8181', boxShadow: 'none' },
   };
   
-  const CustomForm = ({ value, type, errorMessage, handleChange, label, sx }) => {
+  const CustomForm = ({
+    value,
+    type,
+    errorMessage,
+    handleChange,
+    label,
+    sx,
+    readOnly,
+    defaultValue,
+  }) => {
     const [text, setText] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-  
+    console.log({
+      readOnly,
+    });
     const { userCredentials, setUserCredentials } = useContext(AuthProvider);
-  
+
     const handleError = () => {
       let isError = true;
       if (value === 'email') {
@@ -31,7 +42,7 @@ import {
       isError = text === '' ? true : false;
       return isError;
     };
-  
+
     return (
       <FormControl
         isInvalid={handleError(value)}
@@ -95,11 +106,12 @@ import {
             </Flex>
           </>
         )}
-  
+
         {value !== 'portalURL' && (
           <>
             <FormLabel fontSize={'13px'}>{label}</FormLabel>
             <Input
+              isReadOnly={readOnly}
               type={type}
               // value={value}
               id={value}
@@ -119,6 +131,7 @@ import {
                       boxShadow: 'none',
                     },
               }}
+              defaultValue={defaultValue}
               value={userCredentials[value]}
               onChange={e => {
                 handleError();
@@ -127,13 +140,13 @@ import {
                   ...userCredentials,
                   [e.target.id]: e.target.value,
                 });
-  
+
                 handleChange(e.target);
               }}
             />
           </>
         )}
-  
+
         {handleError() && (
           <FormErrorMessage alignSelf={'end'} sx={{ ...sx }}>
             {errorMessage} is required.

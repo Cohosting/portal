@@ -29,6 +29,7 @@ useEffect(() => {
             uid: userData.uid,
           });
         }
+
         setUser(snapshot.data());
         setIsAuthenticated(true);
       });
@@ -38,7 +39,9 @@ useEffect(() => {
     }
   });
 }, []);
-
+console.log({
+  user,
+});
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated }}>
@@ -48,3 +51,26 @@ useEffect(() => {
 };
 
 export default AuthContextProvider;
+
+
+/* 
+
+useEffect(() => {
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      onSnapshot(doc(db, 'users', user.uid), snapshot => {
+        let userData = { ...snapshot.data() };
+       
+        if(!userData.customerId) {
+          // crreate customer using backend
+        }
+
+      });
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  });
+}, []);
+
+*/
