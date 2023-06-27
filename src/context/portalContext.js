@@ -99,6 +99,37 @@ export const PortalContextProvider = ({ children }) => {
       createUserCustomer(portalTeamMemberData.uid);
     }
   }, [portalTeamMemberData]);
+  useEffect(() => {
+    if (!portal || !user) return;
+    (async () => {
+      const currentDate = new Date();
+      const currentTimestamp = Math.floor(currentDate.getTime() / 1000);
+
+      if (
+        portal?.addOnSubscription?.items?.removeBranding &&
+        (currentTimestamp ===
+          portal.addOnSubscription.items.removeBranding.will_expire ||
+          currentTimestamp >
+            portal.addOnSubscription.items.removeBranding.will_expire)
+      ) {
+        try {
+          await updateDoc(db, {
+            'addOnSubscription.items.removeBranding': {
+              ...portal.addOnSubscription.items.removeBranding,
+              active: false,
+              will_expire: null,
+            },
+          });
+        } catch (err) {
+          console.log(
+            'Error while updating the portal remove branding active status and will_expire field removing'
+          );
+        }
+      }
+    })();
+  }, [portal, user]);
+  console.log(JSON.stringify(portal?.subscriptions));
+  console.log(JSON.stringify(portal?.addOnSubscription));
   return (
     <PortalContext.Provider
       value={{ portal, currentPortal, portalTeamMemberData }}

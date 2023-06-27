@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import { Layout } from '../Dashboard/Layout'
+import React, { useContext, useEffect, useState } from 'react';
+import { Layout } from '../Dashboard/Layout';
 import { Box, Button, Checkbox, Divider, Flex, Text } from '@chakra-ui/react';
 import { prices } from '../../utils/prices';
 import { AuthContext } from '../../context/authContext';
@@ -17,33 +17,8 @@ const PricingItem = ({
   user,
   onSelect,
   type,
+  isSubscriptionLoading,
 }) => {
-  const [isPoweredBy, setIsPoweredBy] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const handleCreateCheckoutSession = async () => {
-    setIsLoading(true);
-
-    const response = await fetch(
-      'http://localhost:9000/create-subscription-session',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: priceId,
-          email,
-          portalId: portalId,
-          uid: user.uid,
-          isPoweredBy,
-        }),
-      }
-    );
-    const { session } = await response.json();
-    window.location.href = session.url;
-    setIsLoading(false);
-  };
-
   return (
     <Box
       ml={3}
@@ -75,8 +50,8 @@ const PricingItem = ({
         ))}
       </Box>
       <Button
-        onClick={() => onSelect(isPoweredBy)}
-        isLoading={isLoading}
+        onClick={() => onSelect()}
+        isLoading={isSubscriptionLoading}
         mt={4}
         width={'100%'}
         color={'#fff'}
@@ -100,9 +75,13 @@ export const Pricing = () => {
   const [isPoweredBy, setIsPoweredBy] = useState(false);
   const [showUpgradeDowngrade, setShowUpgradeDowngrade] = useState(false);
   const [isBrandRemoved, setIsBrandRemoved] = useState(false);
-  // Data reference
-  /*  const { portalId, removeBranding, numberOfTeamMembers } = req.body;
-   */
+  const [isBrandingPaymentElementOpen, setIsBrandingPaymentElementOpen] =
+    useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
+  const [cardDetails, setCardDetails] = useState(null);
+
+  const [isBrandingCancel, setIsBrandingCancel] = useState(false);
 
   const handleAddOnSubscription = async () => {
     setIsBrandRemoved(true);
@@ -118,6 +97,7 @@ export const Pricing = () => {
           body: JSON.stringify({
             portalId: portal.id,
             removeBranding: true,
+            numberOfTeamMembers: 0,
           }),
         }
       );
@@ -129,16 +109,147 @@ export const Pricing = () => {
       console.log(err.message);
     }
   };
-  console.log(portal);
+  const handleSubscription = async price => {
+    setIsSubscriptionLoading(true);
+
+    const res = await fetch(
+      `http://localhost:9000/checkDefaultPaymentMethod/${portal.customerId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const { hasDefaultPaymentMethod } = await res.json();
+    if (!hasDefaultPaymentMethod) {
+      setPriceId(price.priceId);
+    } else {
+      const response = await fetch(
+        'http://localhost:9000/create-subscription',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerId: portal.customerId,
+            priceId: price.priceId,
+            portalId: portal.id,
+            uid: user.uid,
+          }),
+        }
+      );
+      const data = await response.json();
+
+      console.log('subscription is implemented', data);
+    }
+
+    setIsSubscriptionLoading(false);
+  };
+
+  const handleIsBrandingPaymentElementOpen = async () => {
+    setIsLoading(true);
+    const res = await fetch(
+      `http://localhost:9000/checkDefaultPaymentMethod/${portal.customerId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const { hasDefaultPaymentMethod } = await res.json();
+    console.log({ hasDefaultPaymentMethod });
+    if (!hasDefaultPaymentMethod) {
+      setIsBrandingPaymentElementOpen(true);
+    } else {
+      handleAddOnSubscription();
+    }
+    setIsLoading(false);
+  };
+  useEffect(() => {
+    if (!portal) return;
+    (async () => {
+      // fetch from /payment-method using javascript fetch
+      const res = await fetch(`http://localhost:9000/payment-method`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: portal?.customerId,
+        }),
+      });
+      const { cardType, last4Digits } = await res.json();
+      setCardDetails({ cardType, last4Digits });
+    })();
+  }, [portal]);
+
+  const handleBrandingRemoveCancel = async () => {
+    setIsBrandingCancel(true);
+
+    try {
+      // use PUT method on /subscriptions/items
+      const response = await fetch(
+        'http://localhost:9000/subscriptions/items',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            portalId: portal.id,
+            subscriptionId: portal.addOnSubscription.subscriptionId,
+            itemId: portal.addOnSubscription.items.removeBranding.itemId,
+          }),
+        }
+      );
+      setIsBrandingCancel(false);
+      console.log(await response.json());
+    } catch (err) {
+      setIsBrandingCancel(false);
+
+      console.log(err.message);
+    }
+  };
+
+  async function createBillingPortalSession(customerId) {
+    try {
+      const response = await fetch(
+        `http://localhost:9000/create-billing-portal-session/${customerId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Error creating Billing Portal session');
+      }
+      const { url } = await response.json();
+      // Redirect the user to the session URL
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle the error appropriately
+    }
+  }
+
   return (
     <Layout>
-      {priceId ? (
+      {priceId || isBrandingPaymentElementOpen ? (
         <Box px={'25px'}>
-          <SubscriptionPage priceId={priceId} isPoweredBy={isPoweredBy} />
+          <SubscriptionPage
+            isBrandingPaymentElementOpen={isBrandingPaymentElementOpen}
+            priceId={priceId}
+            isPoweredBy={isPoweredBy}
+          />
         </Box>
       ) : (
         <Box px={'25px'}>
-          {portal?.subscriptionStatus === 'active' ? (
+          {portal?.subscriptions?.current?.subscriptionStatus === 'active' ? (
             <Box
               bg={'white'}
               p={4}
@@ -147,9 +258,21 @@ export const Pricing = () => {
             >
               <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
                 You are already subscribed to{' '}
-                {prices.filter(el => el.priceId === portal.priceId)[0].title}{' '}
+                {
+                  prices.filter(
+                    el => el.priceId === portal.subscriptions?.current?.priceId
+                  )[0].title
+                }{' '}
                 plan
               </Text>
+              {portal.payment_error && (
+                <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
+                  There is a error processing your payment:
+                  {JSON.stringify(portal.payment_error)}
+                </Text>
+              )}
+              <Text>Card: {cardDetails?.cardType}</Text>
+              <Text>Card Number: **** ***** {cardDetails?.last4Digits}</Text>
               <Text fontSize={'14px'} fontWeight={'bold'} color={'#6B6F76'}>
                 You can change your plan from your dashboard
               </Text>
@@ -170,19 +293,72 @@ export const Pricing = () => {
                 <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
                   Add-ons
                 </Text>
-
-                <Flex alignItems={'center'} justifyContent={'space-between'}>
-                  <Text fontWeight={'700'}>
-                    Remove copilot branding for 100$
-                  </Text>
-                  <Button
-                    onClick={handleAddOnSubscription}
-                    isLoading={isBrandRemoved}
+                {portal.addOnSubscription?.items['removeBranding']?.active ? (
+                  <Flex
+                    p={2}
+                    borderRadius={'6px'}
+                    border={'1px solid gray'}
+                    flexDir={'column'}
+                    alignItems={'space-between'}
+                    justifyContent={'center'}
                   >
-                    Subscribe
-                  </Button>
-                </Flex>
+                    <Text fontWeight={'700'} fontSize={'24px'}>
+                      You are subscribed to remove branding for 100$/mo
+                    </Text>
+                    {!portal.addOnSubscription?.items['removeBranding']
+                      ?.will_expire ? (
+                      <>
+                        <Text>Wanna cancel??</Text>
+                        <Button
+                          w={'min-content'}
+                          onClick={() => handleBrandingRemoveCancel()}
+                          isLoading={isBrandingCancel}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Box>
+                        <Text>
+                          Your subscription will expire on:{' '}
+                          {new Date(
+                            portal.addOnSubscription?.items['removeBranding']
+                              ?.will_expire * 1000
+                          ).toUTCString()}
+                        </Text>
+                        <Text>You can again can subscribe after that!</Text>
+                      </Box>
+                    )}
+                  </Flex>
+                ) : (
+                  <Flex alignItems={'center'} justifyContent={'space-between'}>
+                    <Text fontWeight={'700'}>
+                      Remove copilot branding for 100$
+                    </Text>
+                    <Button
+                      onClick={handleAddOnSubscription}
+                      isLoading={isBrandRemoved}
+                    >
+                      Subscribe
+                    </Button>
+                  </Flex>
+                )}
               </Box>
+
+              {portal.subscriptions?.current && (
+                <Box>
+                  <Text>Billing details</Text>
+                  <Button
+                    bg={'black'}
+                    color={'white'}
+                    onClick={() =>
+                      createBillingPortalSession(portal.customerId)
+                    }
+                  >
+                    Update payment method
+                  </Button>
+                </Box>
+              )}
 
               <Text my={2}>Manage your subscription</Text>
               <Box>
@@ -193,7 +369,9 @@ export const Pricing = () => {
                   Procceed
                 </Button>
                 {showUpgradeDowngrade && (
-                  <UpgradeOrDowngrade currentPriceId={portal.priceId} />
+                  <UpgradeOrDowngrade
+                    currentPriceId={portal?.subscriptions?.current?.priceId}
+                  />
                 )}
               </Box>
             </Box>
@@ -245,14 +423,29 @@ export const Pricing = () => {
                       price={price.price}
                       features={price.features}
                       priceId={price.priceId}
-                      onSelect={poweredBy => {
-                        setPriceId(price.priceId);
-                        setIsPoweredBy(poweredBy);
-                      }}
+                      onSelect={() => handleSubscription(price)}
+                      isSubscriptionLoading={isSubscriptionLoading}
                       type={price.type}
                     />
                   ))}
               </Flex>
+              <Box>
+                <Flex flexDir={'column'}>
+                  <Text fontSize={'26px'} fontWeight={700}>
+                    Removing powered by for 100$
+                  </Text>
+                  <Button
+                    isLoading={isLoading}
+                    fontSize={'15px'}
+                    bg={'black'}
+                    color={'white'}
+                    width={'min-content'}
+                    onClick={handleIsBrandingPaymentElementOpen}
+                  >
+                    Subscribe
+                  </Button>
+                </Flex>
+              </Box>
             </>
           )}
         </Box>
@@ -260,146 +453,3 @@ export const Pricing = () => {
     </Layout>
   );
 };
-
-
-/* 
-
-[
-  {
-    id: 'il_1NGKhkG6ekPTMWCwCW2cQ0KG',
-    object: 'line_item',
-    amount: 8900,
-    amount_excluding_tax: 8900,
-    currency: 'usd',
-    description: '1 × Portal HQ (at $89.00 / month)',
-    discount_amounts: [],
-    discountable: true,
-    discounts: [],
-    livemode: false,
-    metadata: {
-      portalId: 'mryw1DKDVYmotmKufpko',
-      uid: 't8wtAnCk1ERpA0arHcXmz9KOKU02'
-    },
-    period: { end: 1688729948, start: 1686137948 },
-    plan: {
-      id: 'price_1NGIMkG6ekPTMWCwswlQQmkS',
-      object: 'plan',
-      active: true,
-      aggregate_usage: null,
-      amount: 8900,
-      amount_decimal: '8900',
-      billing_scheme: 'per_unit',
-      created: 1686128958,
-      currency: 'usd',
-      interval: 'month',
-      interval_count: 1,
-      livemode: false,
-      metadata: {},
-      nickname: null,
-      product: 'prod_NqlWkOR3IRpfea',
-      tiers_mode: null,
-      transform_usage: null,
-      trial_period_days: null,
-      usage_type: 'licensed'
-    },
-    price: {
-      id: 'price_1NGIMkG6ekPTMWCwswlQQmkS',
-      object: 'price',
-      active: true,
-      billing_scheme: 'per_unit',
-      created: 1686128958,
-      currency: 'usd',
-      custom_unit_amount: null,
-      livemode: false,
-      lookup_key: null,
-      metadata: {},
-      nickname: null,
-      product: 'prod_NqlWkOR3IRpfea',
-      recurring: [Object],
-      tax_behavior: 'unspecified',
-      tiers_mode: null,
-      transform_quantity: null,
-      type: 'recurring',
-      unit_amount: 8900,
-      unit_amount_decimal: '8900'
-    },
-    proration: false,
-    proration_details: { credited_items: null },
-    quantity: 1,
-    subscription: 'sub_1NGKhkG6ekPTMWCwcuPKPS0J',
-    subscription_item: 'si_O2PWPg5zoUvLat',
-    tax_amounts: [],
-    tax_rates: [],
-    type: 'subscription',
-    unit_amount_excluding_tax: '8900'
-  },
-  {
-    id: 'il_1NGKhkG6ekPTMWCwBIhBjko7',
-    object: 'line_item',
-    amount: 10000,
-    amount_excluding_tax: 10000,
-    currency: 'usd',
-    description: '1 × Portal HQ (at $100.00 / month)',
-    discount_amounts: [],
-    discountable: true,
-    discounts: [],
-    livemode: false,
-    metadata: {
-      portalId: 'mryw1DKDVYmotmKufpko',
-      uid: 't8wtAnCk1ERpA0arHcXmz9KOKU02'
-    },
-    period: { end: 1688729948, start: 1686137948 },
-    plan: {
-      id: 'price_1N53z2G6ekPTMWCwGfVS7xDn',
-      object: 'plan',
-      active: true,
-      aggregate_usage: null,
-      amount: 10000,
-      amount_decimal: '10000',
-      billing_scheme: 'per_unit',
-      created: 1683452064,
-      currency: 'usd',
-      interval: 'month',
-      interval_count: 1,
-      livemode: false,
-      metadata: {},
-      nickname: null,
-      product: 'prod_NqlWkOR3IRpfea',
-      tiers_mode: null,
-      transform_usage: null,
-      trial_period_days: null,
-      usage_type: 'licensed'
-    },
-    price: {
-      id: 'price_1N53z2G6ekPTMWCwGfVS7xDn',
-      object: 'price',
-      active: true,
-      billing_scheme: 'per_unit',
-      created: 1683452064,
-      currency: 'usd',
-      custom_unit_amount: null,
-      livemode: false,
-      lookup_key: null,
-      metadata: {},
-      nickname: null,
-      product: 'prod_NqlWkOR3IRpfea',
-      recurring: [Object],
-      tax_behavior: 'unspecified',
-      tiers_mode: null,
-      transform_quantity: null,
-      type: 'recurring',
-      unit_amount: 10000,
-      unit_amount_decimal: '10000'
-    },
-    proration: false,
-    proration_details: { credited_items: null },
-    quantity: 1,
-    subscription: 'sub_1NGKhkG6ekPTMWCwcuPKPS0J',
-    subscription_item: 'si_O2PWrog1iB23zh',
-    tax_amounts: [],
-    tax_rates: [],
-    type: 'subscription',
-    unit_amount_excluding_tax: '10000'
-  }
-]
-*/

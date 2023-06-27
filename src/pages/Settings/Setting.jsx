@@ -10,6 +10,7 @@ import {
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { CustomDomainForm } from './CustomDomainForm';
+import { CheckDomainConfiguration } from './CheckDomainConfig';
 
 export const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -88,7 +89,12 @@ export const Settings = () => {
             </Box>
           )}
         </Box>
-        <CustomDomainForm />
+        {!portal?.customDomain ? (
+          <CustomDomainForm />
+        ) : (
+          <CheckDomainConfiguration defaultDomain={portal?.customDomain} />
+        )}
+
         <Box mt={4}>
           <Text my={2} color={'green.300'}>
             Setting for importing invoice

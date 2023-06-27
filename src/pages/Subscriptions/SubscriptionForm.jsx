@@ -4,9 +4,9 @@ import {
   useElements,
   PaymentElement,
 } from '@stripe/react-stripe-js';
-import { Button } from '@chakra-ui/react';
+import { Button, Text } from '@chakra-ui/react';
 import { PortalContext } from '../../context/portalContext';
-export const SubscriptionForm = ({ priceId }) => {
+export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
   const { portal } = useContext(PortalContext);
   console.log(portal);
 
@@ -43,20 +43,38 @@ export const SubscriptionForm = ({ priceId }) => {
       return;
     }
 
+    let response;
+
+    if (isBrandingPaymentElementOpen) {
+      response = fetch('http://localhost:9000/createAddOnSubscription', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          portalId: portal.id,
+          removeBranding: true,
+        }),
+      });
+    } else {
+      response = fetch('http://localhost:9000/create-subscription', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          customerId: portal.customerId,
+          priceId: priceId,
+          portalId: portal.id,
+          // only owner id
+          uid: portal.createdBy,
+        }),
+      });
+    }
+
+    const res = await response; // Await the response to get the actual data
+    console.log({ res });
     // Create the Subscription
-    const res = await fetch('http://localhost:9000/create-subscription', {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        customerId: portal.customerId,
-        priceId: priceId,
-        portalId: portal.id,
-        // only owner id
-        uid: portal.createdBy,
-      }),
-    });
     const { clientSecret } = await res.json();
 
     // Confirm the Subscription using the details collected by the Payment Element
@@ -83,6 +101,7 @@ export const SubscriptionForm = ({ priceId }) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      {isBrandingPaymentElementOpen && <Text>100$ for custom domain</Text>}
       <PaymentElement />
       <Button
         isLoading={isLoading}

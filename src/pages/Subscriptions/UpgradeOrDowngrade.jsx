@@ -7,7 +7,7 @@ import { usePlanName } from '../../hooks/usePlanName';
 export const UpgradeOrDowngrade = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { portal } = useContext(PortalContext);
-  const planName = usePlanName(prices, portal.priceId);
+  const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [currentSelectedPlan, setCurrentSelectedPlan] = useState(null);
   const handleUpdateSubscription = async () => {
@@ -20,10 +20,12 @@ export const UpgradeOrDowngrade = () => {
         },
         body: JSON.stringify({
           priceId: currentSelectedPlan.priceId,
-          subscriptionId: portal.subscriptionId,
+          subscriptionId: portal.subscriptions.current.subscriptionId,
           isDowngrade:
             currentSelectedPlan.id <
-            prices.filter(price => price.priceId === portal.priceId)[0].id,
+            prices.filter(
+              price => price.priceId === portal?.subscriptions?.current?.priceId
+            )[0].id,
           portalId: portal.id,
           uid: portal.createdBy,
         }),
@@ -48,7 +50,7 @@ export const UpgradeOrDowngrade = () => {
                 <Text>{el.title}</Text>
                 <Text>{el.price}</Text>
               </Box>
-              {portal.priceId === el.priceId ? (
+              {portal?.subscriptions?.current?.priceId === el.priceId ? (
                 <Box>Current Plan</Box>
               ) : (
                 <Button
@@ -59,9 +61,12 @@ export const UpgradeOrDowngrade = () => {
                 >
                   {/* decide upgrade or downgrade or current based on index */}
                   {el.id >
-                  prices.filter(price => price.priceId === portal.priceId)[0].id
+                  prices.filter(
+                    price =>
+                      price.priceId === portal?.subscriptions?.current?.priceId
+                  )[0].id
                     ? 'Upgrade'
-                    : el.priceId === portal.priceId
+                    : el.priceId === portal?.subscriptions?.current?.priceId
                     ? 'Current'
                     : 'Downgrade'}
                 </Button>
@@ -79,7 +84,7 @@ export const UpgradeOrDowngrade = () => {
                 <Text>{el.title}</Text>
                 <Text>{el.price}</Text>
               </Box>
-              {portal.priceId === el.priceId ? (
+              {portal?.subscriptions?.current?.priceId === el.priceId ? (
                 <Box>Current Plan</Box>
               ) : (
                 <Button
@@ -90,9 +95,12 @@ export const UpgradeOrDowngrade = () => {
                 >
                   {/* decide upgrade or downgrade or current based on index */}
                   {el.id >
-                  prices.filter(price => price.priceId === portal.priceId)[0].id
+                  prices.filter(
+                    price =>
+                      price.priceId === portal?.subscriptions?.current?.priceId
+                  )[0].id
                     ? 'Upgrade'
-                    : el.priceId === portal.priceId
+                    : el.priceId === portal?.subscriptions?.current?.priceId
                     ? 'Current'
                     : 'Downgrade'}
                 </Button>

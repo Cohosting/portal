@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -115,6 +115,7 @@ export const CustomDomainForm = () => {
       // Then, save the cleaned and formatted data
       const ref = doc(db, 'portals', portal.id);
       await updateDoc(ref, {
+        customDomain: `${subdom}.${dom}`,
         settings: {
           ...portal.settings,
           domain: dom,
@@ -123,6 +124,23 @@ export const CustomDomainForm = () => {
           customDomain: `${subdom}.${dom}`, // constructed FQDN
         },
       });
+      const response = await fetch(
+        'https://api.vercel.com/v10/projects/portal/domains?teamId=team_X4iVsHVRDNhpdBRTph9ykl2S',
+        {
+          body: JSON.stringify({
+            name: `${subdom}.${dom}`,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer gFbWyYR3oyt71Qx4f0VNkHon`,
+          },
+          method: 'POST',
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(data);
       setIsLoading(false);
     } catch (err) {
       setIsLoading(false);

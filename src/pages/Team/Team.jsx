@@ -60,6 +60,7 @@ const checkIfEmailExists = async (email, portalId) => {
 export const Team = () => {
   const { portal } = useContext(PortalContext);
   const [seats, setSeats] = useState([]);
+  const [allSeats, setAllSeats] = useState([]);
   const [shouldLimitAddingTeamMembers, setShouldLimitAddingTeamMembers] =
     useState(false); // portalId is used in checkIfEmailExists function [line 130
   const { user } = useContext(AuthContext);
@@ -181,7 +182,34 @@ export const Team = () => {
       });
 
       // sent email invite
-      await sentTeamInviteEmail(email, firstName, portal.companyName, token); // token is used in TeamInvite.jsx [line 120]
+      /*       await sentTeamInviteEmail(email, firstName, portal.companyName, token); // token is used in TeamInvite.jsx [line 120]
+       */
+      // update subscription quantity
+      const portalRef = query(
+        collection(db, 'seats'),
+        where('portalId', '==', portal.id)
+      );
+      const snapshot = await getDocs(portalRef);
+      const seatsCount = snapshot.docs.length;
+      let finalSeatCount = seatsCount - 5;
+      if (finalSeatCount > 0) {
+        const response = await fetch(
+          'http://localhost:9000/team/subscription',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sId: portal.addOnSubscription.items.additionalTeamMembers.itemId,
+              totalPaidTeamMember: finalSeatCount,
+            }),
+          }
+        );
+        console.log({ response });
+      } else {
+        console.log('No need to update! It is less than 5');
+      }
 
       closeInviteModal();
     } catch (err) {
@@ -311,9 +339,7 @@ export const Team = () => {
 
     const unsubscribe = onSnapshot(q, querySnapshot => {
       const seatsData = querySnapshot.docs.map(doc => doc.data());
-      console.log({
-        available: seatsData,
-      });
+
       setSeats(seatsData);
     });
 
@@ -323,18 +349,15 @@ export const Team = () => {
     if (!portal) return;
     const fetchSeats = async () => {
       const seatsCollectionRef = collection(db, 'seats');
-      const q = query(
-        seatsCollectionRef,
-        where('status', '==', 'occupied'),
-        where('portalId', '==', portal.id)
-      );
+      const q = query(seatsCollectionRef, where('portalId', '==', portal.id));
       const querySnapshot = await getDocs(q);
       const seatsData = querySnapshot.docs.map(doc => doc.data());
-      console.log(seatsData);
+      setAllSeats(seatsData);
     };
 
     fetchSeats();
   }, [portal]);
+
   return (
     <Layout>
       {portal?.subscriptionType === 'freemium' ? (
@@ -366,6 +389,24 @@ export const Team = () => {
               </Button>
             )}
           </Flex>
+          <Box p={3} border={'1px solid gray'} color={'red'}>
+            <Text fontSize={'22px'}>This is test corner for seats</Text>
+
+            <Text>Total Seats: {allSeats.length} </Text>
+            <Text>Free Seats: 5</Text>
+            <Text>
+              Paid Seats:{' '}
+              {allSeats?.filter(el => el.seatType === 'paid').length}{' '}
+            </Text>
+            <Text>
+              Unused paid seats:{' '}
+              {
+                allSeats?.filter(
+                  el => el.seatType === 'paid' && el.status === 'available'
+                ).length
+              }{' '}
+            </Text>
+          </Box>
 
           <TeamUsageLimit
             portal={portal}

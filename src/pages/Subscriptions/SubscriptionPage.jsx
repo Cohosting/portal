@@ -9,7 +9,11 @@ const stripePromise = loadStripe(
   'pk_test_51N43KcG6ekPTMWCwR2197fOHN32C1E5jNzPRm4kolK8KCRtleb4beHvMEqCCxgY8Ur53CXpsyTTx4mDu8cqjHFxb004bYWB6Cs'
 );
 
-const SubscriptionPage = ({ priceId, isPoweredBy }) => {
+const SubscriptionPage = ({
+  priceId,
+  isPoweredBy,
+  isBrandingPaymentElementOpen,
+}) => {
   const options = {
     mode: 'subscription',
     amount: 1099,
@@ -23,7 +27,11 @@ const SubscriptionPage = ({ priceId, isPoweredBy }) => {
     <div>
       <h1>Subscription Page</h1>
       <Elements stripe={stripePromise} options={options}>
-        <SubscriptionForm priceId={priceId} isPoweredBy={isPoweredBy} />
+        <SubscriptionForm
+          isBrandingPaymentElementOpen={isBrandingPaymentElementOpen}
+          priceId={priceId}
+          isPoweredBy={isPoweredBy}
+        />
       </Elements>
     </div>
   );
