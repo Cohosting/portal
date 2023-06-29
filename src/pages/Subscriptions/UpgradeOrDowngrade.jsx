@@ -4,7 +4,14 @@ import { prices } from '../../utils/prices';
 import { PortalContext } from '../../context/portalContext';
 import { SubscriptionAlert } from './SubscriptionAlert';
 import { usePlanName } from '../../hooks/usePlanName';
+import useAsyncLoading from '../../hooks/useAsyncFunc';
 export const UpgradeOrDowngrade = () => {
+  const { isLoading: isSubscriptionCancel, runAsyncFunction: runSubscriptionCancel } = useAsyncLoading();
+  const { isLoading: isReactivateLoading, runAsyncFunction: runReactivateAsync } = useAsyncLoading();
+
+
+
+  const [isCancelLoading, setIsCancelLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false);
   const { portal } = useContext(PortalContext);
   const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
@@ -13,7 +20,7 @@ export const UpgradeOrDowngrade = () => {
   const handleUpdateSubscription = async () => {
     setIsLoading(true);
     try {
-      const resonse = await fetch('http://localhost:9000/update-subscription', {
+      const res = await fetch('http://localhost:9000/update-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,6 +28,7 @@ export const UpgradeOrDowngrade = () => {
         body: JSON.stringify({
           priceId: currentSelectedPlan.priceId,
           subscriptionId: portal.subscriptions.current.subscriptionId,
+          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
           isDowngrade:
             currentSelectedPlan.id <
             prices.filter(
@@ -30,13 +38,79 @@ export const UpgradeOrDowngrade = () => {
           uid: portal.createdBy,
         }),
       });
-      console.log(resonse);
+      console.log(res);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.log(error);
     }
   };
+
+
+  const handleCancelDowngrade = async () => {
+
+    setIsCancelLoading(true);
+    try {
+      const res = await fetch('http://localhost:9000/cancel-downgrade', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentSubscriptionId: portal.subscriptions.current.subscriptionId,
+          portalId: portal.id,
+          futureSubscriptionId: portal.subscriptions.future.subscriptionId,
+          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+
+        }),
+      });
+      console.log(res);
+      setIsCancelLoading(false);
+    } catch (error) {
+      setIsCancelLoading(false);
+      console.log(error);
+    }
+  };
+  const handleCancel = async () => {
+    try {
+      const res = await fetch('http://localhost:9000/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscriptionId: portal.subscriptions.current.subscriptionId,
+          portalId: portal.id,
+          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+        }),
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
+
+  const handleReactivate = async () => {
+
+    try {
+      const res = await fetch('http://localhost:9000/reactivate-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscriptionId: portal.subscriptions.current.subscriptionId,
+          portalId: portal.id,
+          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+        }),
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+
+  }
 
   return (
     <Box>
@@ -50,8 +124,26 @@ export const UpgradeOrDowngrade = () => {
                 <Text>{el.title}</Text>
                 <Text>{el.price}</Text>
               </Box>
-              {portal?.subscriptions?.current?.priceId === el.priceId ? (
-                <Box>Current Plan</Box>
+              <Box mx={4}>
+                {
+                  !(portal?.subscriptions?.future && el.priceId === portal?.subscriptions?.future.priceId) && (
+                    <>
+                      {portal?.subscriptions?.current?.priceId === el.priceId ? (
+                        <Box>
+                          <Text>Current plan</Text>
+                          {
+                            portal?.subscriptions?.current?.subscriptionEnd ? (
+                              <Box>
+                                <Text>Subscription is schedule to get cancelled at: {new Date(portal?.subscriptions?.current?.subscriptionEnd * 1000).toDateString()}</Text>
+                                <Button isLoading={isReactivateLoading} onClick={() => runReactivateAsync(handleReactivate)}>Reactivate</Button>
+
+                              </                              Box>
+                            ) : (
+                              <Button isLoading={isSubscriptionCancel} onClick={() => runSubscriptionCancel(handleCancel)}>Cancel</Button>
+
+                            )
+                          }
+                        </Box>
               ) : (
                 <Button
                   onClick={() => {
@@ -71,6 +163,22 @@ export const UpgradeOrDowngrade = () => {
                     : 'Downgrade'}
                 </Button>
               )}
+
+                    </>
+                  )
+                }
+              </Box>
+              {
+                portal?.subscriptions?.future && el.priceId === portal?.subscriptions?.future.priceId && (
+                  <Box>
+                    <Text>You have downgraded to this plan</Text>
+                    <Text>This will start at: {new Date(portal?.subscriptions?.future?.subscriptionStart * 1000).toDateString()}</Text>
+
+                    <Button isLoading={isCancelLoading} onClick={handleCancelDowngrade}>Cancel downgrade</Button>
+
+                  </Box>
+                )
+              }
             </Flex>
           ))}
       </Box>

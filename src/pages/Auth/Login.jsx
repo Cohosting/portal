@@ -5,16 +5,17 @@ import { LoginForm } from './LoginForm';
 import { ClientLogin } from '../Portal/Client/ClientLogin';
 
 export const Login = () => {
-  const { subdomain, isSubdomainValid, isLoading } = useSubdomain();
+  const { domain, isValid, isLoading } = useSubdomain();
 
+  console.log({ domain, isValid, isLoading })
   return (
     <Box>
-      {!subdomain && <LoginForm />}
-      {subdomain && (
+      {!domain && <LoginForm />}
+      {domain && (
         <Box>
           {isLoading && <Spinner />}
-          {!isLoading && !isSubdomainValid && <Box>Invalid subdomain</Box>}
-          {isSubdomainValid && !isLoading && <ClientLogin />}
+          {!isLoading && !isValid && <Box>Invalid subdomain</Box>}
+          {isValid && !isLoading && <ClientLogin />}
         </Box>
       )}
     </Box>
