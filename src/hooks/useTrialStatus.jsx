@@ -34,13 +34,3 @@ export const useTrialStatus = portal => {
 
   return { trialStatus, isLoading };
 };
-/* 
-else if(currentDate > trialEndDate && !portal.isExpiryCount) {
-          const dayRemained = Math.floor(
-            (trialEndDate.getTime() - currentDate.getTime()) /
-              (1000 * 3600 * 24)
-          );
-
-          setTrialStatus(`active -- ${dayRemained} days left`);
-        }
-*/

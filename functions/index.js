@@ -12,6 +12,7 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
     try {
       const { email, password, portalId } = data;
 
+      console.log(portalId);
       const usersRef = db.collection('portalMembers');
       const querySnapshot = await usersRef
         .where('email', '==', email)

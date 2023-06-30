@@ -44,6 +44,7 @@ export const ClientLogin = () => {
         setSessionToken(res.data.token);
         navigate('/portal');
         onClose();
+        console.log(res);
       } else {
         onClose();
         setIsError('Email or password incorrect');
