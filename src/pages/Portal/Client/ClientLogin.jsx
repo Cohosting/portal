@@ -49,6 +49,9 @@ export const ClientLogin = () => {
         onClose();
         setIsError('Email or password incorrect');
       }
+
+      console.log(res);
+
     } catch (error) {
       console.log(`Error logging in: ${error}`);
     }
