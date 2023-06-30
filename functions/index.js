@@ -6,21 +6,34 @@ const jwt = require('jsonwebtoken');
 admin.initializeApp();
 
 const db = admin.firestore();
-
 exports.signInWithEmailAndPassword = functions.https.onCall(
   async (data, context) => {
+    const { email, password, portalId } = data;
     try {
-      const { email, password, portalId } = data;
-
-      console.log(portalId);
       const usersRef = db.collection('portalMembers');
+      console.log({
+        action: 'authentication_attempt',
+        email,
+        portalId,
+      });
+
       const querySnapshot = await usersRef
         .where('email', '==', email)
         .where('portalId', '==', portalId)
         .get();
 
       if (querySnapshot.empty) {
-        return { success: false, message: 'Invalid email or password' };
+        console.log({
+          action: 'authentication_failed',
+          reason: 'empty_data',
+          email,
+          portalId,
+        });
+        return {
+          success: false,
+          code: 'INVALID_CREDENTIALS',
+          message: 'Invalid email or password',
+        };
       } else {
         const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
@@ -38,12 +51,32 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
             token,
           };
         } else {
-          return { success: false, message: 'Invalid email or password' };
+          console.log({
+            action: 'authentication_failed',
+            reason: 'token_validation',
+            email,
+            portalId,
+          });
+          return {
+            success: false,
+            code: 'INVALID_CREDENTIALS',
+            message: 'Invalid email or password',
+          };
         }
       }
     } catch (error) {
-      console.error('Error authenticating user:', error);
-      return { success: false, message: 'Error authenticating user' };
+      console.error({
+        action: 'authentication_error',
+        errorType: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        email,
+      });
+      return {
+        success: false,
+        code: 'INTERNAL_ERROR',
+        message: 'Error authenticating user',
+      };
     }
   }
 );

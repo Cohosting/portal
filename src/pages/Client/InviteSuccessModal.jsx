@@ -39,7 +39,7 @@ export const InviteSuccessModal = ({ isOpen, onClose, temporaryClient }) => {
         portal.others.companyName,
         `
       <div>
-        <p>link: http://${portal.others.portalURL}.localhost:3000/login</p>
+        <p>link: ${window.location.host}/login</p>
         password: ${password}
       </div>
       `
