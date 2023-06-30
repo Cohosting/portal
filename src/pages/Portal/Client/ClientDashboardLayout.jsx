@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { ClientPortalContext } from '../../../context/clientPortalContext';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -61,7 +61,7 @@ const NavItem = ({ children, isActive, ...rest }) => {
 export const ClientDashboardLayout = ({ children }) => {
   const { clientUser } = useContext(ClientAuthContext);
   const navigate = useNavigate();
-  const [apps, setApps] = useState([]);
+  const [apps, setApps] = useState(null);
   const { clientPortal } = useContext(ClientPortalContext);
   const { portalName } = useParams();
   const settings = clientPortal.brandSettings;
@@ -81,28 +81,36 @@ export const ClientDashboardLayout = ({ children }) => {
 
   return (
     <Flex h={'100vh'}>
-      <Box
-        w={'300px'}
-        h={'100%'}
-        bg={settings?.sidebarBgColor || 'gray.100'}
-        color={settings?.sidebarTextColor || 'gray.800'}
-        p={4}
-      >
-        <Text>{settings?.brandName}</Text>
-        {apps.map(app => (
-          <NavItem
-            key={app.id}
-            isActive={app?.name.toLowerCase() === portalName?.toLowerCase()}
-            onClick={() => navigate(`/portal/${app.name}`)}
-          >
-            {app.name}
-          </NavItem>
-        ))}
-      </Box>
-      <Box flex={1}>
-        {' '}
-        <PortalComponentDecider />
-      </Box>
+      {
+        !apps ? <Spinner /> : (
+          <>
+          <Box
+          w={'300px'}
+          h={'100%'}
+          bg={settings?.sidebarBgColor || 'gray.100'}
+          color={settings?.sidebarTextColor || 'gray.800'}
+          p={4}
+        >
+          <Text>{settings?.brandName}</Text>
+          {apps.map(app => (
+            <NavItem
+              key={app.id}
+              isActive={app?.name.toLowerCase() === portalName?.toLowerCase()}
+              onClick={() => navigate(`/portal/${app.name}`)}
+            >
+              {app.name}
+            </NavItem>
+          ))}
+        </Box>
+        <Box flex={1}>
+          {' '}
+          <PortalComponentDecider />
+        </Box>
+        </>
+
+        )
+      }
+     
     </Flex>
   );
 };
