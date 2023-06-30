@@ -49,7 +49,7 @@ export const ClientPortalContextComponent = ({ children }) => {
   return (
     <ClientPortalContext.Provider
       value={{
-        portalData,
+        clientPortal: portalData,
         isLoading,
       }}
     >

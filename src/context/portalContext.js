@@ -72,16 +72,19 @@ export const PortalContextProvider = ({ children }) => {
     // create stripe cusomter
     const createUserCustomer = async uid => {
       try {
-        const response = await fetch('http://localhost:9000/create-customer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: uid,
-            email: portalTeamMemberData.email,
-          }),
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_NODE_URL}/create-customer`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: uid,
+              email: portalTeamMemberData.email,
+            }),
+          }
+        );
 
         const { customerId } = await response.json();
 
@@ -128,8 +131,7 @@ export const PortalContextProvider = ({ children }) => {
       }
     })();
   }, [portal, user]);
-  console.log(JSON.stringify(portal?.subscriptions));
-  console.log(JSON.stringify(portal?.addOnSubscription));
+
   return (
     <PortalContext.Provider
       value={{ portal, currentPortal, portalTeamMemberData }}

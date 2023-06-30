@@ -38,6 +38,7 @@ export const ClientLogin = () => {
       const res = await signInWithEmailAndPassword({
         email,
         password,
+        portalId: clientPortal.id,
       });
       if (res.data.success) {
         setSessionToken(res.data.token);

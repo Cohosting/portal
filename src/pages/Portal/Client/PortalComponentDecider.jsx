@@ -12,6 +12,12 @@ export const PortalComponentDecider = ({}) => {
           <h1>Messages</h1>
         </div>
       );
+    case 'files':
+      return (
+        <div>
+          <h1>Files</h1>
+        </div>
+      );
     case 'billing':
       return <ClientBilling />;
 

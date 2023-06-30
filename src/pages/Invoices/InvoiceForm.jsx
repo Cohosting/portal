@@ -57,48 +57,6 @@ export const InvoiceForm = () => {
     setStripeUser(user);
   };
 
-  /*   const handleCreateInvoice = async () => {
-    if (!stripeUser.customerId) {
-      return;
-    }
-
-    let paymentMethodArray = [];
-    if (settings.achDebit) {
-      paymentMethodArray.push('ach_debit');
-    }
-    if (settings.card) {
-      paymentMethodArray.push('card');
-    }
-
-    try {
-      const res = await fetch(
-        `http://localhost:9000/connect/create-connect-invoice`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            // replace with portal.stripeConnectAccountId
-            stripeConnectAccountId: user.stripeConnectAccountId,
-            line_items: lineItems,
-            customerId: stripeUser.customerId,
-            payment_settings: {
-              payment_method_types: paymentMethodArray,
-            },
-          }),
-        }
-      );
-      const data = await res.json();
-      console.log({
-        data,
-      });
-      setIsLoading(false);
-    } catch (err) {
-      console.log(`Error creating invoice: ${err}`);
-      setIsLoading(false);
-    }
-  }; */
 
   const saveFiretoreInvoice = async () => {
     try {

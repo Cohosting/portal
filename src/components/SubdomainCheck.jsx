@@ -9,22 +9,22 @@ export const SubdomainCheck = ({
   isProtected = true,
 }) => {
   const navigate = useNavigate();
-  const { subdomain, isSubdomainValid, isLoading } = useSubdomain();
+  const { domain, isValid, isLoading } = useSubdomain();
 
-  if (subdomain && isSubdomainValid && !isLoading && isProtected) {
+  if (domain && isValid && !isLoading && isProtected) {
     const token = localStorage.getItem('sessionToken');
     if (!token) return navigate('/login');
   }
 
   return (
     <>
-      {!subdomain && mainDomainComponent}
+      {!domain && mainDomainComponent}
 
-      {subdomain && (
+      {domain && (
         <Box>
           {isLoading && <Spinner />}
-          {!isLoading && !isSubdomainValid && <Box>Invalid subdomain</Box>}
-          {isSubdomainValid && !isLoading && children}
+          {!isLoading && !isValid && <Box>Invalid subdomain</Box>}
+          {isValid && !isLoading && children}
         </Box>
       )}
     </>

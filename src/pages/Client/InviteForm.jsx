@@ -71,17 +71,20 @@ export const InviteForm = ({
         // member or client
         members: arrayUnion(ref.id),
       });
-      await fetch('http://localhost:9000/connect/create-connected-customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: inviteState.email,
-          id: ref.id,
-          stripeConnectAccountId: portal.stripeConnectAccountId,
-        }),
-      });
+      await fetch(
+        `${process.env.REACT_APP_NODE_URL}/connect/create-connected-customer`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: inviteState.email,
+            id: ref.id,
+            stripeConnectAccountId: portal.stripeConnectAccountId,
+          }),
+        }
+      );
       setTemporaryClient(member);
       onClose();
       onToggleSuccess();

@@ -88,7 +88,7 @@ export const Pricing = () => {
 
     try {
       const response = await fetch(
-        'http://localhost:9000/createAddOnSubscription',
+        `${process.env.REACT_APP_NODE_URL}/createAddOnSubscription`,
         {
           method: 'POST',
           headers: {
@@ -113,7 +113,7 @@ export const Pricing = () => {
     setIsSubscriptionLoading(true);
 
     const res = await fetch(
-      `http://localhost:9000/checkDefaultPaymentMethod/${portal.customerId}`,
+      `${process.env.REACT_APP_NODE_URL}/checkDefaultPaymentMethod/${portal.customerId}`,
       {
         method: 'GET',
         headers: {
@@ -126,7 +126,7 @@ export const Pricing = () => {
       setPriceId(price.priceId);
     } else {
       const response = await fetch(
-        'http://localhost:9000/create-subscription',
+        `${process.env.REACT_APP_NODE_URL}/create-subscription`,
         {
           method: 'POST',
           headers: {
@@ -151,7 +151,7 @@ export const Pricing = () => {
   const handleIsBrandingPaymentElementOpen = async () => {
     setIsLoading(true);
     const res = await fetch(
-      `http://localhost:9000/checkDefaultPaymentMethod/${portal.customerId}`,
+      `${process.env.REACT_APP_NODE_URL}/checkDefaultPaymentMethod/${portal.customerId}`,
       {
         method: 'GET',
         headers: {
@@ -172,15 +172,18 @@ export const Pricing = () => {
     if (!portal) return;
     (async () => {
       // fetch from /payment-method using javascript fetch
-      const res = await fetch(`http://localhost:9000/payment-method`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId: portal?.customerId,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/payment-method`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerId: portal?.customerId,
+          }),
+        }
+      );
       const { cardType, last4Digits } = await res.json();
       setCardDetails({ cardType, last4Digits });
     })();
@@ -192,7 +195,7 @@ export const Pricing = () => {
     try {
       // use PUT method on /subscriptions/items
       const response = await fetch(
-        'http://localhost:9000/subscriptions/items',
+        `${process.env.REACT_APP_NODE_URL}/subscriptions/items`,
         {
           method: 'PUT',
           headers: {
@@ -217,7 +220,7 @@ export const Pricing = () => {
   async function createBillingPortalSession(customerId) {
     try {
       const response = await fetch(
-        `http://localhost:9000/create-billing-portal-session/${customerId}`,
+        `${process.env.REACT_APP_NODE_URL}/create-billing-portal-session/${customerId}`,
         {
           method: 'GET',
           headers: {

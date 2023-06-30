@@ -20,24 +20,28 @@ export const UpgradeOrDowngrade = () => {
   const handleUpdateSubscription = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:9000/update-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: currentSelectedPlan.priceId,
-          subscriptionId: portal.subscriptions.current.subscriptionId,
-          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
-          isDowngrade:
-            currentSelectedPlan.id <
-            prices.filter(
-              price => price.priceId === portal?.subscriptions?.current?.priceId
-            )[0].id,
-          portalId: portal.id,
-          uid: portal.createdBy,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/update-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            priceId: currentSelectedPlan.priceId,
+            subscriptionId: portal.subscriptions.current.subscriptionId,
+            addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+            isDowngrade:
+              currentSelectedPlan.id <
+              prices.filter(
+                price =>
+                  price.priceId === portal?.subscriptions?.current?.priceId
+              )[0].id,
+            portalId: portal.id,
+            uid: portal.createdBy,
+          }),
+        }
+      );
       console.log(res);
       setIsLoading(false);
     } catch (error) {
@@ -46,24 +50,24 @@ export const UpgradeOrDowngrade = () => {
     }
   };
 
-
   const handleCancelDowngrade = async () => {
-
     setIsCancelLoading(true);
     try {
-      const res = await fetch('http://localhost:9000/cancel-downgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentSubscriptionId: portal.subscriptions.current.subscriptionId,
-          portalId: portal.id,
-          futureSubscriptionId: portal.subscriptions.future.subscriptionId,
-          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
-
-        }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/cancel-downgrade`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            currentSubscriptionId: portal.subscriptions.current.subscriptionId,
+            portalId: portal.id,
+            futureSubscriptionId: portal.subscriptions.future.subscriptionId,
+            addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+          }),
+        }
+      );
       console.log(res);
       setIsCancelLoading(false);
     } catch (error) {
@@ -73,44 +77,47 @@ export const UpgradeOrDowngrade = () => {
   };
   const handleCancel = async () => {
     try {
-      const res = await fetch('http://localhost:9000/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subscriptionId: portal.subscriptions.current.subscriptionId,
-          portalId: portal.id,
-          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/cancel-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionId: portal.subscriptions.current.subscriptionId,
+            portalId: portal.id,
+            addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+          }),
+        }
+      );
       console.log(res);
     } catch (error) {
       console.log(error);
     }
-
-  }
+  };
 
   const handleReactivate = async () => {
-
     try {
-      const res = await fetch('http://localhost:9000/reactivate-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subscriptionId: portal.subscriptions.current.subscriptionId,
-          portalId: portal.id,
-          addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/reactivate-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionId: portal.subscriptions.current.subscriptionId,
+            portalId: portal.id,
+            addOnSubscriptionId: portal.addOnSubscription.subscriptionId,
+          }),
+        }
+      );
       console.log(res);
     } catch (error) {
       console.log(error);
     }
-
-  }
+  };
 
   return (
     <Box>

@@ -194,7 +194,7 @@ export const Team = () => {
       let finalSeatCount = seatsCount - 5;
       if (finalSeatCount > 0) {
         const response = await fetch(
-          'http://localhost:9000/team/subscription',
+          `${process.env.REACT_APP_NODE_URL}/team/subscription`,
           {
             method: 'POST',
             headers: {

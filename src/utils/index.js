@@ -102,3 +102,6 @@ export function isValidEmail(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email);
 }
+
+export const isSubdomain = domain =>
+  domain.includes('huehq.com') || domain.includes('localhost');

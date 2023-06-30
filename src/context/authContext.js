@@ -39,9 +39,6 @@ useEffect(() => {
     }
   });
 }, []);
-console.log({
-  user,
-});
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated }}>

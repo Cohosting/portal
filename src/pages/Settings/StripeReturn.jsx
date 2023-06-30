@@ -19,7 +19,7 @@ export const StripeReturn = () => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:9000/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
+        `${process.env.REACT_APP_NODE_URL}/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
         {
           method: 'GET',
           headers: {

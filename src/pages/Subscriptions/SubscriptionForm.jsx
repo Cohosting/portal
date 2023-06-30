@@ -46,30 +46,36 @@ export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
     let response;
 
     if (isBrandingPaymentElementOpen) {
-      response = fetch('http://localhost:9000/createAddOnSubscription', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          portalId: portal.id,
-          removeBranding: true,
-        }),
-      });
+      response = fetch(
+        `${process.env.REACT_APP_NODE_URL}/createAddOnSubscription`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            portalId: portal.id,
+            removeBranding: true,
+          }),
+        }
+      );
     } else {
-      response = fetch('http://localhost:9000/create-subscription', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          customerId: portal.customerId,
-          priceId: priceId,
-          portalId: portal.id,
-          // only owner id
-          uid: portal.createdBy,
-        }),
-      });
+      response = fetch(
+        `${process.env.REACT_APP_NODE_URL}/create-subscription`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            customerId: portal.customerId,
+            priceId: priceId,
+            portalId: portal.id,
+            // only owner id
+            uid: portal.createdBy,
+          }),
+        }
+      );
     }
 
     const res = await response; // Await the response to get the actual data
@@ -82,7 +88,7 @@ export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
       elements,
       clientSecret,
       confirmParams: {
-        return_url: 'http://localhost:3000/success',
+        return_url: `${process.env.REACT_APP_NODE_URL}/success`,
       },
     });
 

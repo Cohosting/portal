@@ -10,7 +10,7 @@ export const Login = () => {
   console.log({ domain, isValid, isLoading })
   return (
     <Box>
-      {!domain && <LoginForm />}
+      {domain && domain.includes('dashboard') && <LoginForm />}
       {domain && (
         <Box>
           {isLoading && <Spinner />}

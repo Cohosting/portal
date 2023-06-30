@@ -10,10 +10,13 @@ const db = admin.firestore();
 exports.signInWithEmailAndPassword = functions.https.onCall(
   async (data, context) => {
     try {
-      const { email, password } = data;
+      const { email, password, portalId } = data;
 
       const usersRef = db.collection('portalMembers');
-      const querySnapshot = await usersRef.where('email', '==', email).get();
+      const querySnapshot = await usersRef
+        .where('email', '==', email)
+        .where('portalId', '==', portalId)
+        .get();
 
       if (querySnapshot.empty) {
         return { success: false, message: 'Invalid email or password' };
@@ -44,10 +47,13 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
   }
 );
 
-const getUserByEmail = async email => {
+const getUserByEmail = async (email, portalId) => {
   try {
     const usersRef = db.collection('portalMembers');
-    const querySnapshot = await usersRef.where('email', '==', email).get();
+    const querySnapshot = await usersRef
+      .where('email', '==', email)
+      .where('portalId', '==', portalId)
+      .get();
 
     if (!querySnapshot.empty) {
       const userDoc = querySnapshot.docs[0];
@@ -66,12 +72,12 @@ const getUserByEmail = async email => {
 
 exports.verifyToken = functions.https.onCall(async (data, context) => {
   try {
-    const { token } = data;
+    const { token, portalId } = data;
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
     // Retrieve user data based on the decoded token, e.g., by querying Firestore
-    const user = await getUserByEmail(decoded.email);
+    const user = await getUserByEmail(decoded.email, portalId);
 
     if (user) {
       return {

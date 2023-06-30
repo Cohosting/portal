@@ -45,7 +45,7 @@ export const Invoices = () => {
       paymentMethodArray.push('card');
     }
     const res = await fetch(
-      'http://localhost:9000/connect/create-connect-invoice',
+      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-invoice`,
       {
         method: 'POST',
         headers: {

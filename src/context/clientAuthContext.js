@@ -1,18 +1,20 @@
 import { httpsCallable } from 'firebase/functions';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { functions } from '../lib/firebase';
+import { ClientPortalContext } from './clientPortalContext';
 
 export const ClientAuthContext = createContext();
 
 export const ClientAuthContextComponent = ({ children }) => {
   const [clientUser, setClientUser] = useState();
+  const { clientPortal } = useContext(ClientPortalContext);
   useEffect(() => {
     const storedToken = localStorage.getItem('sessionToken');
-    if (storedToken) {
+    if (storedToken && clientPortal) {
       // Verify the stored token on the server-side and set the user state accordingly
       verifyStoredToken(storedToken);
     }
-  }, []);
+  }, [clientPortal]);
 
   const verifyStoredToken = async token => {
     try {
@@ -20,6 +22,7 @@ export const ClientAuthContextComponent = ({ children }) => {
       const verifyToken = httpsCallable(functions, 'verifyToken');
       const response = await verifyToken({
         token,
+        portalId: clientPortal.id,
       });
 
       if (response.data.success) {
@@ -28,7 +31,7 @@ export const ClientAuthContextComponent = ({ children }) => {
         if (!user.customerId) {
           // create customer  using js fetch to /create-customer
           const response = await fetch(
-            'http://localhost:9000/create-customer',
+            `${process.env.REACT_APP_NODE_URL}/create-customer`,
             {
               method: 'POST',
               headers: {
@@ -62,9 +65,6 @@ export const ClientAuthContextComponent = ({ children }) => {
     setClientUser(null);
   };
 
-  console.log({
-    clientUser,
-  });
   return (
     <ClientAuthContext.Provider
       value={{

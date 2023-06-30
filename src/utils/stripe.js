@@ -7,7 +7,7 @@ export const createStripeConnectAccount = async (
   cb(true);
   try {
     const response = await fetch(
-      'http://localhost:9000/connect/create-connect-session',
+      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-session`,
       {
         method: 'POST',
         headers: {

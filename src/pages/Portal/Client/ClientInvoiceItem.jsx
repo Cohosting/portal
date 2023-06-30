@@ -12,9 +12,11 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment }) => {
           <Text fontWeight="bold" marginBottom={1}>
             {item.name}
           </Text>
-          <Text>{`Price: ${item.price}`}</Text>
+          <Text>{`Price: ${item.unit_amount / 100}`}</Text>
           <Text>{`Quantity: ${item.quantity}`}</Text>
-          <Text>{`Total: ${item.total}`}</Text>
+          <Text>{`Total: ${
+            (item.unit_amount / 100) * Number(item.quantity)
+          }`}</Text>
           {item.description && (
             <Text marginTop={2} fontStyle="italic">
               {item.description}

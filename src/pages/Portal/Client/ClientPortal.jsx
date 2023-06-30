@@ -7,32 +7,40 @@ import { ClientAuthContext } from '../../../context/clientAuthContext';
 import { useSubdomain } from '../../../hooks/useSubdomain';
 import { ClientDashboardLayout } from './ClientDashboardLayout';
 
+// TODO: Update the logic for the subdomain because it now return domain and also update the fetching logic for the invoices 
 export const ClientPortal = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { subdomain } = useSubdomain();
+  const { domain, isLoading: isDomainLoading, isValid } = useSubdomain();
   const [invoices, setInvoices] = useState([]);
   const { clientUser } = useContext(ClientAuthContext);
 
   useEffect(() => {
-    if (!clientUser) return;
+    if (!clientUser || isDomainLoading) return;
+
     const getInvoicesFromFirebase = async () => {
-      const ref = collection(db, 'invoices');
-      const q = query(
-        ref,
-        where('portalURL', '==', subdomain),
-        where('status', '==', 'finalized')
-      );
-      const snapshot = await getDocs(q);
-      const invoices = snapshot.docs.map(doc => doc.data());
-      setInvoices(invoices);
+      try {
+        const ref = collection(db, 'invoices');
+        const q = query(
+          ref,
+          isValid && !domain.includes('.')
+            ? where('portalURL', '==', domain)
+            : where('customDomain', '==', domain),
+          where('status', '==', 'finalized')
+        );
+        const snapshot = await getDocs(q);
+        const invoices = snapshot.docs.map(doc => doc.data());
+        setInvoices(invoices);
+      } catch (err) {
+        console.log('Error getting invoices', err);
+      }
     };
 
     getInvoicesFromFirebase();
-  }, [clientUser]);
+  }, [clientUser, domain, isDomainLoading]);
 
   const createCheckoutSession = async invoice => {
     const res = await fetch(
-      `http://localhost:9000/connect/create-connect-checkout`,
+      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-checkout`,
       {
         method: 'POST',
         headers: {
@@ -53,7 +61,7 @@ export const ClientPortal = () => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:9000/connect/create-connect-billing-session`,
+        `${process.env.REACT_APP_NODE_URL}/connect/create-connect-billing-session`,
         {
           method: 'POST',
 

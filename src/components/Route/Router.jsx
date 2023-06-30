@@ -23,11 +23,16 @@ import { CustomizePortal } from '../../pages/Settings/CustomizePortal';
 import { Team } from '../../pages/Team/Team';
 import { AccountSettingsPage } from '../../pages/Settings/Profile/Profile';
 import { AcceptInvitationPage } from '../../pages/Team/AcceptInvitationPage';
+import SubdomainWrapper from '../UI/SubdomainWrapper';
 
 const router = createBrowserRouter([
   {
     path: '/signup',
-    element: <Signup />,
+    element: (
+      <SubdomainWrapper>
+        <Signup />
+      </SubdomainWrapper>
+    ),
   },
   {
     path: '/login',
@@ -45,7 +50,9 @@ const router = createBrowserRouter([
     path: '/subscription',
     element: (
       <ProtectedRoutes>
-        <Pricing />
+        <SubdomainWrapper>
+          <Pricing />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -61,7 +68,9 @@ const router = createBrowserRouter([
     path: '/settings',
     element: (
       <ProtectedRoutes>
-        <Settings />
+        <SubdomainWrapper>
+          <Settings />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -69,7 +78,9 @@ const router = createBrowserRouter([
     path: '/client',
     element: (
       <ProtectedRoutes>
-        <Client />
+        <SubdomainWrapper>
+          <Client />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -106,7 +117,9 @@ const router = createBrowserRouter([
     path: '/billing',
     element: (
       <ProtectedRoutes>
-        <Invoices />
+        <SubdomainWrapper>
+          <Invoices />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -114,7 +127,9 @@ const router = createBrowserRouter([
     path: '/billing/create',
     element: (
       <ProtectedRoutes>
-        <InvoiceForm />
+        <SubdomainWrapper>
+          <InvoiceForm />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -122,7 +137,9 @@ const router = createBrowserRouter([
     path: '/customize',
     element: (
       <ProtectedRoutes>
-        <CustomizePortal />
+        <SubdomainWrapper>
+          <CustomizePortal />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -131,7 +148,9 @@ const router = createBrowserRouter([
     path: '/module-management',
     element: (
       <ProtectedRoutes>
-        <AppSetup />
+        <SubdomainWrapper>
+          <AppSetup />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -139,7 +158,9 @@ const router = createBrowserRouter([
     path: '/module-management/setup',
     element: (
       <ProtectedRoutes>
-        <AddApp />
+        <SubdomainWrapper>
+          <AddApp />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -147,7 +168,9 @@ const router = createBrowserRouter([
     path: '/extentions',
     element: (
       <ProtectedRoutes>
-        <Extentions />
+        <SubdomainWrapper>
+          <Extentions />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -155,7 +178,9 @@ const router = createBrowserRouter([
     path: '/team',
     element: (
       <ProtectedRoutes>
-        <Team />
+        <SubdomainWrapper>
+          <Team />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
@@ -163,7 +188,9 @@ const router = createBrowserRouter([
     path: '/settings/me',
     element: (
       <ProtectedRoutes>
-        <AccountSettingsPage />
+        <SubdomainWrapper>
+          <AccountSettingsPage />
+        </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
