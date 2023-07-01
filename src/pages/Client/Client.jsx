@@ -85,37 +85,7 @@ export const Client = () => {
     };
   }, [portal]);
 
-  /*   useEffect(() => {
-    if (!portal) return;
-    const createDemoSeats = async portalId => {
-      const batch = writeBatch(db);
 
-      // Create the seats subcollection reference
-      const portalRef = doc(db, 'portals', portalId);
-      const seatsCollectionRef = collection(portalRef, 'seats');
-
-      // Generate 5 demo seats
-      const demoSeats = [
-        { seatNumber: 'Seat 1', status: 'available' },
-        { seatNumber: 'Seat 2', status: 'available' },
-        { seatNumber: 'Seat 3', status: 'available' },
-        { seatNumber: 'Seat 4', status: 'available' },
-        { seatNumber: 'Seat 5', status: 'available' },
-      ];
-
-      // Add each demo seat to the batch
-      demoSeats.forEach(seat => {
-        const seatRef = doc(seatsCollectionRef);
-        batch.set(seatRef, seat);
-      });
-
-      // Commit the batch write
-      await batch.commit();
-
-      console.log('Demo seats created successfully!');
-    };
-    createDemoSeats(portal.id);
-  }, [portal]); */
 
   return (
     <Layout>

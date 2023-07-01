@@ -152,7 +152,11 @@ export const UpgradeOrDowngrade = () => {
                           }
                         </Box>
               ) : (
-                <Button
+                <>
+
+                {
+                                     !portal?.subscriptions?.current?.subscriptionEnd && (
+<Button
                   onClick={() => {
                     setCurrentSelectedPlan(el);
                     onOpen();
@@ -169,6 +173,13 @@ export const UpgradeOrDowngrade = () => {
                     ? 'Current'
                     : 'Downgrade'}
                 </Button>
+
+                                     )
+
+                }
+                                                     </>
+
+                
               )}
 
                     </>
@@ -202,23 +213,32 @@ export const UpgradeOrDowngrade = () => {
               {portal?.subscriptions?.current?.priceId === el.priceId ? (
                 <Box>Current Plan</Box>
               ) : (
-                <Button
-                  onClick={() => {
-                    setCurrentSelectedPlan(el);
-                    onOpen();
-                  }}
-                >
-                  {/* decide upgrade or downgrade or current based on index */}
-                  {el.id >
-                  prices.filter(
-                    price =>
-                      price.priceId === portal?.subscriptions?.current?.priceId
-                  )[0].id
-                    ? 'Upgrade'
-                    : el.priceId === portal?.subscriptions?.current?.priceId
-                    ? 'Current'
-                    : 'Downgrade'}
-                </Button>
+
+                <>
+                  {
+                    !portal?.subscriptions?.current?.subscriptionEnd && (
+                      <Button
+                      onClick={() => {
+                        setCurrentSelectedPlan(el);
+                        onOpen();
+                      }}
+                    >
+                      {/* decide upgrade or downgrade or current based on index */}
+                      {el.id >
+                      prices.filter(
+                        price =>
+                          price.priceId === portal?.subscriptions?.current?.priceId
+                      )[0].id
+                        ? 'Upgrade'
+                        : el.priceId === portal?.subscriptions?.current?.priceId
+                        ? 'Current'
+                        : 'Downgrade'}
+                    </Button>
+                    )
+
+                  }
+                </>
+               
               )}
             </Flex>
           ))}

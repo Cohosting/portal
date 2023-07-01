@@ -42,7 +42,7 @@ export const ClientLogin = () => {
       });
       if (res.data.success) {
         setSessionToken(res.data.token);
-        navigate('/portal');
+        navigate('/portal/messages');
         onClose();
         console.log(res);
       } else {
