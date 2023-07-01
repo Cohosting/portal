@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import {
   Box,
-  Avatar,
   Text,
   FormControl,
   FormLabel,
@@ -99,35 +98,30 @@ export const AccountSettingsPage = () => {
   const handleProfileUpdate = async () => {
     setIsUpdating(true);
     const ref = doc(db, 'users', user.uid);
-    if (previousUserInfo.email !== userInfo.email) {
-      const ref = doc(db, 'users', user.uid);
-
-      updateEmail(auth.currentUser, userInfo.email)
-        .then(async () => {
-          await updateDoc(ref, {
-            email: userInfo.email,
-            name: `${userInfo.firstName} ${userInfo.lastName}`,
-            profileImageUrl: userInfo.profileImageUrl,
-          });
-          setIsUpdating(false);
-        })
-        .catch(error => {
-          console.log(`Error updating email: ${error}`);
-          if (error.code === 'auth/requires-recent-login') {
-            setIsPasswordVerificationModalOpen(true);
-            setIsUpdating(false);
-          }
-        });
-    } else {
+  
+    try {
+      if (previousUserInfo.email !== userInfo.email) {
+        await updateEmail(auth.currentUser, userInfo.email);
+      }
+  
       await updateDoc(ref, {
+        email: userInfo.email,
         name: `${userInfo.firstName} ${userInfo.lastName}`,
-        profileImageUrl: userInfo.profileImageUrl,
+        profileImageUrl: userInfo.profileImageUrl || '',
       });
+  
+      setIsUpdating(false);
+      console.log('Profile updated successfully!');
+    } catch (error) {
+      console.log(`Error updating profile: ${error}`);
+  
+      if (error.code === 'auth/requires-recent-login') {
+        setIsPasswordVerificationModalOpen(true);
+      }
+  
       setIsUpdating(false);
     }
-    console.log('Updating profile...');
   };
-
   const handleLogout = () => {
     // Implement your logout logic here
     console.log('Logging out...');
@@ -165,31 +159,32 @@ export const AccountSettingsPage = () => {
     }
   }, [userInfo, previousUserInfo]);
 
-  const handleFileUpload = file => {
+  const handleFileUpload = async (file) => {
     if (file) {
-      const storageRef = ref(storage, file.name);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on('state_changed', snapshot => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setUploadProgress(progress);
-      });
-
-      uploadTask
-        .then(() => {
-          getDownloadURL(uploadTask.snapshot.ref).then(url => {
-            setUserInfo({
-              ...userInfo,
-              profileImageUrl: url,
-            });
-            setSelectedFile('');
-          });
-        })
-        .catch(error => {
-          console.error(error);
+      try {
+        const storageRef = ref(storage, file.name);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+  
+        uploadTask.on('state_changed', (snapshot) => {
+          const progress = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          setUploadProgress(progress);
         });
+        await uploadTask;
+  
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+  
+        setUserInfo({
+          ...userInfo,
+          profileImageUrl: url,
+        });
+  
+        setSelectedFile('');
+        console.log('File uploaded successfully!');
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
     }
   };
 

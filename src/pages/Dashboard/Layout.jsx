@@ -7,12 +7,13 @@ import {
   AiOutlineFile,
   AiOutlineHome,
   AiOutlineRotateLeft,
+  AiOutlineSetting,
 } from 'react-icons/ai';
 import { MdPayment } from 'react-icons/md';
 import { GiSettingsKnobs } from 'react-icons/gi';
 import { BiCustomize } from 'react-icons/bi';
 import { FiUsers } from 'react-icons/fi';
-import { FaMoneyBillAlt } from 'react-icons/fa';
+import { FaMoneyBillAlt, FaRegUserCircle } from 'react-icons/fa';
 import { BiMessageMinus } from 'react-icons/bi';
 import { RiBillLine, RiTeamLine } from 'react-icons/ri';
 import { PortalContext } from '../../context/portalContext';
@@ -201,6 +202,21 @@ export const Layout = ({ children, user }) => {
           >
             Subscription
           </NavItem>
+          <NavItem
+            isActive={ location.pathname === '/settings'}
+            onClick={() => navigate('/settings')}
+            icon={<AiOutlineSetting />}
+          >
+            Portal settings
+          </NavItem>
+          <NavItem
+            isActive={location.pathname.includes('/me')}
+            onClick={() => navigate('/settings/me')}
+            icon={<FaRegUserCircle />}
+          >
+            Profile
+          </NavItem>
+
         </Box>
       </Box>
       <Box height={'100%'} flex={1}>
