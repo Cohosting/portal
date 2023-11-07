@@ -67,7 +67,6 @@ export const Client = () => {
               </Flex>
               <Box ml={3}>
                 <Text>{el.name}</Text>
-                <Text fontSize={'12px'}>{el.email}</Text>
               </Box>
             </Flex>
           ),

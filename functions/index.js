@@ -33,6 +33,8 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
           success: false,
           code: 'INVALID_CREDENTIALS',
           message: 'Invalid email or password',
+          reason: 'empty_data',
+
         };
       } else {
         const userDoc = querySnapshot.docs[0];
@@ -61,6 +63,8 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
             success: false,
             code: 'INVALID_CREDENTIALS',
             message: 'Invalid email or password',
+            reason: 'token_validation',
+
           };
         }
       }

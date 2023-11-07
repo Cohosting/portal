@@ -11,6 +11,15 @@ export const generateInvoiceNumber = () => {
   return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 };
 
+export const formattedMonthTime = (timestamp) => {
+ 
+  const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+  
+  const day = date.getDate().toString().padStart(2, '0'); // Ensure two digits with leading zero
+  const month = date.toLocaleString('default', { month: 'short' }); // Get the abbreviated month name
+  
+  return `${day} ${month}`;
+}
 
 export const isValidBrandUrl = url => {
   if (url.includes('https://airtable.com')) {

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { SimpleGrid, Box, Flex } from '@chakra-ui/react';
+import { SimpleGrid, Box, Flex, Text, useMediaQuery } from '@chakra-ui/react';
 
 const Table = ({ columns, data, sortableColumns }) => {
   const [sortedColumn, setSortedColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
+  const [isLessThen630] = useMediaQuery('(max-width: 630px)')
 
   const handleHeaderClick = column => {
     if (sortableColumns.includes(column)) {
@@ -29,10 +30,17 @@ const Table = ({ columns, data, sortableColumns }) => {
       }
     });
   };
-
+  console.log({
+    columns, data
+  })
+console.log({isLessThen630})
   return (
-    <SimpleGrid columns={columns.length} p="2">
-      {/* Render table headers */}
+    <SimpleGrid  columns={ isLessThen630 ?  0 : columns.length}  p="2">
+
+      {
+        !isLessThen630 ? (
+          <>
+           {/* Render table headers */}
       {columns.map((column, index) => (
         <Box
           borderBottom={'1px solid #eff1f4'}
@@ -46,6 +54,12 @@ const Table = ({ columns, data, sortableColumns }) => {
           mb={'10px'}
         >
           {column}
+
+          <Text> {/*  {typeof row[column] === 'object'
+              ? // Render child component if the cell value is an object
+                row[column]
+              : // Render text value if the cell value is not an object
+                row[column]} */}</Text>
         </Box>
       ))}
       {/* Render table rows */}
@@ -68,6 +82,46 @@ const Table = ({ columns, data, sortableColumns }) => {
           </Flex>
         ))
       )}
+          </>
+
+        ) : (
+          <Box>
+      
+      {/* Render table rows */}
+      {getSortedData().map((row, rowIndex) =>
+      <Box>
+        <Text>#{rowIndex + 1}</Text>
+        {
+        columns.map((column, colIndex) => (
+          <Box
+          borderBottom={'1px solid #eff1f4'}
+          py={'5px'}
+          key={colIndex}
+          p="2"
+          cursor={sortableColumns.includes(column) ? 'pointer' : 'default'}
+          onClick={() => handleHeaderClick(column)}
+          fontSize={'13px'}
+          lineHeight={'20px'}
+          mb={'10px'}
+        >
+          {column}
+
+          <Text mt={1} > {  typeof row[column] === 'object'
+              ? // Render child component if the cell value is an object
+                row[column]
+              : // Render text value if the cell value is not an object
+                row[column]} </Text>
+        </Box>
+        ))
+        }
+        </Box>
+        
+      )}
+          </Box>
+
+        )
+      }
+     
     </SimpleGrid>
   );
 };

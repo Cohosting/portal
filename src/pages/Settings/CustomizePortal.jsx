@@ -11,8 +11,8 @@ import { PortalContext } from '../../context/portalContext';
 const Heading = ({ text, subText }) => {
   return (
     <>
-      <Text>{text}</Text>
-      <Text fontSize={'14px'} my={2}>
+      <Text fontSize={['15px', '16px']}>{text}</Text>
+      <Text fontSize={['13px','14px']} my={2}>
         {subText}
       </Text>
     </>
@@ -80,7 +80,7 @@ export const CustomizePortal = () => {
         />
       </Box>
 
-      <Box w={'600px'} margin={'auto'}>
+      <Box w={'100%'} maxW={'600px'} margin={'auto'}>
         <Box my={3}>
           <Heading
             text={'Brand name'}
@@ -132,19 +132,21 @@ export const CustomizePortal = () => {
           />
         </Box>
 
-        <Box my={3}>
+        <Box my={3} fontSize={['15px', '16px']}>
           <Heading
             text={'Brand colors'}
             subText={`Customize the colors in your portal. Note that these colors only affect your portal and not the internal user experience. The accent is used for buttons, tags, and other UI elements.`}
           />
 
           <Flex
+          flexDir={['column', 'row']}
+          alignItems={['flex-start','center']}
+
             borderTop={'1px solid gray'}
-            alignItems={'center'}
             justifyContent={'space-between'}
             p={3}
           >
-            <Text>Sidebar background color</Text>
+            <Text my={1}>Sidebar background color</Text>
             <ColorPicker
               defaultColor={sidebarBgColor}
               field={'sidebarBgColor'}
@@ -153,11 +155,13 @@ export const CustomizePortal = () => {
           </Flex>
           <Flex
             borderTop={'1px solid gray'}
-            alignItems={'center'}
             justifyContent={'space-between'}
             p={3}
+            flexDir={['column', 'row']}
+            alignItems={['flex-start','center']}
+  
           >
-            <Text>Sidebar text color</Text>
+            <Text my={1}>Sidebar text color</Text>
             <ColorPicker
               defaultColor={sidebarTextColor}
               field={'sidebarTextColor'}
@@ -167,11 +171,11 @@ export const CustomizePortal = () => {
 
           <Flex
             borderTop={'1px solid gray'}
-            alignItems={'center'}
-            justifyContent={'space-between'}
+            flexDir={['column', 'row']}
+            alignItems={['flex-start','center']}            justifyContent={'space-between'}
             p={3}
           >
-            <Text>Accent color</Text>
+            <Text my={1}>Accent color</Text>
             <ColorPicker
               defaultColor={accentColor}
               field={'accentColor'}
@@ -187,7 +191,7 @@ export const CustomizePortal = () => {
             }
           />
 
-          <Flex alignItems={'center'} justifyContent={'space-between'}>
+          <Flex pb={'50px'} alignItems={'center'} justifyContent={'space-between'}>
             <Text>Powered by Copilot</Text>
             <Box>
               <Checkbox

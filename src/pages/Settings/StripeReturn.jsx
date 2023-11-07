@@ -68,6 +68,7 @@ export const StripeReturn = () => {
               createStripeConnectAccount(
                 user.uid,
                 user.stripeConnectAccountId,
+                portal.id,
                 setIsLoadingFill
               )
             }

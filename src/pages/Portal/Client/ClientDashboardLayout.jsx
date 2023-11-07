@@ -1,4 +1,4 @@
-import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Slide, Spinner, Text, useDisclosure, useMediaQuery, useOutsideClick } from '@chakra-ui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { ClientPortalContext } from '../../../context/clientPortalContext';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,9 +7,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { sortAppWithAboveSettings } from '../../../utils';
 import { ClientAuthContext } from '../../../context/clientAuthContext';
+import { GiHamburgerMenu } from 'react-icons/gi';
+
+import { Overlay } from './../../../components/UI/Overlay'
 
 // create a function that sorts the apps by index and filters out the disabled apps and also if the setup type is manual then check for clientSettings array if that apps assigned to that user
-let sortAppWithIndexAndFilterOutDisabledApps = portal => {};
+
 const fetchAppDataForEachApp = async portal => {
   if (!portal) return;
   const newApps = [...portal.apps];
@@ -32,9 +35,7 @@ const fetchAppDataForEachApp = async portal => {
     };
   });
 
-  console.log({
-    updatedApps,
-  });
+
   return updatedApps;
 };
 
@@ -64,10 +65,23 @@ export const ClientDashboardLayout = ({ children }) => {
   const [apps, setApps] = useState(null);
   const { clientPortal } = useContext(ClientPortalContext);
   const { portalName } = useParams();
-  const settings = clientPortal.brandSettings;
+  const  {isOpen, onOpen, onClose} = useDisclosure()
+  const [isLessThen660] =  useMediaQuery('(min-width: 660px)');
+
+  const ref = React.useRef();
+  useOutsideClick({
+    ref: ref,
+    handler: onClose,
+  });
+
+  const settings = clientPortal.brandSettings || {};
 
   useEffect(() => {
-    if (!clientPortal || !clientUser) return;
+    if (!clientPortal || !clientUser) { 
+
+      console.log('I think this is the problem');
+      return;
+    };
     (async () => {
       const apps = await fetchAppDataForEachApp(clientPortal);
       const sorted = sortAppWithAboveSettings(apps, clientUser.id);
@@ -80,12 +94,28 @@ export const ClientDashboardLayout = ({ children }) => {
   }, [clientPortal, clientUser]);
 
   return (
-    <Flex h={'100vh'}>
+    <Flex h={'100vh'} flexDir={!isLessThen660 ? 'column' : 'row'}>
+      {
+        !isLessThen660 && (
+          <Flex alignItems={'center'} p={'10px'} borderBottom={'1px solid'} borderColor={'gray.400'} >
+            <Button onClick={onOpen}>
+              <GiHamburgerMenu />
+            </Button>
+            <Text ml={3}>Welcome</Text>
+          </Flex>
+        )
+      }
       {
         !apps ? <Spinner /> : (
           <>
+          <Overlay isOpen={isOpen} />
+          <Slide in={isOpen} direction="left" >
+           
+
           <Box
-          w={'300px'}
+          ref={ref}
+          zIndex={99999}
+          w={'240px'}
           h={'100%'}
           bg={settings?.sidebarBgColor || 'gray.100'}
           color={settings?.sidebarTextColor || 'gray.800'}
@@ -96,13 +126,40 @@ export const ClientDashboardLayout = ({ children }) => {
             <NavItem
               key={app.id}
               isActive={app?.name.toLowerCase() === portalName?.toLowerCase()}
-              onClick={() => navigate(`/portal/${app.name}`)}
+              onClick={() => {
+                onClose()
+                navigate(`/portal/${app.name}`)}}
             >
               {app.name}
             </NavItem>
           ))}
-        </Box>
-        <Box flex={1}>
+            </Box>
+
+          </Slide>
+          {
+            isLessThen660 && (
+              <Box
+              w={'300px'}
+              h={'100%'}
+              bg={settings?.sidebarBgColor || 'gray.100'}
+              color={settings?.sidebarTextColor || 'gray.800'}
+              p={4}
+            >
+              <Text>{settings?.brandName}</Text>
+              {apps.map(app => (
+                <NavItem
+                  key={app.id}
+                  isActive={app?.name.toLowerCase() === portalName?.toLowerCase()}
+                  onClick={() => navigate(`/portal/${app.name}`)}
+                >
+                  {app.name}
+                </NavItem>
+              ))}
+            </Box>
+            )
+          }
+
+        <Box flex={1} overflowY={'auto'} >
           {' '}
           <PortalComponentDecider />
         </Box>

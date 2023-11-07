@@ -8,7 +8,6 @@ export const useSubdomain = () => {
   const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [portalData, setPortalData] = useState(null);
-
   useEffect(() => {
     const host = window.location.host; // gets the full domain of the app
 

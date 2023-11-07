@@ -242,8 +242,9 @@ export const Pricing = () => {
 
   return (
     <Layout>
+      <Box fontSize={['15px','16px']}>
       {priceId || isBrandingPaymentElementOpen ? (
-        <Box px={'25px'}>
+        <Box px={['15px','25px']}>
           <SubscriptionPage
             isBrandingPaymentElementOpen={isBrandingPaymentElementOpen}
             priceId={priceId}
@@ -251,7 +252,8 @@ export const Pricing = () => {
           />
         </Box>
       ) : (
-        <Box px={'25px'}>
+        <Box px={['15px','25px']}>
+        
           {portal?.subscriptions?.current?.subscriptionStatus === 'active' ? (
             <Box
               bg={'white'}
@@ -259,7 +261,7 @@ export const Pricing = () => {
               borderRadius={'4px'}
               boxShadow={'0px 0px 24px rgba(0, 0, 0, 0.07)'}
             >
-              <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
+              <Text fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                 You are already subscribed to{' '}
                 {
                   prices.filter(
@@ -269,7 +271,7 @@ export const Pricing = () => {
                 plan
               </Text>
               {portal.payment_error && (
-                <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
+                <Text  fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                   There is a error processing your payment:
                   {JSON.stringify(portal.payment_error)}
                 </Text>
@@ -282,7 +284,7 @@ export const Pricing = () => {
 
               {portal.subscriptions && portal.subscriptions.future && (
                 <Box>
-                  <Text fontSize={'18px'} fontWeight={'bold'} color={'red'}>
+                  <Text  fontSize={['16px','18px']} fontWeight={'bold'} color={'red'}>
                     You have a plan change scheduled for{' '}
                     {unixToDateString(
                       portal.subscriptions.future.subscriptionStart
@@ -292,11 +294,12 @@ export const Pricing = () => {
                 </Box>
               )}
               <Divider my={4} />
+
               <Box>
-                <Text fontSize={'18px'} fontWeight={'bold'} mb={4}>
+                <Text  fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                   Add-ons
                 </Text>
-                {portal.addOnSubscription?.items['removeBranding']?.active ? (
+                {portal?.addOnSubscription?.items['removeBranding']?.active ? (
                   <Flex
                     p={2}
                     borderRadius={'6px'}
@@ -305,7 +308,7 @@ export const Pricing = () => {
                     alignItems={'space-between'}
                     justifyContent={'center'}
                   >
-                    <Text fontWeight={'700'} fontSize={'24px'}>
+                    <Text fontWeight={'700'}  fontSize={['18px','24px']}>
                       You are subscribed to remove branding for 100$/mo
                     </Text>
                     {!portal.addOnSubscription?.items['removeBranding']
@@ -341,17 +344,22 @@ export const Pricing = () => {
                     <Button
                       onClick={handleAddOnSubscription}
                       isLoading={isBrandRemoved}
+                      size={['sm', 'md']}
+                      p={3}
                     >
                       Subscribe
                     </Button>
                   </Flex>
                 )}
               </Box>
+             
 
               {portal.subscriptions?.current && (
                 <Box>
                   <Text>Billing details</Text>
                   <Button
+                  mt={1}
+                  size={[ 'md']}
                     bg={'black'}
                     color={'white'}
                     onClick={() =>
@@ -433,26 +441,17 @@ export const Pricing = () => {
                   ))}
               </Flex>
               <Box>
-                <Flex flexDir={'column'}>
-                  <Text fontSize={'26px'} fontWeight={700}>
-                    Removing powered by for 100$
-                  </Text>
-                  <Button
-                    isLoading={isLoading}
-                    fontSize={'15px'}
-                    bg={'black'}
-                    color={'white'}
-                    width={'min-content'}
-                    onClick={handleIsBrandingPaymentElementOpen}
-                  >
-                    Subscribe
-                  </Button>
-                </Flex>
+                {
+
+                }
+    
               </Box>
             </>
           )}
         </Box>
       )}
+      </Box>
+ 
     </Layout>
   );
 };

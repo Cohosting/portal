@@ -32,7 +32,7 @@ export const AddAppForm = ({ appState, setAppState, mode }) => {
   };
 
   return (
-    <Box w={'80%'} margin={'auto'} mt={5}>
+    <Box w={['100%', '80%']} margin={'auto'} fontSize={['15px', '16px']} mt={5}>
       <Text>Add app</Text>
 
       <Box my={4}>
@@ -48,7 +48,7 @@ export const AddAppForm = ({ appState, setAppState, mode }) => {
         <Box my={4}>
           <Text>Setup type</Text>
 
-          <Box mt={2}>
+          <Box mt={2} pos={'relative'}>
             <Select
               defaultValue={'automatic'}
               value={setupType}

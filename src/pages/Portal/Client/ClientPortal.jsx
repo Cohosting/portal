@@ -84,7 +84,7 @@ export const ClientPortal = () => {
   };
 
   return (
-    <SubdomainCheck>
+    <SubdomainCheck domain={domain} isValid={isValid} isLoading={isDomainLoading}>
       <ClientDashboardLayout>
         <Box p={4}>
           <Button onClick={handleManageBillingInfo}>

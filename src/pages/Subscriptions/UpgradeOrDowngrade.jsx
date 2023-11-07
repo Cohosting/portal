@@ -236,10 +236,23 @@ export const UpgradeOrDowngrade = () => {
                     </Button>
                     )
 
+                    
+
                   }
                 </>
                
               )}
+                            {
+                portal?.subscriptions?.future && el.priceId === portal?.subscriptions?.future.priceId && (
+                  <Box>
+                    <Text>You have downgraded to this plan</Text>
+                    <Text>This will start at: {new Date(portal?.subscriptions?.future?.subscriptionStart * 1000).toDateString()}</Text>
+
+                    <Button isLoading={isCancelLoading} onClick={handleCancelDowngrade}>Cancel downgrade</Button>
+
+                  </Box>
+                )
+              }
             </Flex>
           ))}
       </Box>

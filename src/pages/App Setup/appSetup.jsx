@@ -150,11 +150,12 @@ export const AppSetup = () => {
 
   return (
     <Layout>
+      <Box p={[2,4]} mt={4} >
       <Collapse in={hasChanges} animateOpacity>
+        
         <Flex
           alignItems={'center'}
           justifyContent={'flex-end'}
-          p={4}
           borderBottom={'1px solid #ccc'}
         >
           <Button variant={'outline'} size={'md'}>
@@ -171,14 +172,14 @@ export const AppSetup = () => {
         </Flex>
       </Collapse>
 
-      <Box p={4}>
+      <Box>
         <Flex
           justifyContent="space-between"
           mb={4}
           pb={4}
           borderBottom={'1px solid gray'}
         >
-          <Text fontSize="xl">App Setup</Text>
+          <Text fontSize={['lg',"xl"]}>App Setup</Text>
           <IconButton
             onClick={() => navigate(`setup`)}
             icon={<MdAdd />}
@@ -206,7 +207,7 @@ export const AppSetup = () => {
                         {...provided.draggableProps}
                         alignItems="center"
                         justifyContent="space-between"
-                        px={4}
+                        px={[2,4]}
                         py={2}
                         boxShadow="md"
                         borderRadius="md"
@@ -219,8 +220,8 @@ export const AppSetup = () => {
                         >
                           <Box as={MdDragHandle} color="gray.400" mr={2} />
                           <Box>
-                            <Text>{item.name}</Text>
-                            <Text>Read more</Text>
+                            <Text fontSize={['15px', '16px']}>{item.name}</Text>
+                            <Text fontSize={['12px', '14px']}>Read more</Text>
                           </Box>
                         </Flex>
                         <Menu>
@@ -230,17 +231,22 @@ export const AppSetup = () => {
                             aria-label="Options"
                             icon={<HamburgerIcon />}
                           />
-                          <MenuList>
-                            <MenuItem
-                              icon={<AiOutlineEdit />}
-                              onClick={() =>
-                                navigate(
-                                  `/module-management/setup?extentionId=${item.id}`
-                                )
-                              }
-                            >
-                              Edit
-                            </MenuItem>
+                          <MenuList> 
+                            {
+                              !item.isDefault && (
+                                <MenuItem
+                                icon={<AiOutlineEdit />}
+                                onClick={() =>
+                                  navigate(
+                                    `/module-management/setup?extentionId=${item.id}`
+                                  )
+                                }
+                              >
+                                Edit
+                              </MenuItem>
+                              )
+                            }
+                       
                             {!item.isDefault && (
                               <MenuItem
                                 onClick={() => handleDeleteApp(item.id)}
@@ -269,6 +275,8 @@ export const AppSetup = () => {
           </Droppable>
         </DragDropContext>
       </Box>
+</Box>
+
     </Layout>
   );
 };

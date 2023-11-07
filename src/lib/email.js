@@ -28,7 +28,7 @@ export const addMail = async (
 
 export const sentTeamInviteEmail = async (email, name, teamName, token) => {
   const colRef = collection(db, 'mail');
-  console.log(`http://localhost:3000/accept-team?token=${token}`);
+  console.log(`http://dashboard.localhost:3000/accept-team?token=${token}`);
   await addDoc(colRef, {
     to: email,
     message: {
@@ -38,7 +38,7 @@ export const sentTeamInviteEmail = async (email, name, teamName, token) => {
       <div>
         <p>You have been invited to join ${teamName} team</p>
         <p>Click Here</p>
-        <p>http://localhost:3000/accept-team?token=${token}</p>
+        <p>http://dashboard.localhost:3000/accept-team?token=${token}</p>
       </div>
       `,
     },

@@ -1,14 +1,20 @@
 import { Box, Spinner } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSubdomain } from '../../hooks/useSubdomain';
 import { LoginForm } from './LoginForm';
 import { ClientLogin } from '../Portal/Client/ClientLogin';
+import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
   const { domain, isValid, isLoading } = useSubdomain();
+  const navigate = useNavigate()
 
-  console.log({ domain, isValid, isLoading })
-  return (
+/*   useEffect(() => {
+    if(!window.location.hostname.includes('dashboard')) {
+      navigate(`/dashboard.${window.location.hostname}/login`)
+    }
+  }, []); */
+    return (
     <Box>
       {domain && domain.includes('dashboard') && <LoginForm />}
       {domain && (

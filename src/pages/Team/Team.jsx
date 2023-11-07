@@ -182,8 +182,8 @@ export const Team = () => {
       });
 
       // sent email invite
-      /*       await sentTeamInviteEmail(email, firstName, portal.companyName, token); // token is used in TeamInvite.jsx [line 120]
-       */
+         await sentTeamInviteEmail(email, firstName, portal.companyName, token);  
+      
       // update subscription quantity
       const portalRef = query(
         collection(db, 'seats'),
@@ -289,7 +289,6 @@ export const Team = () => {
                 </Flex>
                 <Box ml={3}>
                   <Text>{el.firstName}</Text>
-                  <Text fontSize={'12px'}>{el.email}</Text>
                 </Box>
               </Flex>
             ),
@@ -389,8 +388,8 @@ export const Team = () => {
               </Button>
             )}
           </Flex>
-          <Box p={3} border={'1px solid gray'} color={'red'}>
-            <Text fontSize={'22px'}>This is test corner for seats</Text>
+          <Box fontSize={['15px', '16px']} p={3} border={'1px solid'} borderRadius={'5px'} borderColor={'gray.400'} color={'red'}>
+            <Text fontSize={['18px','22px']}>This is test corner for seats</Text>
 
             <Text>Total Seats: {allSeats.length} </Text>
             <Text>Free Seats: 5</Text>

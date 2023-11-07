@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {
   collection,
@@ -13,6 +13,46 @@ import {
 import { AuthContext } from '../../context/authContext';
 import { db } from '../../lib/firebase';
 import { PortalContext } from '../../context/portalContext';
+
+
+const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <Flex
+    alignItems={'center'}
+    justifyContent={'space-between'}
+    border={'1px solid red'}
+    p={2}
+    my={2}
+    borderRadius={'10px'}
+  >
+    <Box>
+      <Text>Name: {invoice.client.name}</Text>
+      <Text>Email: {invoice.client.email}</Text>
+      <Text>Status: {invoice.status}</Text>
+      <Text>Invoice number: {invoice.invoiceNumber}</Text>
+    </Box>
+    <Box>
+      {invoice.status === 'draft' && <Button>Edit</Button>}
+      {invoice.status === 'draft' &&
+        invoice.status !== 'finalized' && (
+          <Button
+          isLoading={isOpen}
+            ml={2}
+            onClick={ async () => {
+              onOpen();
+              await updateInvoiceStatusFirebase(invoice);
+              onClose();
+            }}
+          >
+            Finalized
+          </Button>
+        )}
+    </Box>
+  </Flex>
+  )
+}
 
 export const Invoices = () => {
   const navigate = useNavigate();
@@ -77,33 +117,7 @@ export const Invoices = () => {
           <Box>
             <Text my={3}>Invoices</Text>
             {invoices.map(invoice => (
-              <Flex
-                alignItems={'center'}
-                justifyContent={'space-between'}
-                border={'1px solid red'}
-                p={2}
-                my={2}
-                borderRadius={'10px'}
-              >
-                <Box>
-                  <Text>Name: {invoice.client.name}</Text>
-                  <Text>Email: {invoice.client.email}</Text>
-                  <Text>Status: {invoice.status}</Text>
-                  <Text>Invoice number: {invoice.invoiceNumber}</Text>
-                </Box>
-                <Box>
-                  {invoice.status === 'draft' && <Button>Edit</Button>}
-                  {invoice.status === 'draft' &&
-                    invoice.status !== 'finalized' && (
-                      <Button
-                        ml={2}
-                        onClick={() => updateInvoiceStatusFirebase(invoice)}
-                      >
-                        Finalized
-                      </Button>
-                    )}
-                </Box>
-              </Flex>
+  <InvoiceItem invoice={invoice} updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} />
             ))}
           </Box>
         ) : (

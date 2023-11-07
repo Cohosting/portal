@@ -95,7 +95,7 @@ export const InvoiceForm = () => {
   }, [portal]);
 
   console.log({
-    stripeUser,
+    lineItems
   });
   return (
     <Layout>

@@ -4,7 +4,7 @@ export const createStripeConnectAccount = async (
   portalId,
   cb
 ) => {
-  cb(true);
+  cb &&  cb(true);
   try {
     const response = await fetch(
       `${process.env.REACT_APP_NODE_URL}/connect/create-connect-session`,
@@ -21,9 +21,9 @@ export const createStripeConnectAccount = async (
       }
     );
     const { accountLink } = await response.json();
-    cb(false);
+    cb && cb(false);
     window.location.href = accountLink.url;
   } catch (err) {
-    cb(false);
+    cb && cb(false);
   }
 };

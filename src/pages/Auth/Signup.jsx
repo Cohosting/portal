@@ -79,6 +79,13 @@ export const Signup = () => {
     }
   };
 
+/*    useEffect(() => {
+    console.log(`dashboard.${window.location.hostname}/signup`)
+    if(!window.location.hostname.includes('dashboard')) {
+      navigate(`dashboard.${window.location.hostname}/login`)
+    }
+  }, []) 
+ */
   return (
     <>
       {/* Register Section */}

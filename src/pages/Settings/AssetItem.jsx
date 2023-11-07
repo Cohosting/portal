@@ -61,16 +61,16 @@ export const AssetItem = ({
       justifyContent={'space-between'}
     >
       <Box>
-        <Text>{text}</Text>
-        <Text>{subText}</Text>
+        <Text fontSize={['15px', '16px']} fontWeight={700}>{text}</Text>
+        <Text fontSize={['14px', '15px']} >{subText}</Text>
       </Box>
       {/* Sqaure box for image */}
       <Flex
         alignItems={'center'}
         justifyContent={'center'}
         cursor={'pointer'}
-        w={'48px'}
-        h={'48px'}
+        w={[ '35px','48px']}
+        h={[ '35px','48px']}
         borderRadius={'6px'}
         border={'1px solid gray'}
         onClick={handleFileOpen}
@@ -84,7 +84,7 @@ export const AssetItem = ({
         {downloadURL ? (
           <Image src={downloadURL} w={'100%'} height={'100%'} />
         ) : (
-          <AddIcon />
+          <AddIcon font fontSize={['12px', '16px']} />
         )}
       </Flex>
 

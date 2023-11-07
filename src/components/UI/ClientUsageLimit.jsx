@@ -45,11 +45,11 @@ export const ClientUsageLimit = ({
     }
   }, [clients, portal]);
   return (
-    <Box p={3}>
-      <Text color={'red.500'}>{warningText}</Text>
+    <Box p={[2,3]}>
+      <Text  color={'red.500'} fontSize={['14px', '16px']} >{warningText}</Text>
 
       <Box>
-        <Text fontSize={'14px'}>{subText}</Text>
+        <Text fontSize={['12px', '14px']}>{subText}</Text>
       </Box>
     </Box>
   );

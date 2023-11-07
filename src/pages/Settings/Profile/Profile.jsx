@@ -190,12 +190,14 @@ export const AccountSettingsPage = () => {
 
   return (
     <Layout>
+      <Box fontSize={['15px', '16px']}>
+      
       <ActionButtons
         isLoading={isUpdating}
         onUpdate={handleProfileUpdate}
         shouldShow={hasChanges}
       />
-      <Box p={4} maxW="md" mx="auto">
+      <Box p={[2, 4]} maxW="md" mx="auto">
         <ProfilePicture
           profileImageUrl={selectedFile ? imageObjectUrl : profileImageUrl}
           firstName={firstName}
@@ -380,6 +382,9 @@ export const AccountSettingsPage = () => {
           <Progress value={uploadProgress} size="sm" mt={2} />
         </Box>
       )}
+      </Box>
+
+
     </Layout>
   );
 };

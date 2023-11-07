@@ -80,7 +80,20 @@ export const Login = ({ inviteData, portal }) => {
       navigate('/');
     } catch (err) {
       console.log(`Error logging in: ${err}`);
-      setError(err.message);
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('This email is already in use.');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid email format.');
+          break;
+        case 'auth/user-not-found':
+          setError('Wrong email or password');
+          break;
+        default:
+          setError('An unknown error occurred. Please try again.');
+      }
+
       setIsLoading(false);
     }
   };

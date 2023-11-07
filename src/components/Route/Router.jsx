@@ -24,6 +24,7 @@ import { Team } from '../../pages/Team/Team';
 import { AccountSettingsPage } from '../../pages/Settings/Profile/Profile';
 import { AcceptInvitationPage } from '../../pages/Team/AcceptInvitationPage';
 import SubdomainWrapper from '../UI/SubdomainWrapper';
+import { SubdomainCheck } from '../SubdomainCheck';
 
 const router = createBrowserRouter([
   {
@@ -102,7 +103,9 @@ const router = createBrowserRouter([
   },
   {
     path: '/portal',
-    element: <ClientPortal />,
+    element: 
+<ClientPortal />
+    ,
   },
   {
     path: '/portal/:portalName',

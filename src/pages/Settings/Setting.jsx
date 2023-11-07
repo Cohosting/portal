@@ -34,7 +34,7 @@ export const Settings = () => {
 
   return (
     <Layout>
-      <Box p={4}>
+      <Box  p={[2,4]}  pt={4}>
         <Text>Settings</Text>
         <Text mt={4}>Connect your stripe to get payouts</Text>
         <Button
@@ -54,7 +54,7 @@ export const Settings = () => {
           Connect your account
         </Button>
 
-        <Box mt={4}>
+        <Box mt={4} fontSize={['15px', '16px']}>
           <Text>Default setting for invoice payment</Text>
           {!portal ? (
             <Spinner />
@@ -66,7 +66,7 @@ export const Settings = () => {
                 alignItems={'center'}
                 justifyContent={'space-between'}
               >
-                <Text fontSize={'17px'}>Enable ACH Debit payment</Text>
+                <Text fontSize={'16px'}>Enable ACH Debit payment</Text>
                 <Checkbox
                   onChange={() => updatePortalSetting('achDebit')}
                   colorScheme="green"
@@ -79,7 +79,7 @@ export const Settings = () => {
                 alignItems={'center'}
                 justifyContent={'space-between'}
               >
-                <Text fontSize={'17px'}>Card</Text>
+                <Text fontSize={'16px'}>Card</Text>
                 <Checkbox
                   colorScheme="green"
                   isChecked={portal?.settings.card}
@@ -105,7 +105,7 @@ export const Settings = () => {
             alignItems={'center'}
             justifyContent={'space-between'}
           >
-            <Text fontSize={'17px'}>Auto-import</Text>
+            <Text fontSize={'16px'}>Auto-import</Text>
             <Checkbox
               colorScheme="green"
               isChecked={portal?.settings.autoImport}

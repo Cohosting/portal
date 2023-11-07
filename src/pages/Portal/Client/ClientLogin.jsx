@@ -7,6 +7,7 @@ import {
   Input,
   Text,
   useDisclosure,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import { signInWithEmailAndPassword } from '../../../lib/Client/auth';
@@ -24,8 +25,8 @@ export const ClientLogin = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [clientLoginCredentials, setClientLoginCredentials] = useState({
     email: '',
-    password: '',
-  });
+    assword: '',
+  }); const [isLessThen660] = useMediaQuery('(min-width: 660px)')
 
   const handleLogin = async () => {
     try {
@@ -42,7 +43,7 @@ export const ClientLogin = () => {
       });
       if (res.data.success) {
         setSessionToken(res.data.token);
-        navigate('/portal/messages');
+      window.location.href = '/portal/messages';
         onClose();
         console.log(res);
       } else {
@@ -145,18 +146,24 @@ export const ClientLogin = () => {
           </Box>
         </Box>
 
-        <Box flex={1} w={'100%'}>
-          <Image
-            objectFit={'cover'}
-            src={
-              clientPortal?.brandSettings?.squareLoginImage ||
-              'https://images.unsplash.com/photo-1685058160554-17a165ad47da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80'
-            }
-            alt={'login image'}
-            width={'100%'}
-            height={'100%'}
-          />
-        </Box>
+        {
+          isLessThen660  &&  (
+            <Box flex={1} w={'100%'}>
+            <Image
+              objectFit={'cover'}
+              src={
+                clientPortal?.brandSettings?.squareLoginImage ||
+                'https://images.unsplash.com/photo-1685058160554-17a165ad47da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80'
+              }
+              alt={'login image'}
+              width={'100%'}
+              height={'100%'}
+            />
+          </Box>
+          )
+        }
+
+    
       </Flex>
       {clientPortal?.brandSettings?.poweredByCopilot && (
         <Text mt={'20px'} textAlign={'center'}>

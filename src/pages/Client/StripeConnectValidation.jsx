@@ -51,14 +51,15 @@ export const StripeConnectValidation = ({ setShouldShowAddClient }) => {
           {portal.stripeConnectAccountId && stripeUser.details_submitted ? (
             <Text>Stripe account connected</Text>
           ) : (
-            <Flex alignItems={'center'} justifyContent={'space-between'}>
-              <Box>
+            <Flex direction={['column', 'row' ]} alignItems={['flex-start','center']} justifyContent={'space-between'}>
+              <Box fontSize={['15px', '16px']}>
                 <Text>Stripe account not connected</Text>
-                <Text>Connect your stripe account to create clients</Text>
+                <Text >Connect your stripe account to create clients</Text>
               </Box>
               <Button
                 onClick={() => navigate('/settings')}
                 size={'sm'}
+                mt={2}
                 fontSize={'14px'}
                 color={'white'}
                 bg={'black'}

@@ -2,6 +2,7 @@ import React, { useEffect, useContext, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import {
   Box,
+  Button,
   Flex,
   IconButton,
   Menu,
@@ -27,6 +28,7 @@ import { ExtentionContentViewer } from './ExtentionContentViewer';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { AiOutlineEdit } from 'react-icons/ai';
 import queryString from 'query-string';
+import { AddIcon } from '@chakra-ui/icons';
 
 const MemberItem = ({
   member,
@@ -106,7 +108,10 @@ export const Extentions = () => {
   }, [portal]);
 
   useEffect(() => {
-    if (!extentionId) return;
+    if (!extentionId) {
+      setIsLoading(false)
+      return
+    };
     setIsLoading(true);
 
     const getExtention = async () => {
@@ -124,7 +129,16 @@ export const Extentions = () => {
     return () => {};
   }, [location]);
 
-  if (!extention) return <Layout>Loading...</Layout>;
+  if (!extention && !isLoading) return <Layout>
+    <Flex flexDir={'column'} alignItems={'center'} justifyContent={'center'}>
+      <Text my={3}>
+    No extention is created. Please create one
+
+        </Text>
+    <Button onClick={() => navigate('/module-management/setup')} rightIcon={<AddIcon />}>Create</Button>
+    </Flex>
+   
+  </Layout>;
   return (
     <Layout>
       <Flex h={'inherit'}>
@@ -134,7 +148,7 @@ export const Extentions = () => {
           </Flex>
         ) : (
           <>
-            <Box width="400px">
+            <Box flex={1} >
               <Flex p={4} borderBottom={'1px solid gray'}>
                 {extention.name}
               </Flex>

@@ -20,14 +20,15 @@ export const ActionButtons = ({
     >
       {shouldShow && (
         <>
-          <Button size={'md'} onClick={onCancel} variant={'outine'}>
+          <Button             size={['sm','md']}
+ onClick={onCancel} variant={'outine'}>
             {cancelText}
           </Button>
           <Button
             bg={'black'}
             color={'white'}
             isLoading={isLoading}
-            size={'md'}
+            size={['sm','md']}
             onClick={onUpdate}
           >
             {updateText}

@@ -38,7 +38,7 @@ export const TeamUsageLimit = ({
   });
   return (
     <Box p={3}>
-      <Text color={'red.500'}>{warningText}</Text>
+      <Text fontSize={['14px', '16px']} color={'red.500'}>{warningText}</Text>
     </Box>
   );
 };

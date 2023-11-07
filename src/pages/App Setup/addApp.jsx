@@ -125,14 +125,16 @@ export const AddApp = () => {
   return (
     <Layout>
       <Flex
+      flexDir={['column', 'row']}
         alignItems={'center'}
         justifyContent={'space-between'}
-        p={3}
+        p={[2,3]}
         borderBottom={'1px solid #eee'}
       >
         <Breadcrumb
           spacing="8px"
           separator={<ChevronRightIcon color="gray.500" />}
+          fontSize={['14px', '16px']}
         >
           <BreadcrumbItem>
             <BreadcrumbLink href="#">Apps</BreadcrumbLink>
@@ -146,7 +148,7 @@ export const AddApp = () => {
             <BreadcrumbLink href="#">Custom app</BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
-        <Box>
+        <Box mt={[3, 0]}>
           <Button size={'sm'} variant={'outline'}>
             Cancel
           </Button>
