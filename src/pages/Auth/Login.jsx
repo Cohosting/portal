@@ -7,13 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
   const { domain, isValid, isLoading } = useSubdomain();
-  const navigate = useNavigate()
 
-/*   useEffect(() => {
-    if(!window.location.hostname.includes('dashboard')) {
-      navigate(`/dashboard.${window.location.hostname}/login`)
-    }
-  }, []); */
+
     return (
     <Box>
       {domain && domain.includes('dashboard') && <LoginForm />}
