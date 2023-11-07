@@ -44,7 +44,7 @@ export const LoginForm = () => {
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, password);
       setIsLoading(false);
-      navigate('/');
+     window.location.href = '/';
     } catch (error) {
       console.log(error);
       setError(error.message);
