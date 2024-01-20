@@ -59,15 +59,34 @@ export const StripeReturn = () => {
         </Text>
       )}
       {stripeUser && !stripeUser.charges_enabled && (
-        <Box>
+        <Box fontSize={'20px'} display={'flex'} flexDir={'column'} gap={2}>
           <Text>Your onboarding is not completed</Text>
+          {
+            stripeUser?.requirements.pending_verification.length > 0 && (
+              <>
+                <Text color={'red.500'}>Your information is beeing verified! It's  pending! please wait for confirmation</Text>
+                <Text></Text>
+
+              </>
+            )
+          }
+          {
+            stripeUser?.requirements.currently_due.length > 0 && stripeUser?.requirements.past_due.length > 0 && (
+              <Text color={'red.700'}>
+                Thanks for submitting your information.
+                It's seems you still need to submit some information or documents.
+                please submit those</Text>
+            )
+          }
+
+
           <Text>Do you want to fill it!? </Text>
           <Button
             isLoading={isLoadingFill}
             onClick={() =>
               createStripeConnectAccount(
-                user.uid,
-                user.stripeConnectAccountId,
+                portal.uid,
+                portal.stripeConnectAccountId,
                 portal.id,
                 setIsLoadingFill
               )

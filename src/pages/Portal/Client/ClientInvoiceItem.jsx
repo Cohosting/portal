@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Heading, Text, Button, Flex, Tag, StatNumber, StatHelpText, Stat, StatLabel } from '@chakra-ui/react';
 import { formattedMonthTime } from '../../../utils';
+import { MdEdit } from "react-icons/md";
 
 const isPendingOrPaid = (value) => {
   console.log(value)
@@ -21,10 +22,10 @@ const isPendingOrPaid = (value) => {
   }
 }
 
-export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, status }) => {
+export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, status }) => {
 
   const total = invoice.lineItems.reduce((acc, item) => {
-    const itemTotal = (item.unit_amount / 100) * Number(item.quantity);
+    const itemTotal = (item.unit_amount) * Number(item.quantity);
     return acc + itemTotal;
   }, 0);
   
@@ -34,9 +35,9 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, status }) =>
     {invoice.lineItems.map(item => (
         <Flex  my={2} pr={'12px'} fontFamily={'monospace'} alignItems={'center'} justifyContent={'space-between'} >
           <Text>
-         { item.description  &&   item.description + ' ' + `(${item.unit_amount / 100}$ x ${item.quantity})` }
+          {item.description && item.description + ' ' + `(${item.unit_amount}$ x ${item.quantity})`}
           </Text>
-          <Text fontSize={'15px'} fontWeight={400} >${(item.unit_amount / 100) * Number(item.quantity)}</Text>
+        <Text fontSize={'15px'} fontWeight={400} >${(item.unit_amount) * Number(item.quantity)}</Text>
         </Flex>
       ))}
 
@@ -48,7 +49,7 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, status }) =>
    </Box>
    <Box>
        <Text>
-       <Tag sx={isPendingOrPaid(invoice.status)} width={'60px'} fontSize={'12px'} size={'md'}>{invoice.status === 'finalized' ? 'pending' : 'paid'}</Tag>
+              <Tag sx={isPendingOrPaid(invoice.status)} fontSize={'12px'} textAlign={'center'} size={'md'}>{invoice.status === 'finalized' ? 'pending' : 'draft'}</Tag>
        </Text>
    </Box>
 
@@ -62,21 +63,8 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, status }) =>
 </Stat>
    </Box>
  </Flex>
- {
-   invoice.status === 'finalized' ? (
-    <Button w={'150px'} size={'sm'} colorScheme="blue" onClick={() => handleRedirectPayment(invoice)}>
-        Pay
-      </Button>
-   ) : (
-    <Button onClick={()=> {
-      window.open(invoice.invoice_pdf, '_blank');
+        {children}
 
-    }} variant={'link'} textDecor={'underline'} >
-      View recipt
-    </Button>
-
-   )
- }
 
 
   

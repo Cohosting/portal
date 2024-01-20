@@ -6,9 +6,11 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   query,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -24,9 +26,10 @@ import {
 } from '@chakra-ui/react';
 import { ItemsComponent } from '../../components/UI/Items';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { generateInvoiceNumber } from '../../utils';
 import { PortalContext } from '../../context/portalContext';
+import queryString from 'query-string';
 
 export const InvoiceForm = () => {
   const [clients, setClients] = useState([]);
@@ -36,11 +39,13 @@ export const InvoiceForm = () => {
   const [lineItems, setLineItems] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [settings, setSettings] = useState({});
+  const [invoiceData, setInvoiceData] = useState();
+  const { mode } = useParams()
 
   const [stripeUser, setStripeUser] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    if (!user) return;
+    if (!user || !portal) return;
     const collecRef = collection(db, 'portalMembers');
     const q = query(collecRef, where('portalId', '==', portal.id));
     const unsubscribe = onSnapshot(q, querySnapshot => {
@@ -51,7 +56,7 @@ export const InvoiceForm = () => {
     return () => {
       unsubscribe();
     };
-  }, [user]);
+  }, [user, portal]);
 
   const handleSelectUser = user => {
     setStripeUser(user);
@@ -72,7 +77,10 @@ export const InvoiceForm = () => {
         client: stripeUser,
         id: ref.id,
         invoiceNumber: generateInvoiceNumber(),
-        settings,
+        settings: {
+          achDebit: settings.achDebit,
+          card: settings.card
+        },
         portalId: portal.id,
         customerId: stripeUser.customerId,
         email: stripeUser.email,
@@ -94,26 +102,77 @@ export const InvoiceForm = () => {
     setSettings(portal.settings);
   }, [portal]);
 
-  console.log({
-    lineItems
-  });
+  useEffect(() => {
+    if (mode === 'edit') {
+
+      (async () => {
+        const id = queryString.parse(window.location.search).id;
+        const ref = doc(db, 'invoices', id);
+        const snapshot = await getDoc(ref);
+        const data = snapshot.data();
+        setInvoiceData(data);
+        setStripeUser(data.client);
+        setAttachments(data.attachments);
+        setLineItems(data.lineItems);
+
+
+
+      })();
+
+
+    }
+  }, [])
+
+
+  const updateInvoiceDB = async () => {
+
+    const id = queryString.parse(window.location.search).id;
+    setIsLoading(true);
+
+    try {
+
+      const ref = doc(db, 'invoices', id);
+      await updateDoc(ref, {
+        lineItems,
+        attachments,
+        client: stripeUser,
+        customerId: stripeUser.customerId,
+        email: stripeUser.email,
+        settings
+      })
+    } catch (err) {
+      console.log(err);
+    }
+    setIsLoading(false);
+
+  };
+
+
   return (
     <Layout>
-      <Box p={5}>
+      <Box p={5}  >
         <Flex alignItems={'center'} justifyContent={'space-between'}>
           <h1>Invoice Form</h1>
           <Box>
             <Button variant={'ghost'}>Cancel</Button>
-            <Button onClick={saveFiretoreInvoice} isLoading={isLoading}>
-              Create
+            <Button onClick={() => {
+
+              if (mode === 'edit') {
+                updateInvoiceDB()
+              } else {
+                saveFiretoreInvoice()
+
+              }
+            }} isLoading={isLoading}>
+              {mode === 'edit' ? 'update' : 'create'}
             </Button>
           </Box>
         </Flex>
         <Text mt={'20px'} mb={'10px'}>
           Select client from dropdown
         </Text>
-        <SearchDropdown users={clients} onSelectUser={handleSelectUser} />
-        <ItemsComponent onUpdateItems={val => setLineItems(val)} />
+        <SearchDropdown defaultValue={stripeUser} users={clients} onSelectUser={handleSelectUser} />
+        <ItemsComponent defaultValue={lineItems} onUpdateItems={val => setLineItems(val)} />
         <Box mt={'20px'}>
           <Text>Memo</Text>
           <Textarea />

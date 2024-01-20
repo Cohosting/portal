@@ -28,7 +28,7 @@ export const PortalContextProvider = ({ children }) => {
       onSnapshot(ref, snapshot => {
         const data = snapshot.data();
         setPortal(data);
-        setCurrentPortal(data.id);
+        setCurrentPortal(data?.id);
       });
     };
     getData();

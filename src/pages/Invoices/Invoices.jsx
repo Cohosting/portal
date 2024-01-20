@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Spinner, Text, useDisclosure } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {
   collection,
@@ -13,44 +13,39 @@ import {
 import { AuthContext } from '../../context/authContext';
 import { db } from '../../lib/firebase';
 import { PortalContext } from '../../context/portalContext';
+import { ClientInvoiceItem } from '../Portal/Client/ClientInvoiceItem';
+import { MdEdit, } from 'react-icons/md';
+import { AddIcon } from '@chakra-ui/icons';
 
 
 const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const navigate = useNavigate()
   return (
-    <Flex
-    alignItems={'center'}
-    justifyContent={'space-between'}
-    border={'1px solid red'}
-    p={2}
-    my={2}
-    borderRadius={'10px'}
-  >
-    <Box>
-      <Text>Name: {invoice.client.name}</Text>
-      <Text>Email: {invoice.client.email}</Text>
-      <Text>Status: {invoice.status}</Text>
-      <Text>Invoice number: {invoice.invoiceNumber}</Text>
-    </Box>
-    <Box>
-      {invoice.status === 'draft' && <Button>Edit</Button>}
-      {invoice.status === 'draft' &&
-        invoice.status !== 'finalized' && (
-          <Button
-          isLoading={isOpen}
-            ml={2}
-            onClick={ async () => {
-              onOpen();
+    <ClientInvoiceItem invoice={invoice} >
+      <Flex alignItems={'center'} >
+        {
+          invoice.status === 'draft' && (
+            <Button isLoading={isOpen} w={'150px'} size={'sm'} colorScheme="blue" onClick={async () => {
+              onOpen()
               await updateInvoiceStatusFirebase(invoice);
-              onClose();
-            }}
-          >
+              onClose()
+            }}>
             Finalized
           </Button>
-        )}
-    </Box>
-  </Flex>
+          )
+        }
+
+        {
+          invoice.status !== 'finalized' && (
+            <Button onClick={() => navigate(`/billing/edit?id=${invoice.id}`)} ml={3} leftIcon={<MdEdit />
+            } >edit</Button>
+
+          )
+        }
+
+      </Flex>
+    </ClientInvoiceItem>
   )
 }
 
@@ -59,18 +54,21 @@ export const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const { user } = useContext(AuthContext);
   const { portal } = useContext(PortalContext);
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    defaultIsOpen: true
+  })
 
   // fetch invoices from firebase invoices collection
   useEffect(() => {
     if (!portal) return;
     const collecRef = collection(db, 'invoices');
-
+    onOpen()
     const q = query(collecRef, where('portalId', '==', portal.id));
     const unsubscribe = onSnapshot(q, querySnapshot => {
       const invoices = querySnapshot.docs.map(doc => doc.data());
       setInvoices(invoices);
     });
-
+    onClose()
     return () => {
       unsubscribe();
     };
@@ -103,32 +101,54 @@ export const Invoices = () => {
         }),
       }
     );
-    const data = await res.json();
+    await res.json();
     const ref = doc(db, 'invoices', invoice.id);
 
     await updateDoc(ref, {
       status: 'finalized',
     });
   };
+
   return (
     <Layout>
+
+
       <Box p={4}>
-        {invoices.length > 0 ? (
-          <Box>
+
+        <Box>
+          <Flex justifyContent={'space-between'} alignItems={'center'}>
             <Text my={3}>Invoices</Text>
-            {invoices.map(invoice => (
-  <InvoiceItem invoice={invoice} updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} />
-            ))}
-          </Box>
-        ) : (
-          <Button onClick={() => navigate('create')}>Create Invoice</Button>
-        )}
-        {invoices.length > 0 && (
-          <Button mt={4} onClick={() => navigate('create')}>
-            Create Invoice
-          </Button>
-        )}
+
+            {invoices.length > 0 && (
+              <Button mt={4} onClick={() => navigate('create')}>
+                Create Invoice
+              </Button>
+            )}
+          </Flex>
+
+          {!invoices.length && (
+            <Flex flexDir={'column'} alignItems={'center'} justifyContent={'center'} >
+              <Text> You dont have any invoices. </Text>
+              <Button my={3} >
+                <Text >Create one</Text>
+                <AddIcon />
+              </Button>
+            </Flex>
+          )}
+          {invoices.map(invoice => (
+
+            <InvoiceItem updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} invoice={invoice} />
+
+
+          ))}
+        </Box>
+
+
       </Box>
+
+
+
+
     </Layout>
   );
 };

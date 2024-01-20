@@ -23,6 +23,7 @@ export const ExtentionContent = ({ settings, clientId, settingType }) => {
   } else {
     tempSettings = settings;
   }
+  console.log(tempSettings)
 
   return (
     <Box height={'100%'}>
@@ -36,11 +37,15 @@ export const ExtentionContent = ({ settings, clientId, settingType }) => {
                 </Flex>
               ) : (
                 <iframe
+                    style={{
+                      overflow: 'hidden'
+                    }}
                   src={isValidBrandUrl(tempSettings.content)}
                   width="100%"
                   height="100%"
                   allowFullScreen
                   onLoad={handleIframeLoad}
+
                 />
               )}
             </>

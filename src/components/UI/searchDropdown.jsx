@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Input,
   InputGroup,
@@ -7,9 +7,10 @@ import {
   List,
   ListItem,
   Text,
+  Avatar,
 } from '@chakra-ui/react';
 
-export const SearchDropdown = ({ users, onSelectUser }) => {
+export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
   const [searchValue, setSearchValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -34,8 +35,17 @@ export const SearchDropdown = ({ users, onSelectUser }) => {
     user.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
+  useEffect(() => {
+    if (!defaultValue) return
+    if (defaultValue.name === searchValue) return
+
+    setSearchValue(defaultValue.name)
+
+  }, [defaultValue])
+
+  console.log(filteredUsers)
   return (
-    <Box position="relative" zIndex={2222}>
+    <Box position="relative" zIndex={99}>
       <InputGroup>
         <Input
           type="text"
@@ -48,6 +58,8 @@ export const SearchDropdown = ({ users, onSelectUser }) => {
             zIndex={9999999}
             spacing={1}
             mt={2}
+            w={'100%'}
+            maxW={'300px'}
             maxHeight={200}
             overflowY="auto"
             boxShadow="lg"
@@ -58,6 +70,7 @@ export const SearchDropdown = ({ users, onSelectUser }) => {
             {filteredUsers.length > 0 ? (
               filteredUsers.map(user => (
                 <ListItem
+                  display={'flex'}
                   w={'100%'}
                   key={user.id}
                   px={3}
@@ -66,7 +79,8 @@ export const SearchDropdown = ({ users, onSelectUser }) => {
                   _hover={{ background: 'gray.100' }}
                   onClick={() => handleSelectUser(user)}
                 >
-                  <Text>{user.name}</Text>
+                  <Avatar size={'xs'} src={filteredUsers.src} name={filteredUsers.name} />
+                  <Text ml={1}>{user.name}</Text>
                 </ListItem>
               ))
             ) : (

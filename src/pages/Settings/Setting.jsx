@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Layout } from '../Dashboard/Layout'
 import { Box, Button, Checkbox, Flex, Spinner, Text } from '@chakra-ui/react';
 import { AuthContext } from '../../context/authContext';
@@ -17,6 +17,8 @@ export const Settings = () => {
   const { portal } = useContext(PortalContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState('');
+  const [stripeUser, setStripeUser] = useState(null)
+  const [stripeUserLoding, setStripeUserLoding] = useState(false)
 
   const updatePortalSetting = async setting => {
     try {
@@ -31,12 +33,95 @@ export const Settings = () => {
       console.log('Error updating portal setting', err);
     }
   };
+  const getStripeUser = async stripeConnectAccountId => {
+    if (!stripeConnectAccountId) {
+      throw new Error('No stripe connect account id found');
+    }
+    setStripeUserLoding(true);
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data = await res.json();
+      setStripeUser(data.account);
+      setStripeUserLoding(false);
+    } catch (err) {
+      setStripeUserLoding(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!portal) return;
+    getStripeUser(portal.stripeConnectAccountId);
+  }, [portal]);
+
 
   return (
     <Layout>
       <Box  p={[2,4]}  pt={4}>
         <Text>Settings</Text>
-        <Text mt={4}>Connect your stripe to get payouts</Text>
+        {stripeUser && stripeUser.details_submitted && stripeUser.charges_enabled && (
+          <Box my={3}>
+            <Text color={'green'} fontSize={'20px'}>
+              Your account is verified.
+
+            </Text>
+            <Button bg={'green'}
+
+              onClick={() =>
+                createStripeConnectAccount(
+                  portal.createdBy,
+                  portal.stripeConnectAccountId,
+                  portal.id,
+                  setIsLoading
+                )
+              }
+              color={'white'}
+              mt={3}>Manage account</Button>
+          </Box>
+
+        )}
+        {stripeUser && stripeUser?.requirements.currently_due.length > 0 && stripeUser?.requirements.past_due.length > 0 && (
+
+          <Box my={2}>
+
+            <Text color={'red.700'}>
+
+              It's seems you still need to submit some information or documents.
+              please submit those</Text>
+
+
+
+            <Button
+              isLoading={isLoading}
+              onClick={() =>
+                createStripeConnectAccount(
+                  portal.createdBy,
+                  portal.stripeConnectAccountId,
+                  portal.id,
+                  setIsLoading
+                )
+              }
+              bg={'green'}
+              color={'white'}
+              mt={3}
+            >
+              Update you information
+            </Button>
+          </Box>
+
+        )}
+        {
+          portal && !portal.stripeConnectAccountId && (
+            <>
+
+              <Text mt={4}>Connect your stripe to get payouts</Text>
         <Button
           isLoading={isLoading}
           onClick={() =>
@@ -53,6 +138,9 @@ export const Settings = () => {
         >
           Connect your account
         </Button>
+            </>
+          )
+        }
 
         <Box mt={4} fontSize={['15px', '16px']}>
           <Text>Default setting for invoice payment</Text>

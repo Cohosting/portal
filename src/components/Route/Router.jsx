@@ -127,7 +127,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/billing/create',
+    path: '/billing/:mode',
     element: (
       <ProtectedRoutes>
         <SubdomainWrapper>

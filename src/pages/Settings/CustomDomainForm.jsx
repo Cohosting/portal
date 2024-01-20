@@ -67,7 +67,6 @@ export const CustomDomainForm = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    setIsLoading(true);
 
     let errorObj = {};
 
@@ -92,6 +91,7 @@ export const CustomDomainForm = () => {
       setError(errorObj);
       return;
     }
+    setIsLoading(true);
 
     // If validation passes, process the data and save it
     let dom = domain.toLowerCase().trim();

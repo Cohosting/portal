@@ -1,134 +1,163 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Input,
-  NumberInput,
-  NumberInputField,
-  Stack,
   IconButton,
   HStack,
   Text,
   Spacer,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Flex,
+  Button,
+  VStack,
+  Badge,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { AddIcon, CloseIcon } from '@chakra-ui/icons';
+import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import { v4 as uuidv4 } from 'uuid';
+export const ItemsComponent = ({ defaultValue, onUpdateItems }) => {
+  let defaultState = {
+    description: '',
+    unit_amount: 0,
+    quantity: 0
+  }
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-export const ItemsComponent = ({ onUpdateItems }) => {
-  const [items, setItems] = useState([
-    { description: '', unit_amount: 0, quantity: 0 },
-  ]);
+  const [currentItem, setCurrentItem] = useState(defaultState);
 
-  const handleItemChange = (index, field, value) => {
-    setItems((prevItems) =>
-      prevItems.map((item, i) => {
-        if (i === index) {
-          return { ...item, [field]: value };
-        }
-        return item;
-      })
-    );
-  };
+  const { description, unit_amount, quantity } = currentItem;
 
-  const handleAddItem = () => {
-    setItems((prevItems) => [
-      ...prevItems,
-      { description: '', unit_amount: 0, quantity: 0 },
-    ]);
-  };
+  const handleRemoveItem = (item) => {
+    console.log(item)
+    const filteredItems = defaultValue.filter((el) => el.uiid !== item.uiid);
 
-  const handleRemoveItem = (index) => {
-    setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+    onUpdateItems(filteredItems)
+
   };
 
   const calculateTotal = () => {
-    return items.reduce(
-      (total, item) => total + item.unit_amount * item.quantity,
-      0
-    );
+    return defaultValue.reduce((total, item) => total + item.unit_amount * item.quantity, 0);
   };
 
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setCurrentItem({
+      ...currentItem,
+      [name]: (name === 'unit_amount' || name === 'quantity') ? Number(value) : value,
+      uiid: uuidv4()
+    })
+
+  }
+
   useEffect(() => {
-    onUpdateItems(
-      items.map((item) => ({ ...item, unit_amount: item.unit_amount * 100 }))
-    );
-  }, [items]);
+    if (isOpen) return;
+
+    setCurrentItem(defaultState)
+  }, [isOpen]);
+
+  console.log({
+    defaultValue
+  })
 
   return (
-    <Box>
+    <Box zIndex={9999999999999}>
       <div
         style={{
           overflowX: 'auto', // Enable horizontal scrolling
           maxWidth: '100%', // Ensure the table doesn't extend beyond the container
         }}
       >
-        <Table variant="striped">
-          <Thead>
-            <Tr>
-              <Th>Description</Th>
-              <Th>unit_amount</Th>
-              <Th>Quantity</Th>
-              <Th>Total</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {items.map((item, index) => (
-              <Tr key={index}>
-                <Td>
-                  <Input
-                    placeholder="Description"
-                    value={item.description}
-                    onChange={(e) =>
-                      handleItemChange(index, 'description', e.target.value)
-                    }
-                  />
-                </Td>
-                <Td>
-                  <NumberInput
-                    min={0}
-                    value={item.unit_amount}
-                    onChange={(value) =>
-                      handleItemChange(index, 'unit_amount', value)
-                    }
-                  >
-                    <NumberInputField placeholder="unit_amount" />
-                  </NumberInput>
-                </Td>
-                <Td>
-                  <NumberInput
-                    min={0}
-                    value={item.quantity}
-                    onChange={(value) => handleItemChange(index, 'quantity', value)}
-                  >
-                    <NumberInputField placeholder="Quantity" />
-                  </NumberInput>
-                </Td>
-                <Td>{item.unit_amount * item.quantity}</Td>
-                <Td>
-                  <IconButton
-                    icon={<CloseIcon />}
-                    variant="ghost"
-                    onClick={() => handleRemoveItem(index)}
-                  />
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+        <Modal size={'2xl'} isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Invoice item</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+
+              <Flex gap={4} flexDir={'column'}>
+                <Box>
+                  <Text>Description</Text>
+                  <Input onChange={handleChange} name='description' value={description} />
+                </Box>
+                <Box>
+                  <Text>Unit amount</Text>
+                  <Input onChange={handleChange} name='unit_amount' value={unit_amount} />
+                </Box>
+                <Box>
+                  <Text>Quantity</Text>
+                  <Input onChange={handleChange} name='quantity' value={quantity} />
+                </Box>
+
+                <Text>Total: ${currentItem.quantity * currentItem.unit_amount}$</Text>
+              </Flex>
+
+            </ModalBody>
+
+            <ModalFooter>
+              <Button variant={'ghost'}>Cancel</Button>
+              <Button ml={2} onClick={() => {
+                onUpdateItems([...defaultValue, currentItem]);
+                onClose()
+              }} >Create</Button>
+
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        {
+          defaultValue.map((el) => <Box
+            key={el.uiid}
+            p={4}
+            borderWidth="1px"
+            borderRadius="lg"
+            boxShadow="md"
+            mb={4}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <VStack spacing={2} align="flex-start">
+              <Text textTransform={'capitalize'} fontSize="lg" fontWeight="bold">
+                {el.description}
+              </Text>
+              <Text>
+                <Badge colorScheme="green" fontSize="sm">
+                  Unit Amount: ${el.unit_amount}
+                </Badge>
+              </Text>
+              <Text>
+                <Badge colorScheme="blue" fontSize="sm">
+                  Quantity: {el.quantity}
+                </Badge>
+              </Text>
+              <Text>
+                <Badge colorScheme="purple" fontSize="sm">
+                  Total: ${el.unit_amount * el.quantity}
+                </Badge>
+              </Text>
+            </VStack>
+
+            <Button onClick={() => handleRemoveItem(el)} colorScheme={'red'} size={'sm'} leftIcon={<DeleteIcon />}>
+              Delete
+            </Button>
+          </Box>)
+        }
+
       </div>
 
       <IconButton
         my={3}
         icon={<AddIcon />}
         variant="outline"
-        onClick={handleAddItem}
-        isDisabled={items.length === 10}
+        onClick={() => onOpen()}
+        isDisabled={defaultValue.length === 10}
       />
       <HStack justify="flex-end">
         <Text fontWeight="bold">Total:</Text>

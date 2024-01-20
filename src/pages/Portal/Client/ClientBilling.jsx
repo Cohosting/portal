@@ -97,8 +97,23 @@ export const ClientBilling = () => {
               {invoices?.map(invoice => (
                 <ClientInvoiceItem
                   invoice={invoice}
-                  handleRedirectPayment={handleRedirectPayment}
-                />
+                >
+                  {
+                    invoice.status === 'finalized' ? (
+                      <Button w={'150px'} size={'sm'} colorScheme="blue" onClick={() => handleRedirectPayment(invoice)}>
+                        Pay
+                      </Button>
+                    ) : (
+                      <Button onClick={() => {
+                        window.open(invoice.invoice_pdf, '_blank');
+
+                      }} variant={'link'} textDecor={'underline'} >
+                        View recipt
+                      </Button>
+
+                    )
+                  }
+                </ClientInvoiceItem>
               ))}
             </>
           )}

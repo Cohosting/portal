@@ -26,6 +26,8 @@ export const isValidBrandUrl = url => {
     let id = url.split('/')[3];
     return `https://airtable.com/embed/${id}?backgroundColor=gray&viewControls=on`;
   }
+
+  return url;
 };
 
 let generateRamdomId = () => {

@@ -11,6 +11,7 @@ export const ExtentionContentViewer = ({
   isOpen,
   onToggle,
 }) => {
+  console.log(extention)
   return (
     <Box h={'100%'}>
       {extention.settings.setupType === 'automatic' && (
