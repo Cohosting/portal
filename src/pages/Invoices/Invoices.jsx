@@ -130,7 +130,7 @@ export const Invoices = () => {
           {!invoices.length && (
             <Flex flexDir={'column'} alignItems={'center'} justifyContent={'center'} >
               <Text> You dont have any invoices. </Text>
-              <Button my={3} >
+              <Button onClick={() => navigate('create')} my={3} >
                 <Text >Create one</Text>
                 <AddIcon />
               </Button>
