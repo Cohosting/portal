@@ -141,7 +141,8 @@ export const InvoiceForm = () => {
         email: stripeUser.email,
         settings,
         memo
-      })
+      });
+      navigate('/billing')
     } catch (err) {
       console.log(err);
     }
