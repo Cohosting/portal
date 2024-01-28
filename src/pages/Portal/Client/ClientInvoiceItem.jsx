@@ -51,7 +51,7 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
    </Box>
    <Box>
        <Text>
-              <Tag sx={isPendingOrPaid(invoice.status)} fontSize={'12px'} textAlign={'center'} size={'md'}>{invoice.status === 'finalized' ? 'pending' : 'draft'}</Tag>
+              <Tag sx={isPendingOrPaid(invoice.status)} fontSize={'12px'} textAlign={'center'} size={'md'}>{invoice.status === 'finalized' ? 'pending' : invoice.status === 'paid' ? 'paid' : 'draft'}</Tag>
        </Text>
    </Box>
 
