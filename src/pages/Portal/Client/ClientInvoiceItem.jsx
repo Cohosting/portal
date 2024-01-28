@@ -66,12 +66,7 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
    </Box>
  </Flex>
         {children}
-
-
-
-  
-    </Box>
-   
+      </Box>
 
     </>
 

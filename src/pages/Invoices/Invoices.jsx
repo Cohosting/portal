@@ -37,7 +37,7 @@ const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
         }
 
         {
-          invoice.status !== 'finalized' && (
+          invoice.status !== 'finalized' && invoice.status !== 'paid' && (
             <Button onClick={() => navigate(`/billing/edit?id=${invoice.id}`)} ml={3} leftIcon={<MdEdit />
             } >edit</Button>
 
