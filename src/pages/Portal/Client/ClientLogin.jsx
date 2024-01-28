@@ -25,14 +25,14 @@ export const ClientLogin = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [clientLoginCredentials, setClientLoginCredentials] = useState({
     email: '',
-    assword: '',
+    password: '',
   }); const [isLessThen660] = useMediaQuery('(min-width: 660px)')
-
+  console.log(clientPortal, clientLoginCredentials)
   const handleLogin = async () => {
     try {
       onOpen();
       const { email, password } = clientLoginCredentials;
-      const signInWithEmailAndPassword = httpsCallable(
+/*       const signInWithEmailAndPassword = httpsCallable(
         functions,
         'signInWithEmailAndPassword'
       );
@@ -40,9 +40,24 @@ export const ClientLogin = () => {
         email,
         password,
         portalId: clientPortal.id,
+      }); */
+      const response = await fetch(`${process.env.REACT_APP_NODE_URL}/client-auth/signInWithEmailAndPassword`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // You may include additional headers if needed
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          portalId: clientPortal.id
+        }),
       });
-      if (res.data.success) {
-        setSessionToken(res.data.token);
+      const res = await response.json();
+
+      console.log({ res })
+      if (res.success) {
+        setSessionToken(res.token);
       window.location.href = '/portal/messages';
         onClose();
         console.log(res);
@@ -51,10 +66,10 @@ export const ClientLogin = () => {
         setIsError('Email or password incorrect');
       }
 
-      console.log(res);
 
     } catch (error) {
       console.log(`Error logging in: ${error}`);
+      onClose()
     }
   };
 

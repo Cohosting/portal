@@ -19,14 +19,25 @@ export const ClientAuthContextComponent = ({ children }) => {
   const verifyStoredToken = async token => {
     try {
       // Send an API request to the server to verify the token and retrieve user data
-      const verifyToken = httpsCallable(functions, 'verifyToken');
-      const response = await verifyToken({
-        token,
-        portalId: clientPortal.id,
-      });
 
-      if (response.data.success) {
-        const { user } = response.data;
+      const response = await fetch(
+        `${process.env.REACT_APP_NODE_URL}/client-auth/verifyToken`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // You may include additional headers if needed
+          },
+          body: JSON.stringify({
+            token,
+            portalId: clientPortal.id,
+          }),
+        }
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        const { user } = data;
 
         if (!user.customerId) {
           // create customer  using js fetch to /create-customer

@@ -1,19 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Input,
   InputGroup,
-  InputRightElement,
   Box,
   List,
   ListItem,
   Text,
   Avatar,
+  Flex,
+  useOutsideClick
 } from '@chakra-ui/react';
 
 export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
   const [searchValue, setSearchValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const ref = useRef()
+  useOutsideClick({
+    ref: ref,
+    handler: () => setShowDropdown(false),
+  })
   const handleInputChange = event => {
     const { value } = event.target;
     setSearchValue(value);
@@ -45,7 +50,7 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
 
   console.log(filteredUsers)
   return (
-    <Box position="relative" zIndex={99}>
+    <Box my={2} position="relative" zIndex={99}>
       <InputGroup>
         <Input
           type="text"
@@ -55,6 +60,7 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
         />
         {showDropdown && (
           <List
+            ref={ref}
             zIndex={9999999}
             spacing={1}
             mt={2}
@@ -71,8 +77,10 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
               filteredUsers.map(user => (
                 <ListItem
                   display={'flex'}
+                  alignItems={'center'}
                   w={'100%'}
                   key={user.id}
+                  gap={2}
                   px={3}
                   py={2}
                   cursor="pointer"
@@ -80,7 +88,11 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
                   onClick={() => handleSelectUser(user)}
                 >
                   <Avatar size={'xs'} src={filteredUsers.src} name={filteredUsers.name} />
+                  <Flex flexDir={'column'}>
                   <Text ml={1}>{user.name}</Text>
+                    <Text ml={1}>{user.email}</Text>
+                  </Flex>
+
                 </ListItem>
               ))
             ) : (

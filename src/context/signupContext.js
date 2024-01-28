@@ -15,7 +15,7 @@ export const SignupContext = ({ children }) => {
     name: '',
     email: '',
     password: '',
-    foundOn: '',
+    foundOn: 'Tiktok',
     companyName: '',
     portalURL: '',
     industry: '',

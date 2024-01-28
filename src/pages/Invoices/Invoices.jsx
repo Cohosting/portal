@@ -98,6 +98,7 @@ export const Invoices = () => {
           },
           invoiceId: invoice.id,
           isFromApp: 'true',
+          memo: invoice.memo
         }),
       }
     );

@@ -8,7 +8,7 @@ import {
   Spinner,
   Text,
 } from '@chakra-ui/react';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 
@@ -45,6 +45,7 @@ const CustomForm = ({
   const { userCredentials, setUserCredentials } = useContext(AuthProvider);
 
   const handleError = () => {
+    if (!text) return false;
     let isError = true;
     if (value === 'email') {
       isError = text !== '' && text.includes('@') ? false : true;
@@ -75,6 +76,7 @@ const CustomForm = ({
       });
     }
   }, 700); 
+
 
   return (
     <FormControl
@@ -115,9 +117,7 @@ const CustomForm = ({
                     },
               }}
               value={
-                isFocused
-                  ? userCredentials.portalURL
-                  : userCredentials.companyName
+                userCredentials.portalURL
               }
               onFocus={e => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}

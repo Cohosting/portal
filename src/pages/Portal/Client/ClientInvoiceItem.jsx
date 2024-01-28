@@ -32,7 +32,9 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
   return (
     <>
     <Box my={2}  p={4} borderBottom={'1px solid'} borderColor={'gray.300'}>
+        <Text>{invoice.memo}</Text>
     {invoice.lineItems.map(item => (
+
         <Flex  my={2} pr={'12px'} fontFamily={'monospace'} alignItems={'center'} justifyContent={'space-between'} >
           <Text>
           {item.description && item.description + ' ' + `(${item.unit_amount}$ x ${item.quantity})`}

@@ -50,6 +50,7 @@ export const Client = () => {
       const clients = querySnapshot.docs.map(doc => doc.data());
       let data = [];
       clients.forEach(el => {
+        console.log({ el })
         data.push({
           Name: (
             <Flex alignItems={'center'}>
@@ -67,12 +68,16 @@ export const Client = () => {
               </Flex>
               <Box ml={3}>
                 <Text>{el.name}</Text>
+
               </Box>
             </Flex>
           ),
-          Email: el.email,
+          Email: <Box>
+            <Text>{el.email}</Text>
+            {el.status === 'restricted' && (<Button mt={1} colorScheme='green' size={'xs'} onClick={onToggleSuccess}>Invite</Button>)}
+          </Box>,
           Status: el.status,
-          ['Creation date']: el.createdAt,
+          'Creation date': el.createdAt,
         });
       });
 

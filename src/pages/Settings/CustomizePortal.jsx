@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { Box, Checkbox, Flex, Input, Text } from '@chakra-ui/react';
+import { Box, Checkbox, Collapse, Flex, Input, Text, useToast } from '@chakra-ui/react';
 import { ActionButtons } from '../../components/UI/ActionButtons';
 import { AssetItem } from './AssetItem';
 import { SketchPicker } from 'react-color';
@@ -22,16 +22,12 @@ const Heading = ({ text, subText }) => {
 export const CustomizePortal = () => {
   const { portal } = useContext(PortalContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, sethasChanges] = useState(false)
+  const [previousSetting, setPreviousSetting] = useState({})
   const [brandSettings, setBrandSettings] = useState({
-    brandName: '',
-    sidebarBgColor: '',
-    sidebarTextColor: '',
-    accentColor: '',
-    poweredByCopilot: false,
-    squareIcon: '',
-    fullLogo: '',
-    squareLoginImage: '',
+
   });
+  const toast = useToast()
   const {
     brandName,
     squareIcon,
@@ -57,6 +53,13 @@ export const CustomizePortal = () => {
       await updateDoc(ref, {
         brandSettings,
       });
+      toast({
+        title: 'Settings updated.',
+        description: 'The Setting has been successfully updated.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -66,21 +69,31 @@ export const CustomizePortal = () => {
   useEffect(() => {
     if (portal && portal.brandSettings) {
       setBrandSettings(portal.brandSettings);
+      setPreviousSetting(portal.brandSettings)
     }
   }, [portal]);
-
+  useEffect(() => {
+    if (previousSetting !== null) {
+      const dataChanged = JSON.stringify(brandSettings) !== JSON.stringify(previousSetting);
+      sethasChanges(dataChanged);
+    }
+  }, [brandSettings, previousSetting]);
   if (!portal) return <Layout>Loading...</Layout>;
   return (
     <Layout>
       <Box>
+        <Collapse in={hasChanges} animateOpacity>
+
         <ActionButtons
           isLoading={isLoading}
           onUpdate={handleUpdatePortalBrand}
           shouldShow={true}
         />
+        </Collapse>
       </Box>
 
       <Box w={'100%'} maxW={'600px'} margin={'auto'}>
+        <Text fontWeight={700} fontSize={'24px'} my={3}>Customize portal view</Text>
         <Box my={3}>
           <Heading
             text={'Brand name'}
@@ -96,7 +109,7 @@ export const CustomizePortal = () => {
               placeholder={'Brand name'}
             />
             <Text textAlign={'right'} fontSize={'14px'}>
-              {brandName.length} of 30 characters used.
+              {!brandName ? 0 : brandName.length} of 30 characters used.
             </Text>
           </Box>
         </Box>
@@ -124,7 +137,7 @@ export const CustomizePortal = () => {
             initialDownloadUrl={fullLogo}
           />
           <AssetItem
-            text={'Square login image          '}
+            text={'Square login image'}
             subText={'Used on the side of your login page          '}
             onUpload={handleUpdateState}
             field={'squareLoginImage'}

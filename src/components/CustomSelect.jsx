@@ -14,11 +14,13 @@ import {
     errorMessage,
     handleChange,
   }) => {
-    const [text, setText] = useState('');
-  
     const { userCredentials, setUserCredentials } = useContext(AuthProvider);
+
+    const [text, setText] = useState(userCredentials.foundOn);
+    console.log({ text })
   
     const handleError = () => {
+      if (!text) return false
       let isError = true;
       isError = text === '' ? true : false;
       return isError;

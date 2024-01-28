@@ -39,6 +39,7 @@ export const InvoiceForm = () => {
   const [lineItems, setLineItems] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [settings, setSettings] = useState({});
+  const [memo, setMemo] = useState('')
   const [invoiceData, setInvoiceData] = useState();
   const { mode } = useParams()
 
@@ -69,7 +70,7 @@ export const InvoiceForm = () => {
       const ref = doc(collection(db, 'invoices'));
       await setDoc(ref, {
         lineItems,
-        memo: '',
+        memo,
         attachments: attachments,
         status: 'draft',
         createdBy: user.uid,
@@ -114,6 +115,7 @@ export const InvoiceForm = () => {
         setStripeUser(data.client);
         setAttachments(data.attachments);
         setLineItems(data.lineItems);
+        setMemo(data.memo)
 
 
 
@@ -128,7 +130,6 @@ export const InvoiceForm = () => {
 
     const id = queryString.parse(window.location.search).id;
     setIsLoading(true);
-
     try {
 
       const ref = doc(db, 'invoices', id);
@@ -138,7 +139,8 @@ export const InvoiceForm = () => {
         client: stripeUser,
         customerId: stripeUser.customerId,
         email: stripeUser.email,
-        settings
+        settings,
+        memo
       })
     } catch (err) {
       console.log(err);
@@ -150,7 +152,7 @@ export const InvoiceForm = () => {
 
   return (
     <Layout>
-      <Box p={5}  >
+      <Box p={5}   >
         <Flex alignItems={'center'} justifyContent={'space-between'}>
           <h1>Invoice Form</h1>
           <Box>
@@ -175,7 +177,7 @@ export const InvoiceForm = () => {
         <ItemsComponent defaultValue={lineItems} onUpdateItems={val => setLineItems(val)} />
         <Box mt={'20px'}>
           <Text>Memo</Text>
-          <Textarea />
+          <Textarea value={memo} onChange={(e) => setMemo(e.target.value)} />
         </Box>
 
         <UploadAttachmentComponent

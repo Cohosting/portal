@@ -24,10 +24,10 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
   const [error, setError] = useState(false);
   const { user } = useContext(AuthContext);
   const [credentials, setCredentials] = useState({
-    industry: '',
-    companySize: '',
-    clients: '',
-    typeOfService: '',
+    industry: 'Accounting and bookkeeping',
+    companySize: 'Just me',
+    clients: `I don't have any clients yet`,
+    typeOfService: 'Companies',
   });
 
   const handleChange = e => {

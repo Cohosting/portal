@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 admin.initializeApp();
 
 const db = admin.firestore();
+
 exports.signInWithEmailAndPassword = functions.https.onCall(
   async (data, context) => {
     const { email, password, portalId } = data;
@@ -34,7 +35,6 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
           code: 'INVALID_CREDENTIALS',
           message: 'Invalid email or password',
           reason: 'empty_data',
-
         };
       } else {
         const userDoc = querySnapshot.docs[0];
@@ -64,7 +64,6 @@ exports.signInWithEmailAndPassword = functions.https.onCall(
             code: 'INVALID_CREDENTIALS',
             message: 'Invalid email or password',
             reason: 'token_validation',
-
           };
         }
       }

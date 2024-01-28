@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Slide, Text, useDisclosure, useMediaQuery, useOutsideClick } from '@chakra-ui/react'
+import { Avatar, Box, Button, Divider, Flex, Slide, Text, useDisclosure, useMediaQuery, useOutsideClick } from '@chakra-ui/react'
 import React, { useContext, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -19,6 +19,7 @@ import { RiBillLine, RiTeamLine } from 'react-icons/ri';
 import { PortalContext } from '../../context/portalContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Overlay } from '../../components/UI/Overlay';
+import { AuthContext } from '../../context/authContext';
 
 const NavItem = ({ children, icon, url, isActive, onClick }) => {
   const navigate = useNavigate();
@@ -63,9 +64,9 @@ let CommonBoxContainer = ({ children, isActive, onClick }) => {
   );
 };
 
-export const Layout = ({ children, user }) => {
+export const Layout = ({ children, }) => {
   const [isLessThen756] = useMediaQuery('(max-width: 760px)')
-
+  const { user } = useContext(AuthContext)
   const { portal, portalTeamMemberData } = useContext(PortalContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,10 +86,16 @@ export const Layout = ({ children, user }) => {
     height={'100%'}
     w={'200px'}
     p={1}
+      position={'fixed'}
   >
     <Box p={'16px 8px 20px 8px'}>
       <CommonBoxContainer>
-        <Box
+
+          <Avatar size={'sm'} name={user?.name} src=' ' />
+          <Text ml={2} fontSize={'14px'}>
+            {user?.name || 'Himel'}
+          </Text>
+          {/*        <Box
           display={'flex'}
           alignItems={'center'}
           fontSize={'14px'}
@@ -98,11 +105,9 @@ export const Layout = ({ children, user }) => {
           w={'25px'}
           h={'25px'}
         >
-          <Text>H</Text>
+            <Text></Text>
         </Box>
-        <Text ml={2} fontSize={'14px'}>
-          {user?.name || 'Himel'}
-        </Text>
+         */}
       </CommonBoxContainer>
     </Box>
     {portalTeamMemberData?.role === 'owner' ? (
@@ -273,7 +278,7 @@ export const Layout = ({ children, user }) => {
         
      
  
-      <Box height={'100%'} pr={1} flex={1}>
+      <Box paddingLeft={!isLessThen756 && '200px'} height={'100%'} pr={1} flex={1}>
         {children}
       </Box>
     </Flex>

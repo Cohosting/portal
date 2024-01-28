@@ -9,7 +9,7 @@ import { boxStyle } from "../Signup";
 export const QuestionsSelection1 = ({ isLargerThan450 }) => {
     const [credentials, setCredentials] = useState({
       name: '',
-      foundOn: '',
+      foundOn: 'Tiktok',
       companyName: '',
       portalURL: '',
     });
@@ -21,7 +21,7 @@ export const QuestionsSelection1 = ({ isLargerThan450 }) => {
         [e.id]: e.value,
       });
     };
-  
+  console.log(credentials)
     return (
       <Flex
         minW={'100%'}

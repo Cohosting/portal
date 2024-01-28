@@ -76,8 +76,14 @@ export const Signup = () => {
             setError('An unknown error occurred. Please try again.');
         }
       }
+    } else {
+      setError('Please fill all the information')
     }
   };
+
+  useEffect(() => {
+    if (error) setError('')
+  }, [userCredentials])
 
 
   return (

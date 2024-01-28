@@ -18,6 +18,7 @@ export const LoginForm = () => {
   });
   const navigate = useNavigate();
   const handleError = name => {
+    if (!userCredentials[name]) return;
     let isError = true;
     isError = userCredentials[name] === '' ? true : false;
 
@@ -51,6 +52,12 @@ export const LoginForm = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+
+    if (error) setError('')
+
+  }, [userCredentials])
 
 
   return (
