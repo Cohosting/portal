@@ -87,6 +87,7 @@ export const Layout = ({ children, }) => {
     w={'200px'}
     p={1}
       position={'fixed'}
+      overflowY={'auto'}
   >
     <Box p={'16px 8px 20px 8px'}>
       <CommonBoxContainer>

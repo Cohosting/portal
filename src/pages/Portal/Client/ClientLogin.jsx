@@ -32,15 +32,7 @@ export const ClientLogin = () => {
     try {
       onOpen();
       const { email, password } = clientLoginCredentials;
-/*       const signInWithEmailAndPassword = httpsCallable(
-        functions,
-        'signInWithEmailAndPassword'
-      );
-      const res = await signInWithEmailAndPassword({
-        email,
-        password,
-        portalId: clientPortal.id,
-      }); */
+
       const response = await fetch(`${process.env.REACT_APP_NODE_URL}/client-auth/signInWithEmailAndPassword`, {
         method: 'POST',
         headers: {
@@ -99,6 +91,7 @@ export const ClientLogin = () => {
                 src={clientPortal?.brandSettings?.squareIcon}
                 alt={'logo'}
                 borderRadius={'6px'}
+                maxHeight={'120px'}
               />
             ) : (
               <Image

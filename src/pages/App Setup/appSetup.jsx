@@ -121,11 +121,11 @@ export const AppSetup = () => {
     }
   };
 
-  const markAsDisabled = async id => {
+  const markAsDisabled = async (id, value) => {
     try {
       const newList = list.map(item => {
         if (item.id === id) {
-          item.disabled = !item.disabled;
+          item.disabled = value;
         }
         return item;
       });
@@ -257,10 +257,12 @@ export const AppSetup = () => {
                             )}
                             {item.isDefault && (
                               <MenuItem
-                                onClick={() => markAsDisabled(item.id)}
+                                onClick={() => markAsDisabled(item.id, item.disabled ? false : true)}
                                 icon={<GiSightDisabled />}
                               >
-                                Disabled
+                                {
+                                  item.disabled ? 'Enable' : 'Disable'
+                                }
                               </MenuItem>
                             )}
                           </MenuList>

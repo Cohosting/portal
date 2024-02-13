@@ -89,6 +89,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
       batch.update(ref, {
         isProfileCompleted: true,
         portals: arrayUnion(portalRef.id),
+        name: firstName + ' ' + lastName
       });
 
       // Creating 5 default seats

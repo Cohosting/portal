@@ -61,9 +61,6 @@ export const defaultAppList = [
 ];
 
 export const sortAppWithAboveSettings = (apps, customerId) => {
-  /*     .filter(app => app.disabled === false)
-   */
-
   let sortedApps = apps
     .sort((a, b) => a.index - b.index)
     .filter(app => {
@@ -77,7 +74,8 @@ export const sortAppWithAboveSettings = (apps, customerId) => {
       } else {
         return app;
       }
-    });
+    })
+    .filter(app => !app.disabled === true);
 
   console.log({
     sortedApps,

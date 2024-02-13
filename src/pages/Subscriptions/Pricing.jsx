@@ -7,6 +7,10 @@ import { PortalContext } from '../../context/portalContext';
 import { UpgradeOrDowngrade } from './UpgradeOrDowngrade';
 import SubscriptionPage from './SubscriptionPage';
 import { unixToDateString } from '../../utils';
+import PaymentMethodList from '../../components/PaymentMethodLists';
+import CurrentPlan from './CurrentPlan';
+import AddonsComponent from './AddonsComponent';
+import SubscriptionPaymentError from '../../components/SubscriptionPaymentError';
 const PricingItem = ({
   title,
   price,
@@ -19,6 +23,7 @@ const PricingItem = ({
   type,
   isSubscriptionLoading,
 }) => {
+  const [isLoading, setIsLoading] = useState(false)
   return (
     <Box
       ml={3}
@@ -50,8 +55,20 @@ const PricingItem = ({
         ))}
       </Box>
       <Button
-        onClick={() => onSelect()}
-        isLoading={isSubscriptionLoading}
+        onClick={async () => {
+
+          setIsLoading(true)
+          try {
+
+            await onSelect()
+          } catch (err) {
+            console.log(err)
+          }
+
+          setIsLoading(false)
+
+        }}
+        isLoading={isLoading}
         mt={4}
         width={'100%'}
         color={'#fff'}
@@ -238,7 +255,9 @@ export const Pricing = () => {
       console.error('Error:', error);
       // Handle the error appropriately
     }
-  }
+  };
+
+  console.log(priceId)
 
   return (
     <Layout>
@@ -253,14 +272,17 @@ export const Pricing = () => {
         </Box>
       ) : (
         <Box px={['15px','25px']}>
-        
-          {portal?.subscriptions?.current?.subscriptionStatus === 'active' ? (
+
+
+              {portal?.subscriptions?.current?.subscriptionStatus ? (
             <Box
               bg={'white'}
               p={4}
               borderRadius={'4px'}
               boxShadow={'0px 0px 24px rgba(0, 0, 0, 0.07)'}
             >
+                  <SubscriptionPaymentError errorCode={'insufficient_funds'} errorDetails={portal?.payment_error} />
+
               <Text fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                 You are already subscribed to{' '}
                 {
@@ -270,17 +292,19 @@ export const Pricing = () => {
                 }{' '}
                 plan
               </Text>
-              {portal.payment_error && (
+                  {/*               {portal.payment_error && (
                 <Text  fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                   There is a error processing your payment:
                   {JSON.stringify(portal.payment_error)}
                 </Text>
-              )}
-              <Text>Card: {cardDetails?.cardType}</Text>
-              <Text>Card Number: **** ***** {cardDetails?.last4Digits}</Text>
-              <Text fontSize={'14px'} fontWeight={'bold'} color={'#6B6F76'}>
+                  )}   */}
+
+                  <CurrentPlan />
+
+                  <PaymentMethodList />
+                  {/*         <Text fontSize={'14px'} fontWeight={'bold'} color={'#6B6F76'}>
                 You can change your plan from your dashboard
-              </Text>
+              </Text> */}
 
               {portal.subscriptions && portal.subscriptions.future && (
                 <Box>
@@ -295,7 +319,7 @@ export const Pricing = () => {
               )}
               <Divider my={4} />
 
-              <Box>
+                  {/*    <Box>
                 <Text  fontSize={['16px','18px']} fontWeight={'bold'} mb={4}>
                   Add-ons
                 </Text>
@@ -351,27 +375,17 @@ export const Pricing = () => {
                     </Button>
                   </Flex>
                 )}
-              </Box>
-             
+              </Box> */}
 
-              {portal.subscriptions?.current && (
-                <Box>
-                  <Text>Billing details</Text>
-                  <Button
-                  mt={1}
-                  size={[ 'md']}
-                    bg={'black'}
-                    color={'white'}
-                    onClick={() =>
-                      createBillingPortalSession(portal.customerId)
-                    }
-                  >
-                    Update payment method
-                  </Button>
-                </Box>
-              )}
+                  <AddonsComponent
+                    isSubscribed={portal?.addOnSubscription?.items['removeBranding']?.active}
+                    expirationDate={portal.addOnSubscription?.items['removeBranding']
+                      ?.will_expire}
+                  />
 
-              <Text my={2}>Manage your subscription</Text>
+
+
+                  {/*       <Text my={2}>Manage your subscription</Text>
               <Box>
                 <Text>Do you wanna upgrade or downgrade subscription? </Text>
                 <Button
@@ -384,7 +398,7 @@ export const Pricing = () => {
                     currentPriceId={portal?.subscriptions?.current?.priceId}
                   />
                 )}
-              </Box>
+              </Box> */}
             </Box>
           ) : (
             <>
@@ -434,8 +448,8 @@ export const Pricing = () => {
                       price={price.price}
                       features={price.features}
                       priceId={price.priceId}
-                      onSelect={() => handleSubscription(price)}
-                      isSubscriptionLoading={isSubscriptionLoading}
+                      onSelect={async () => handleSubscription(price)}
+                      isSubscriptionLoading={isSubscriptionLoading && price.priceId === priceId}
                       type={price.type}
                     />
                   ))}

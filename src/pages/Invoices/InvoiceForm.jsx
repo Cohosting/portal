@@ -115,8 +115,9 @@ export const InvoiceForm = () => {
         setStripeUser(data.client);
         setAttachments(data.attachments);
         setLineItems(data.lineItems);
-        setMemo(data.memo)
-
+        setMemo(data.memo);
+        setSettings(data.settings)
+        console.log(data)
 
 
       })();
