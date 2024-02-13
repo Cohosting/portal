@@ -103,33 +103,31 @@ export const PortalContextProvider = ({ children }) => {
     }
   }, [portalTeamMemberData]);
 
+  // useEffect(() => {
+  //   if (!portal) return;
 
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${process.env.REACT_APP_NODE_URL}/subscriptions/${portal.subscriptions.current.subscriptionId}`
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error(`Network response was not ok: ${response.status}`);
+  //       }
+  //       const data = await response.json();
 
-  useEffect(() => {
-    if (!portal) return;
+  //       console.log(data);
+  //       /*  setSubscription(data); */
+  //     } catch (error) {
+  //       /*         setError(error.message);
+  //        */
+  //     } finally {
+  //       /*  setLoading(false); */
+  //     }
+  //   };
 
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_NODE_URL}/subscriptions/${portal.subscriptions.current.subscriptionId}`
-        );
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-
-        console.log(data);
-        /*  setSubscription(data); */
-      } catch (error) {
-        /*         setError(error.message);
-         */
-      } finally {
-        /*  setLoading(false); */
-      }
-    };
-
-    fetchData();
-  }, [portal]);
+  //   fetchData();
+  // }, [portal]);
   useEffect(() => {
     if (!portal || !user) return;
     (async () => {
