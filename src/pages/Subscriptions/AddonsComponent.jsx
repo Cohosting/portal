@@ -88,12 +88,23 @@ const AddonsComponent = ({ isSubscribed, expirationDate }) => {
                     <Heading as="h3" size="sm" textAlign="center" color={textColor}>
                         You are subscribed to remove branding.
                     </Heading>
-                    <Text textAlign={'center'} fontSize="sm" color={textColor}>
+
+                    {
+                        expirationDate && (
+                            <Text textAlign={'center'} fontSize="sm" color={textColor}>
+                                Your subscription will expire on: {new Date(expirationDate * 1000).toUTCString()}
+                                <br />
+                                You can again can subscribe after that!
+
+                            </Text>
+                        )
+                    }
+                    {/*         <Text textAlign={'center'} fontSize="sm" color={textColor}>
                         Your subscription will expire on: {new Date(expirationDate * 1000).toUTCString()}
                         <br />
                         You can again can subscribe after that!
 
-                    </Text>
+                    </Text> */}
                     {
                         !expirationDate && (
                             <Button isLoading={isLoading} onClick={handleCancel} colorScheme="red">
