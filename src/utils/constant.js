@@ -164,3 +164,36 @@ export const navItemList = [
     ],
   },
 ];
+export const portalTexts = {
+  customizePortalView: 'Customize portal view',
+  brandName: {
+    heading: 'Brand name',
+    subText:
+      'Your brand name is the name your customers use to refer to you. It doesn’t need to be your legal business name.',
+  },
+  imageAsset: {
+    heading: 'Image asset',
+    subText:
+      'Your icon and login images are used in various places to customize the experience for you and your clients',
+    squareIcon: 'Square icon',
+    squareIconSubText: 'Used in the navbar and on mobile',
+    fullLogo: 'Full logo',
+    fullLogoSubText: 'Used on login pages and invoices',
+    squareLoginImage: 'Square login image',
+    squareLoginImageSubText: 'Used on the side of your login page',
+  },
+  brandColors: {
+    heading: 'Brand colors',
+    subText:
+      'Customize the colors in your portal. Note that these colors only affect your portal and not the internal user experience. The accent is used for buttons, tags, and other UI elements.',
+    sidebarBgColor: 'Sidebar background color',
+    sidebarTextColor: 'Sidebar text color',
+    accentColor: 'Accent color',
+  },
+  poweredBy: {
+    heading: 'Powered by Copilot badge',
+    subText:
+      'The Powered by Copilot badge shows on the sign in and sign up pages of your portal.',
+  },
+  // Add more text constants here
+};

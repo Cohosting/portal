@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Input, Square, useOutsideClick } from '@chakra-ui/react';
+import { Box, Flex, Input, Square, Text, useOutsideClick } from '@chakra-ui/react';
 import { SketchPicker } from 'react-color';
 
-export const ColorPicker = ({ onCompletePick, field, defaultColor }) => {
+export const BrandColorPicker = ({
+  onCompletePick, field, defaultColor, title
+}) => {
   const [color, setColor] = React.useState(defaultColor);
   const [showPicker, setShowPicker] = useState(false);
   // Outside click
@@ -27,35 +29,46 @@ export const ColorPicker = ({ onCompletePick, field, defaultColor }) => {
   }, [defaultColor]);
 
   return (
-    <Box display="flex" alignItems="center" position={'relative'}>
-      <Square
-        onClick={() => setShowPicker(!showPicker)}
-        size="45px"
-        bg={color}
-        border="1px solid #cacaca"
-        borderRadius={'6px'}
-        cursor="pointer"
-      />
-      <Input type="text" value={color} readOnly ml="10px" w="110px" />
-      {showPicker && (
-        <Box ref={ref}>
-          <SketchPicker
-            styles={{
-              default: {
-                picker: {
-                  position: 'absolute',
-                  top: '50px',
-                  left: '0px',
-                  zIndex: '1',
+
+
+    <Flex
+      borderTop={'1px solid gray'}
+      justifyContent={'space-between'}
+      p={3}
+      flexDir={['column', 'row']}
+      alignItems={['flex-start', 'center']}
+    >
+      <Text my={1}>{title}</Text>
+      <Box display="flex" alignItems="center" position={'relative'}>
+        <Square
+          onClick={() => setShowPicker(!showPicker)}
+          size="45px"
+          bg={color}
+          border="1px solid #cacaca"
+          borderRadius={'6px'}
+          cursor="pointer"
+        />
+        <Input type="text" value={color} readOnly ml="10px" w="110px" />
+        {showPicker && (
+          <Box ref={ref}>
+            <SketchPicker
+              styles={{
+                default: {
+                  picker: {
+                    position: 'absolute',
+                    top: '50px',
+                    left: '0px',
+                    zIndex: '1',
+                  },
                 },
-              },
-            }}
-            onChange={handleChange}
-            color={color}
-            onChangeComplete={handleChangeComplete}
-          />
-        </Box>
-      )}
-    </Box>
+              }}
+              onChange={handleChange}
+              color={color}
+              onChangeComplete={handleChangeComplete}
+            />
+          </Box>
+        )}
+      </Box>
+    </Flex>
   );
 };
