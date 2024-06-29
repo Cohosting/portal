@@ -96,7 +96,7 @@ const AddonsComponent = ({ isSubscribed, expirationDate }) => {
                                 <br />
                                 You can again can subscribe after that!
 
-                            </Text>
+                            </Text> 
                         )
                     }
                     {/*         <Text textAlign={'center'} fontSize="sm" color={textColor}>

@@ -1,8 +1,9 @@
 import { Box, FormControl, FormErrorMessage, FormLabel, Input } from '@chakra-ui/react'
 import React from 'react'
+import { handleError } from '../utils/formValidation';
 
 export const CustomInput = ({
-  isInvalid,
+
   label,
   value,
   name,
@@ -14,9 +15,11 @@ export const CustomInput = ({
     border: '1px solid #eee',
     _invalid: { borderColor: '#FC8181', boxShadow: 'none' },
   };
+
+  const isInvalid = handleError(name, value)
   return (
     <FormControl
-     isInvalid={isInvalid()}
+      isInvalid={isInvalid}
     display={'flex'}
     flexDirection="column"
     height="105px"
@@ -30,15 +33,16 @@ export const CustomInput = ({
     }
     
     <Input
+        name={name}
       type="email"
       value={value}
       height={'3rem'}
       sx={{
          ...inputStyle,
-        _hover: !isInvalid() && {
+        _hover: !isInvalid && {
           border: '1px solid #eee',
         },
-        _focus: !isInvalid() ?   {
+        _focus: !isInvalid ? {
               border: '1px solid rgb(33, 43, 54)',
               boxShadow: 'none',
             } : {
@@ -52,7 +56,7 @@ export const CustomInput = ({
       }}
       {...otherProps}
     />
-    {isInvalid() && (
+      {isInvalid && (
       <FormErrorMessage alignSelf={'end'} fontSize={'13px'}>
         Email is required.
       </FormErrorMessage>

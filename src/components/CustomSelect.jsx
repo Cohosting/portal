@@ -4,20 +4,18 @@ import {
     FormLabel,
     Select,
   } from '@chakra-ui/react';
-  import React, { useContext, useState } from 'react';
-  import AuthProvider from '../context/signupContext';
+import React, { useContext, useState } from 'react';
   
   const CustomSelect = ({
+    name,
     value,
     options,
     label,
     errorMessage,
     handleChange,
   }) => {
-    const { userCredentials, setUserCredentials } = useContext(AuthProvider);
 
-    const [text, setText] = useState(userCredentials.foundOn);
-    console.log({ text })
+    const [text, setText] = useState('');
   
     const handleError = () => {
       if (!text) return false
@@ -36,6 +34,7 @@ import {
       >
         <FormLabel fontSize={'14px'}>{label}</FormLabel>
         <Select
+          name={name}
           background={'white'}
           placeholder=""
           sx={{
@@ -45,11 +44,8 @@ import {
           id={value}
           onChange={e => {
             setText(e.target.value);
-            handleChange(e.target);
-            setUserCredentials({
-              ...userCredentials,
-              [e.target.id]: e.target.value,
-            });
+            handleChange(e);
+
           }}
         >
           {options.map(value => (

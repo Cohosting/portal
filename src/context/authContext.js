@@ -4,41 +4,43 @@ import { getOrCreateUser } from '../lib/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 
-import signupContext from './signupContext'
 import { doc, onSnapshot } from 'firebase/firestore';
+import useSignupContext from './SignupContext';
 
 export const AuthContext = createContext();
 
 const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const { setStep, userCredentials ,setUserCredentials }  = useContext(signupContext)
+  // const { setStep, userCredentials ,setUserCredentials }  = useContext(signupContext)
+  const { setStep } = useSignupContext();
+  useEffect(() => {
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        console.log(user);
+        onSnapshot(doc(db, 'users', user.uid), snapshot => {
+          console.log('getting called');
 
+          let userData = { ...snapshot.data() };
+          if (userData.isProfileCompleted === false) {
+            setStep(2);
+            /*          setUserCredentials({
+              ...userCredentials,
+              email: userData.email,
+              name: userData.name,
+              uid: userData.uid,
+            });   */
+          }
 
-useEffect(() => {
-  onAuthStateChanged(auth, async user => {
-    if (user) {
-      onSnapshot(doc(db, 'users', user.uid), snapshot => {
-        let userData = { ...snapshot.data() };
-        if (userData.isProfileCompleted === false) {
-          setStep(2);
-          setUserCredentials({
-            ...userCredentials,
-            email: userData.email,
-            name: userData.name,
-            uid: userData.uid,
-          });
-        }
-
-        setUser(snapshot.data());
-        setIsAuthenticated(true);
-      });
-    } else {
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  });
-}, []);
+          setUser(snapshot.data());
+          setIsAuthenticated(true);
+        });
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    });
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated }}>
@@ -48,26 +50,3 @@ useEffect(() => {
 };
 
 export default AuthContextProvider;
-
-
-/* 
-
-useEffect(() => {
-  onAuthStateChanged(auth, async user => {
-    if (user) {
-      onSnapshot(doc(db, 'users', user.uid), snapshot => {
-        let userData = { ...snapshot.data() };
-       
-        if(!userData.customerId) {
-          // crreate customer using backend
-        }
-
-      });
-    } else {
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  });
-}, []);
-
-*/

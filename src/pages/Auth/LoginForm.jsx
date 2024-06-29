@@ -1,63 +1,51 @@
 import { Box, Button, FormLabel, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { CustomInput } from '../../components/CustomInput';
 import { AuthBox, Layout } from './Layout';
 import { useNavigate } from 'react-router-dom';
-import { useSubdomain } from '../../hooks/useSubdomain';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { handleFirebaseError } from '../../utils/firebase';
 
 export const LoginForm = () => {
-  const d = useSubdomain();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [userCredentials, setUserCredentials] = useState({
-    email: '',
-    password: '',
-  });
+  const [error, setError] = useState('');
+  const [userCredentials, setUserCredentials] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  const handleError = name => {
-    if (!userCredentials[name]) return;
-    let isError = true;
-    isError = userCredentials[name] === '' ? true : false;
 
-    return isError;
-  };
+  // Validates if the input fields are not empty
+  const isInputValid = (name) => userCredentials[name] !== '';
 
+  // Handles input change and updates state
   const handleChange = (e, name) => {
-    handleError('email');
-    setUserCredentials({
-      ...userCredentials,
-      [name]: e.target.value,
-    });
+    setUserCredentials({ ...userCredentials, [name]: e.target.value });
   };
 
+  // Handles the login process
   const handleEmailPasswordLogin = async () => {
     const { email, password } = userCredentials;
-    if (email === '' || password === '') {
+    if (!email || !password) {
+      setError('Email and password are required.');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
-      setIsLoading(false);
-     window.location.href = '/';
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/'); // Redirect to home page
     } catch (error) {
-      console.log(error);
-      setError(error.message);
+      handleFirebaseError(error.code, setError);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-
-    if (error) setError('')
-
-  }, [userCredentials])
+  // Checks if the email and password inputs are valid for enabling the Sign in button
+  const isSignInDisabled = () => {
+    const { email, password } = userCredentials;
+    return !email || !email.includes('@') || !password;
+  };
 
 
   return (
@@ -70,7 +58,7 @@ export const LoginForm = () => {
               name={'email'}
               value={userCredentials.email}
               handleChange={handleChange}
-              isInvalid={() => handleError('email')}
+              isInvalid={() => !isInputValid('email')}
               type={'text'}
             />
             <CustomInput
@@ -92,7 +80,7 @@ export const LoginForm = () => {
               }
               value={userCredentials.password}
               handleChange={handleChange}
-              isInvalid={() => handleError('password')}
+              isInvalid={() => !isInputValid('email')}
               type={'password'}
             />
             {error && (
@@ -102,25 +90,16 @@ export const LoginForm = () => {
             )}
             <Button
               isLoading={isLoading}
+              isDisabled={isSignInDisabled()}
+              onClick={handleEmailPasswordLogin}
               width={'100%'}
               color={'#fff'}
-              isDisabled={
-                userCredentials.email === '' ||
-                !userCredentials.email.includes('@') ||
-                userCredentials.password === ''
-              }
               marginTop={'2.3rem'}
               height={'3rem'}
               borderRadius={'4px'}
               background={'#212B36'}
               boxShadow={'0px 1px 2px rgba(0, 0, 0, 0.07)'}
-              onClick={() => {
-                handleEmailPasswordLogin();
-                // userCredentials.email !== '' &&
-                //   userCredentials.password !== '' &&
-                //   setStep(step + 1);
-                // setIsLoading(step === 1 ? false : true);
-              }}
+
               _hover={{ background: '#27333F' }}
             >
               Sign in

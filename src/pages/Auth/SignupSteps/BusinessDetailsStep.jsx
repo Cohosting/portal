@@ -3,26 +3,17 @@ import { useContext, useState } from "react";
 import CustomSelect from "../../../components/CustomSelect";
 import { clients, industries, sizes, types } from "../../../utils/config";
 import { boxStyle } from "../Signup";
-import {
-  arrayUnion,
-  collection,
-  doc,
-  serverTimestamp,
-  writeBatch,
-} from 'firebase/firestore';
-import AuthContextProvider from '../../../context/signupContext';
 import { AuthContext } from '../../../context/authContext';
-import { db } from '../../../lib/firebase';
 import { useNavigate } from 'react-router-dom';
-import { defaultAppList } from '../../../utils';
-import { omit } from 'lodash';
+import useSignupContext from "../../../context/SignupContext";
+import { initializeOrganizationSetup } from "../../../utils/signupUtils";
 
-export const QuestionsSelection2 = ({ isLargerThan450 }) => {
+const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const navigate = useNavigate();
-  const { userCredentials } = useContext(AuthContextProvider);
+  const { personalInfoStep, businessDetailsStep } = useSignupContext()
+  const { user } = useContext(AuthContext)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const { user } = useContext(AuthContext);
   const [credentials, setCredentials] = useState({
     industry: 'Accounting and bookkeeping',
     companySize: 'Just me',
@@ -37,82 +28,15 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
     });
   };
 
-  const persistOtherData = async () => {
+  const setupOrganizationAndNavigate = async () => {
     try {
       setIsLoading(true);
-
-      // Initializations
-      const batch = writeBatch(db);
-      const ref = doc(db, 'users', user.uid);
-      const portalRef = doc(collection(db, 'portals'));
-      const memberRef = doc(collection(db, 'teamMembers'));
-
-      // Portal Data Preparation
-      const trialStartDate = new Date();
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialStartDate.getDate() + 7);
-      const portalData = {
-        subscriptionType: 'freemium',
-        others: omit(userCredentials, ['name', 'email', 'password']),
-        portalURL: userCredentials.portalURL,
-        createdBy: user.uid,
-        settings: {
-          achDebit: true,
-          card: false,
-          autoImport: false,
-        },
-        apps: defaultAppList,
-        id: portalRef.id,
-        trialStartDate,
-        trialEndDate,
-        isSubscribed: false,
-        isExpiryCount: true,
-      };
-      batch.set(portalRef, portalData);
-
-      // Team Member Data Preparation
-      const [firstName, lastName] = userCredentials.name.split(' ');
-      let memberObject = {
-        firstName: firstName || '',
-        lastName: lastName || '',
-        email: userCredentials.email,
-        uid: userCredentials.uid,
-        status: 'active',
-        role: 'owner',
-        portalId: portalRef.id,
-        id: memberRef.id,
-        createdAt: new Date().toLocaleString(),
-      };
-      batch.set(memberRef, memberObject);
-
-      // User Document Update
-      batch.update(ref, {
-        isProfileCompleted: true,
-        portals: arrayUnion(portalRef.id),
-        name: firstName + ' ' + lastName
-      });
-
-      // Creating 5 default seats
-      for (let i = 0; i < 5; i++) {
-        const seatRef = doc(collection(db, 'seats'));
-        const seatData = {
-          id: seatRef.id,
-          portalId: portalRef.id,
-          status: i === 0 ? 'occupied' : 'available', // first seat is 'occupied' by the owner, rest are 'available'
-          userId: i === 0 ? userCredentials.uid : null, // first seat's userId is set to the owner's uid
-          createdAt: serverTimestamp(),
-          seatType: 'free',
-        };
-        batch.set(seatRef, seatData);
-      }
-
-      // Commit batch
-      await batch.commit();
-
+      await initializeOrganizationSetup(user, personalInfoStep, businessDetailsStep);
       navigate('/');
     } catch (err) {
-      setIsLoading(false);
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -134,6 +58,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
       </Box>
       <Flex sx={{ ...boxStyle, minWidth: isLargerThan450 ? '460px' : '100%' }}>
         <CustomSelect
+          name={'industry'}
           options={industries}
           value={'industry'}
           label={'Which industry are you in?'}
@@ -141,6 +66,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
           handleChange={handleChange}
         />
         <CustomSelect
+          name={'companySize'}
           options={sizes}
           value={'companySize'}
           label={'How large is your company?'}
@@ -149,6 +75,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
         />
         <CustomSelect
           options={clients}
+          name={'clients'}
           value={'clients'}
           label={'How many clients do you have?'}
           errorMessage={'Clients count'}
@@ -157,6 +84,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
         <CustomSelect
           options={types}
           value={'typeOfService'}
+          name={'typeOfService'}
           label={'Do you companies, individuals, or a mix of both?'}
           errorMessage={'Client type'}
           handleChange={handleChange}
@@ -174,7 +102,7 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
           sx={{}}
           background={'#212B36'}
           onClick={() => {
-            persistOtherData();
+            setupOrganizationAndNavigate();
             // setStep(step + 1);
           }}
           border={'1px solid #DFE1E4'}
@@ -187,3 +115,5 @@ export const QuestionsSelection2 = ({ isLargerThan450 }) => {
     </Flex>
   );
 };
+
+export default BusinessDetailsStep;

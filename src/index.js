@@ -4,15 +4,12 @@ import * as ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
-import {
-  ChakraProvider,
-  theme,
-} from '@chakra-ui/react';
-import {SignupContext} from './context/signupContext';
+import { ChakraProvider, theme } from '@chakra-ui/react';
 import AuthContextProvider from './context/authContext';
 import { ClientAuthContextComponent } from './context/clientAuthContext';
 import { PortalContextProvider } from './context/portalContext';
 import { ClientPortalContextComponent } from './context/clientPortalContext';
+import { SignupStepContext } from './context/SignupContext';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
@@ -21,13 +18,13 @@ root.render(
   <ChakraProvider>
     <ClientPortalContextComponent>
       <ClientAuthContextComponent>
-        <SignupContext>
+        <SignupStepContext>
           <AuthContextProvider>
             <PortalContextProvider>
               <App />
             </PortalContextProvider>
           </AuthContextProvider>
-        </SignupContext>
+        </SignupStepContext>
       </ClientAuthContextComponent>
     </ClientPortalContextComponent>
   </ChakraProvider>

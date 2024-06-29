@@ -1,16 +1,8 @@
-import { Box, Button, Divider, Flex, Text, useMediaQuery } from '@chakra-ui/react'
-import React, { useContext, useEffect, useState } from 'react'
-import AuthProvider from '../../context/signupContext';
-import { useLocation, useNavigate } from 'react-router-dom';
-import CustomForm from '../../components/CustomForm';
-import { FaChevronLeft } from 'react-icons/fa';
-import { QuestionsSelection1 } from './signup steps/QuestionsSelection1';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { QuestionsSelection2 } from './signup steps/QuestionsSelection2';
-import { getOrCreateUser } from './../../lib/auth';
-import { auth, db } from './../../lib/firebase';
-import queryString from 'query-string';
-import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import React, { useContext, } from 'react'
+import SignupForm from './SignupForm';
+import SignupSteps from './SignupSteps';
+import { AuthBox, Layout } from './Layout';
+import useSignupContext from '../../context/SignupContext';
 
 export const boxStyle = {
   flexDirection: 'column',
@@ -19,184 +11,37 @@ export const boxStyle = {
   border: '1px solid #EFF1F4',
 };
 
+
+/**
+ * The Signup component orchestrates the signup process, controlling the flow
+ * of the signup steps and rendering the appropriate components based on the
+ * current step. It utilizes the SignupContext for managing the state of the
+ * signup process.
+ */
 export const Signup = () => {
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
-  const { userCredentials, setUserCredentials, step, setStep } =
-    useContext(AuthProvider);
-  const [inviteState, setInviteState] = useState(null);
-  const [error, setError] = useState('');
-  const [isExpired, setIsExpired] = useState(false);
+  const { step, setStep } = useSignupContext()
 
-  const [isLargerThan450] = useMediaQuery('(min-width: 450px)');
-  const navigate = useNavigate();
+  // Function to render the current step's component
 
-  useEffect(() => {
-    step === 1 && setIsLoading(false);
-  }, []);
-
-  const handleChange = e => {
-    // console.log(e);
-  };
-
-  const signup = async () => {
-    if (userCredentials.email !== '' && userCredentials.password !== '') {
-      setIsLoading(true);
-      setError('');
-
-      try {
-        const { user } = await createUserWithEmailAndPassword(
-          auth,
-          userCredentials.email,
-          userCredentials.password
-        );
-
-        await getOrCreateUser(user, {
-          ...userCredentials,
-          isProfileCompleted: false,
-          uid: user.uid,
-          portals: [],
-        });
-
-        setStep(step + 1);
-        setIsLoading(step === 1 ? false : true);
-      } catch (err) {
-        setIsLoading(false);
-        switch (err.code) {
-          case 'auth/email-already-in-use':
-            setError('This email is already in use.');
-            break;
-          case 'auth/invalid-email':
-            setError('Invalid email format.');
-            break;
-          case 'auth/weak-password':
-            setError('Password should be at least 6 characters.');
-            break;
-          default:
-            setError('An unknown error occurred. Please try again.');
-        }
-      }
-    } else {
-      setError('Please fill all the information')
+  const renderCurrentStep = () => {
+    switch (step) {
+      case 1:
+        // The initial signup form
+        return <SignupForm />;
+      default:
+        // Handles subsequent signup steps and onboarding questions
+        return <SignupSteps step={step} setStep={setStep} />;
     }
   };
 
-  useEffect(() => {
-    if (error) setError('')
-  }, [userCredentials])
-
-
   return (
-    <>
-      {/* Register Section */}
-      {step === 1 && (
-        <Flex justify={'center'} align={'center'} height={'100vh'}>
-          <Box
-            minW={'100%'}
-            display={'flex'}
-            alignItems={'center'}
-            flexDirection={'column'}
-          >
-            <Flex
-              sx={{ ...boxStyle, minWidth: isLargerThan450 ? '460px' : '100%' }}
-            >
-              <CustomForm
-                value={'email'}
-                type="email"
-                errorMessage={'Email'}
-                handleChange={handleChange}
-                label={'Work email'}
-                readOnly={inviteState ? true : false}
-              />
-              <CustomForm
-                value={'password'}
-                type="password"
-                errorMessage={'Password'}
-                handleChange={handleChange}
-                label={'Set a password'}
-              />
-              {error && <Text color={'red'}>{error}</Text>}
-              {isExpired && (
-                <Text color={'red'}>This invite link has expired.</Text>
-              )}
 
-              <Button
-                width={'100%'}
-                color={'#fff'}
-                isLoading={isLoading}
-                marginTop={'2.3rem'}
-                height={'3rem'}
-                borderRadius={'4px'}
-                background={'#212B36'}
-                onClick={async () => {
-                  await signup();
-                }}
-                boxShadow={'0px 1px 2px rgba(0, 0, 0, 0.07)'}
-                _hover={{ background: '#27333F' }}
-              >
-                Create an account
-              </Button>
-            </Flex>
-            <Box
-              maxW={'340px'}
-              mt={'1rem'}
-              textAlign={'center'}
-              fontSize={'14px'}
-            >
-              <Text>
-                You acknowledge that you read, and agree to our{' '}
-                <Text
-                  as="a"
-                  href="#terms-of-service"
-                  color={'#6B6F76'}
-                  _hover={{ textDecoration: 'underline' }}
-                >
-                  Terms of Service
-                </Text>{' '}
-                and our{' '}
-                <Text
-                  as="a"
-                  href="#privacy-policy"
-                  color={'#6B6F76'}
-                  _hover={{ textDecoration: 'underline' }}
-                >
-                  Privacy Policy.
-                </Text>
-              </Text>
-              <Text
-                mt="1rem"
-                onClick={() => navigate('/login')}
-                cursor={'pointer'}
-              >
-                Already have an account?
-              </Text>
-            </Box>
-          </Box>
-        </Flex>
-      )}
+    <Layout>
+      <AuthBox>
+        {renderCurrentStep()}
+      </AuthBox>
+    </Layout>
 
-      {step !== 1 && (
-        <Button
-          color={'#263238'}
-          onClick={() => setStep(step - 1)}
-          justifySelf={'start'}
-          gap=".5rem"
-          align="center"
-          fontSize={'14px'}
-          top="50px"
-          left={'40px'}
-          position={'absolute'}
-          zIndex={100}
-        >
-          <FaChevronLeft />
-          Back
-        </Button>
-      )}
 
-      {/* Questions Section */}
-      {step === 2 && <QuestionsSelection1 isLargerThan450={isLargerThan450} />}
-
-      {step === 3 && <QuestionsSelection2 isLargerThan450={isLargerThan450} />}
-    </>
   );
 };
