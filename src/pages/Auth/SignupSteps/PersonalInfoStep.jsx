@@ -1,6 +1,6 @@
 import { Box, Button, Divider, Flex, Text } from "@chakra-ui/react";
 import CustomSelect from "../../../components/CustomSelect";
-import { foundOn } from "../../../utils/config";
+import { foundOn } from "../../../utils/constant";
 import { boxStyle } from "../Signup";
 import { CustomInput } from "../../../components/CustomInput";
 import PortalURLInput from "../../../components/PortalURLInput";

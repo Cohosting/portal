@@ -17,7 +17,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { AiOutlinePlus } from 'react-icons/ai';
-import { property } from '../../utils/config';
+import { property } from '../../utils/constant';
 
 export const ClientDetails = () => {
   const [customProperties, setCustomProperties] = useState([]);

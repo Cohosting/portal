@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import CustomSelect from "../../../components/CustomSelect";
-import { clients, industries, sizes, types } from "../../../utils/config";
+import { clients, industries, sizes, types } from "../../../utils/constant";
 import { boxStyle } from "../Signup";
 import { AuthContext } from '../../../context/authContext';
 import { useNavigate } from 'react-router-dom';
