@@ -1,5 +1,5 @@
 import { Box, Button, FormLabel, Text } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { CustomInput } from '../../components/CustomInput';
 import { AuthBox, Layout } from './Layout';
@@ -7,11 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { handleFirebaseError } from '../../utils/firebase';
+import { getOrCreateUser } from '../../lib/auth';
+import { AuthContext } from '../../context/authContext';
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [userCredentials, setUserCredentials] = useState({ email: '', password: '' });
+  const { setUser, setIsAuthenticated } = useContext(AuthContext)
   const navigate = useNavigate();
 
   // Validates if the input fields are not empty
@@ -32,7 +35,10 @@ export const LoginForm = () => {
 
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const userData = await getOrCreateUser(user);
+      setUser(userData);
+      setIsAuthenticated(true);
       navigate('/'); // Redirect to home page
     } catch (error) {
       handleFirebaseError(error.code, setError);

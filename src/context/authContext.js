@@ -12,7 +12,7 @@ export const AuthContext = createContext();
 const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  // const { setStep, userCredentials ,setUserCredentials }  = useContext(signupContext)
+
   const { setStep } = useSignupContext();
   useEffect(() => {
     onAuthStateChanged(auth, async user => {
@@ -24,12 +24,6 @@ const AuthContextProvider = ({ children }) => {
           let userData = { ...snapshot.data() };
           if (userData.isProfileCompleted === false) {
             setStep(2);
-            /*          setUserCredentials({
-              ...userCredentials,
-              email: userData.email,
-              name: userData.name,
-              uid: userData.uid,
-            });   */
           }
 
           setUser(snapshot.data());
@@ -43,7 +37,9 @@ const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, setUser, setIsAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );
