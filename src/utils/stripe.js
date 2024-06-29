@@ -27,3 +27,19 @@ export const createStripeConnectAccount = async (
     cb && cb(false);
   }
 };
+
+export const fetchStripeUser = async stripeConnectAccountId => {
+  const response = await fetch(
+    `${process.env.REACT_APP_NODE_URL}/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error('Failed to fetch stripe user');
+  }
+  return response.json();
+};
