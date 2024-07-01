@@ -15,10 +15,10 @@ export const usePortalData = portals => {
   );
 };
 
-export const usePortalTeamMember = portalId => {
+export const usePortalTeamMember = (portalId, userEmail) => {
   return useQuery(
     queryKeys.portalTeamMember(portalId),
-    () => fetchTeamMemberData(portalId),
+    () => fetchTeamMemberData(portalId, userEmail),
     {
       enabled: !!portalId,
     }

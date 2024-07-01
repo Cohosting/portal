@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { defaultAppList } from '.';
+import useCustomerOnDemand from '../hooks/useCustomerOnDemand';
 
 // Standardizing date handling
 const getCurrentTimestamp = () => serverTimestamp();
@@ -84,7 +85,8 @@ export const prepareTeamMemberData = (portalRef, personalInfoStep, user) => {
 export const initializeOrganizationSetup = async (
   user,
   personalInfoStep,
-  businessDetailsStep
+  businessDetailsStep,
+  createCustomer
 ) => {
   console.log('Initializing organization setup', {
     user,
@@ -108,7 +110,6 @@ export const initializeOrganizationSetup = async (
       businessDetailsStep
     );
     const memberData = prepareTeamMemberData(portalRef, personalInfoStep, user);
-
     console.log('Prepared data', { portalData, memberData }); // Log prepared data
 
     batch.set(portalRef, { ...portalData, id: portalRef.id });
@@ -129,6 +130,8 @@ export const initializeOrganizationSetup = async (
     console.log('createSeats function called');
 
     await batch.commit();
+
+    await createCustomer(portalData, memberData, portalRef.id);
     console.log('Batch commit successful'); // Log successful commit
   } catch (error) {
     console.error('Error persisting data:', error);

@@ -7,6 +7,7 @@ import { boxStyle } from "../Signup";
 import { useNavigate } from 'react-router-dom';
 import { setBusinessDetailsStep } from "../../../store/slices/authSlice";
 import { initializeOrganizationSetup } from "../../../utils/signupUtils";
+import useCustomerOnDemand from "../../../hooks/useCustomerOnDemand";
 
 const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const { personalInfoStep, businessDetailsStep, user } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const createCustomer = useCustomerOnDemand()
 
   const handleChange = (e) => {
     dispatch(setBusinessDetailsStep({
@@ -25,7 +27,7 @@ const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const setupOrganizationAndNavigate = async () => {
     try {
       setIsLoading(true);
-      await initializeOrganizationSetup(user, personalInfoStep, businessDetailsStep);
+      await initializeOrganizationSetup(user, personalInfoStep, businessDetailsStep, createCustomer);
       navigate('/');
     } catch (err) {
       setError(err.message);

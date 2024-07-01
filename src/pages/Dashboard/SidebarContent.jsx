@@ -12,6 +12,7 @@ const SidebarContent = ({ user, portalTeamMemberData, portal }) => {
     const navigate = useNavigate();
     const location = useLocation();
     // Determine the account type message based on the role
+    console.log({ portalTeamMemberData })
     const accountTypeMessage = portalTeamMemberData?.role === 'owner' ? 'This is owner account' : 'This is member account';
     return (
         <Box bg={'#f8f9fb'} px={'16px 8px 28px 8px'} height={'100%'} w={'200px'} p={1} position={'fixed'} overflowY={'auto'}>

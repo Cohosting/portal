@@ -18,29 +18,7 @@ export const PortalContextProvider = ({ children }) => {
   const [currentPortal, setCurrentPortal] = useState(null);
   const [portalTeamMemberData, setPortalTeamMemberData] = useState(null);
 
-    useEffect(() => {
-    if (!user || !user?.portals.length) return;
 
-    console.log(user);
-    const getData = async () => {
-      const data = await fetchPortalData(user.portals[0]);
-      setPortal(data);
-      setCurrentPortal(data?.id);
-    };
-    getData();
-  }, [user]);
-
-   useEffect(() => {
-    if (!portal || !user || !currentPortal) return;
-    const getTeamMemberData = async () => {
-      const data = await fetchTeamMemberData(portal.id, user.email);
-      setPortalTeamMemberData(data);
-      if (data?.status === 'pending') {
-        await updateTeamMemberStatus(data.id, 'active');
-      }
-    };
-    getTeamMemberData();
-  }, [portal, user, currentPortal]);
 
   useEffect(() => {
     if (

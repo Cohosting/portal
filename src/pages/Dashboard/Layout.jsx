@@ -12,13 +12,14 @@ export const Layout = ({ children, }) => {
   const [isMobileView] = useMediaQuery('(max-width: 760px)')
   const { user } = useSelector(state => state.auth)
   const { data: portal } = usePortalData(user?.portals)
-  const { data: portalTeamMemberData } = usePortalTeamMember(user?.portals[0])
+  const { data: portalTeamMemberData } = usePortalTeamMember(user?.portals[0], user.email)
   const ref = useRef();
   // Close sidebar when clicking outside of it
   useOutsideClick({
     ref: ref,
     handler: () => onClose(false),
   })
+  console.log(portalTeamMemberData)
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

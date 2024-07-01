@@ -13,6 +13,7 @@ import AuthListener from './pages/Auth/AuthListener.jsx';
 import { QueryClientProvider } from 'react-query';
 
 import queryClient from './hooks/react-query/queryClient';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);

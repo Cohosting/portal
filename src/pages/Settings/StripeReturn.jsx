@@ -1,14 +1,15 @@
 import { Box, Button, Spinner, Text } from '@chakra-ui/react'
 import React, { useContext, useEffect, useState } from 'react'
 import { createStripeConnectAccount } from '../../utils/stripe';
-import { PortalContext } from '../../context/portalContext';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { useSelector } from 'react-redux';
 
 export const StripeReturn = () => {
   const [stripeUser, setStripeUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFill, setIsLoadingFill] = useState(false);
-
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
 
   const getStripeUser = async stripeConnectAccountId => {
     if (!stripeConnectAccountId) {
