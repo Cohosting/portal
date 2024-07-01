@@ -13,7 +13,6 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { PortalContext } from '../../context/portalContext';
 import { db } from '../../lib/firebase';
 import {
   collection,
@@ -29,6 +28,8 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 import { AiOutlineEdit } from 'react-icons/ai';
 import queryString from 'query-string';
 import { AddIcon } from '@chakra-ui/icons';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { useSelector } from 'react-redux';
 
 const MemberItem = ({
   member,
@@ -82,7 +83,8 @@ export const Extentions = () => {
   const [extentionId, setExtentionId] = useState(null);
   const [portalMembers, setPortalMembers] = useState([]);
   const [currentSelectedMember, setCurrentSelectedMember] = useState(null);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const { isOpen, onToggle } = useDisclosure();
 
   const navigate = useNavigate();
@@ -100,7 +102,7 @@ export const Extentions = () => {
       );
       const data = members.docs.map(doc => doc.data());
       setPortalMembers(data);
-      setCurrentSelectedMember(data[0].id);
+      setCurrentSelectedMember(data[0]?.id);
     };
     getPortalMembers();
 

@@ -1,13 +1,14 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { Box, Button, Checkbox, Flex, Spinner, Text } from '@chakra-ui/react';
 import { createStripeConnectAccount } from '../../utils/stripe';
-import { PortalContext } from '../../context/portalContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { CustomDomainForm } from './CustomDomainForm';
 import { CheckDomainConfiguration } from './CheckDomainConfig';
 import { useStripeUser } from '../../hooks/useStripeUser';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 // SettingItem component
 const SettingItem = React.memo(({ label, isChecked, onChange }) => (
@@ -17,6 +18,7 @@ const SettingItem = React.memo(({ label, isChecked, onChange }) => (
   </Flex>
 ));
 
+// Component for displaying stripe account verification status
 const StripeAccountVerification = ({ stripeUser, isLoading, portal, createStripeAccount }) => {
   if (!stripeUser) return null;
 
@@ -90,7 +92,9 @@ const PaymentSettings = ({ portal, updateSetting }) => {
 };
 
 export const Settings = () => {
-  const { portal } = useContext(PortalContext);
+
+  const { user } = useSelector((state) => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [isLoading, setIsLoading] = useState(false);
   const { stripeUser, isLoading: stripeUserLoading, error } = useStripeUser(portal?.stripeConnectAccountId);
 
@@ -112,29 +116,39 @@ export const Settings = () => {
     createStripeConnectAccount(portal.createdBy, portal.stripeConnectAccountId, portal.id, setIsLoading);
   };
 
+  // Adjusted spinner logic to show spinner if portal is not loaded or stripeUser is loading.
+  if (!portal || stripeUserLoading) {
+    return (
+      <Layout>
+        <Spinner />
+      </Layout>
+    );
+  }
   return (
     <Layout>
       <Box p={[2, 4]} pt={4}>
         <Text>Settings</Text>
-        <StripeAccountVerification
-          stripeUser={stripeUser}
-          isLoading={isLoading}
-          portal={portal}
-          createStripeAccount={createStripeAccount}
-        />
-        <ConnectStripeAccount
-          portal={portal}
-          isLoading={isLoading}
-          createStripeAccount={createStripeAccount}
-        />
-        <Box mt={4} fontSize={['15px', '16px']}>
-          <Text>Default setting for invoice payment</Text>
-          <PaymentSettings
+        <>
+          <StripeAccountVerification
+            stripeUser={stripeUser}
+            isLoading={isLoading}
             portal={portal}
-            updateSetting={togglePortalSetting}
+            createStripeAccount={createStripeAccount}
           />
-        </Box>
-        {!portal.customDomain ? <CustomDomainForm /> : <CheckDomainConfiguration defaultDomain={portal.customDomain} />}
+          <ConnectStripeAccount
+            portal={portal}
+            isLoading={isLoading}
+            createStripeAccount={createStripeAccount}
+          />
+          <Box mt={4} fontSize={['15px', '16px']}>
+            <Text>Default setting for invoice payment</Text>
+            <PaymentSettings
+              portal={portal}
+              updateSetting={togglePortalSetting}
+            />
+          </Box>
+          {!portal.customDomain ? <CustomDomainForm /> : <CheckDomainConfiguration defaultDomain={portal.customDomain} />}
+        </>
       </Box>
     </Layout>
   );

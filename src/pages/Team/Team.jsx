@@ -40,12 +40,12 @@ import { db } from '../../lib/firebase';
 import { Layout } from './../Dashboard/Layout';
 import { AddIcon } from '@chakra-ui/icons';
 import Table from '../Client/ClientTable';
-import { PortalContext } from '../../context/portalContext';
 import { sentTeamInviteEmail } from '../../lib/email';
-import { AuthContext } from '../../context/authContext';
 import { DeleteTeamMember } from './DeleteTeamMember';
 import { TeamUsageLimit } from '../../components/UI/TeamUsageLimit';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 const checkIfEmailExists = async (email, portalId) => {
   const q = query(
@@ -58,12 +58,12 @@ const checkIfEmailExists = async (email, portalId) => {
 };
 
 export const Team = () => {
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [seats, setSeats] = useState([]);
   const [allSeats, setAllSeats] = useState([]);
   const [shouldLimitAddingTeamMembers, setShouldLimitAddingTeamMembers] =
     useState(false); // portalId is used in checkIfEmailExists function [line 130
-  const { user } = useContext(AuthContext);
   const [teamMembers, setTeamMembers] = useState([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteFormData, setInviteFormData] = useState({
@@ -294,7 +294,7 @@ export const Team = () => {
             ),
             Email: el.email,
             Status: el.status,
-            ['Creation date']: el.createdAt,
+            'Creation date': el.createdAt,
             Actions: (
               <>
                 {el.role === 'owner' || el.email === user.email ? (

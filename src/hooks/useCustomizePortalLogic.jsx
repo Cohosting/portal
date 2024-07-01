@@ -2,11 +2,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useToast } from '@chakra-ui/react';
-import { PortalContext } from '../context/portalContext';
 import { db } from '../lib/firebase';
+import { useSelector } from 'react-redux';
+import { usePortalData } from './react-query/usePortalData';
 
 export const useCustomizePortalLogic = () => {
-    const { portal } = useContext(PortalContext);
+    const { user } = useSelector(state => state.auth);
+    const { data: portal } = usePortalData(user?.portals);
     const [isLoading, setIsLoading] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const [previousSetting, setPreviousSetting] = useState({});

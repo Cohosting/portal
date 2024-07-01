@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-
-import { AuthContext } from '../context/authContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { PortalContext } from '../context/portalContext';
+import React, { useEffect, useState } from 'react';
+import { usePortalData } from '../hooks/react-query/usePortalData';
+import { useSelector } from 'react-redux';
 
 export const TrialStatus = () => {
   const [trialStatus, setTrialStatus] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(user.portals)
 
   useEffect(() => {
     if (!portal) {

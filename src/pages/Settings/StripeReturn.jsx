@@ -1,6 +1,5 @@
 import { Box, Button, Spinner, Text } from '@chakra-ui/react'
-import React,{ useContext, useEffect, useState } from 'react'
-import { AuthContext } from '../../context/authContext';
+import React, { useContext, useEffect, useState } from 'react'
 import { createStripeConnectAccount } from '../../utils/stripe';
 import { PortalContext } from '../../context/portalContext';
 
@@ -10,7 +9,6 @@ export const StripeReturn = () => {
   const [isLoadingFill, setIsLoadingFill] = useState(false);
 
   const { portal } = useContext(PortalContext);
-  const { user } = useContext(AuthContext);
 
   const getStripeUser = async stripeConnectAccountId => {
     if (!stripeConnectAccountId) {

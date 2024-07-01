@@ -1,61 +1,42 @@
+/* // portalContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
-import { AuthContext } from './authContext';
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
+  fetchPortalData,
+  fetchTeamMemberData,
+  updateTeamMemberStatus,
+  createCustomer,
+  updateCustomerInPortal,
+  updateSubscriptionStatus,
+} from './../services/portalServices';
+import { useSelector } from 'react-redux';
 
 export const PortalContext = createContext();
 
 export const PortalContextProvider = ({ children }) => {
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector(state => state.auth);
   const [portal, setPortal] = useState(null);
   const [currentPortal, setCurrentPortal] = useState(null);
   const [portalTeamMemberData, setPortalTeamMemberData] = useState(null);
 
-  useEffect(() => {
-    if (!user) return;
+    useEffect(() => {
+    if (!user || !user?.portals.length) return;
+
+    console.log(user);
     const getData = async () => {
-      const id = user.portals[0];
-      const ref = doc(db, 'portals', id);
-      onSnapshot(ref, snapshot => {
-        const data = snapshot.data();
-        setPortal(data);
-        setCurrentPortal(data?.id);
-      });
+      const data = await fetchPortalData(user.portals[0]);
+      setPortal(data);
+      setCurrentPortal(data?.id);
     };
     getData();
   }, [user]);
 
-  useEffect(() => {
+   useEffect(() => {
     if (!portal || !user || !currentPortal) return;
-
     const getTeamMemberData = async () => {
-      const ref = collection(db, 'teamMembers');
-      const q = query(
-        ref,
-        where('portalId', '==', portal.id),
-        where('email', '==', user.email)
-      );
-      const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(doc => doc.data());
-
-      if (data.length > 0) {
-        setPortalTeamMemberData(data[0]);
-        if (data[0].status === 'pending') {
-          // update the status
-          const ref = doc(db, 'teamMembers', data[0].id);
-          await updateDoc(ref, {
-            status: 'active',
-          });
-        }
+      const data = await fetchTeamMemberData(portal.id, user.email);
+      setPortalTeamMemberData(data);
+      if (data?.status === 'pending') {
+        await updateTeamMemberStatus(data.id, 'active');
       }
     };
     getTeamMemberData();
@@ -68,94 +49,36 @@ export const PortalContextProvider = ({ children }) => {
       portalTeamMemberData.role !== 'owner'
     )
       return;
-
-    // create stripe cusomter
-    const createUserCustomer = async uid => {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_NODE_URL}/create-customer`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: uid,
-              email: portalTeamMemberData.email,
-            }),
-          }
+    const createUserCustomer = async () => {
+      if (!portal.customerId) {
+        const { customerId } = await createCustomer(
+          portalTeamMemberData.uid,
+          portalTeamMemberData.email
         );
-
-        const { customerId } = await response.json();
-
-        // Update the customer ID in your database or state
-        // For example, using Firebase Firestore
-        await updateDoc(doc(db, 'portals', currentPortal), {
-          customerId,
-        });
-      } catch (error) {
-        console.error(error);
+        await updateCustomerInPortal(currentPortal, customerId);
       }
     };
-
-    if (!portal.customerId) {
-      createUserCustomer(portalTeamMemberData.uid);
-    }
+    createUserCustomer();
   }, [portalTeamMemberData]);
 
-  // useEffect(() => {
-  //   if (!portal) return;
-
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${process.env.REACT_APP_NODE_URL}/subscriptions/${portal.subscriptions.current.subscriptionId}`
-  //       );
-  //       if (!response.ok) {
-  //         throw new Error(`Network response was not ok: ${response.status}`);
-  //       }
-  //       const data = await response.json();
-
-  //       console.log(data);
-  //       /*  setSubscription(data); */
-  //     } catch (error) {
-  //       /*         setError(error.message);
-  //        */
-  //     } finally {
-  //       /*  setLoading(false); */
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [portal]);
   useEffect(() => {
     if (!portal || !user) return;
-    (async () => {
+    const updateSubscription = async () => {
       const currentDate = new Date();
       const currentTimestamp = Math.floor(currentDate.getTime() / 1000);
-
       if (
         portal?.addOnSubscription?.items?.removeBranding &&
-        (currentTimestamp ===
-          portal.addOnSubscription.items.removeBranding.will_expire ||
-          currentTimestamp >
-            portal.addOnSubscription.items.removeBranding.will_expire)
+        currentTimestamp >=
+          portal.addOnSubscription.items.removeBranding.will_expire
       ) {
-        try {
-          await updateDoc(db, {
-            'addOnSubscription.items.removeBranding': {
-              ...portal.addOnSubscription.items.removeBranding,
-              active: false,
-              will_expire: null,
-            },
-          });
-        } catch (err) {
-          console.log(
-            'Error while updating the portal remove branding active status and will_expire field removing'
-          );
-        }
+        await updateSubscriptionStatus(currentPortal, {
+          ...portal.addOnSubscription.items.removeBranding,
+          active: false,
+          will_expire: null,
+        });
       }
-    })();
+    };
+    updateSubscription();
   }, [portal, user]);
 
   return (
@@ -166,3 +89,4 @@ export const PortalContextProvider = ({ children }) => {
     </PortalContext.Provider>
   );
 };
+ */

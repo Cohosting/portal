@@ -1,9 +1,8 @@
 import { Flex, Spinner } from "@chakra-ui/react";
-import {  useContext } from "react";
-import { AuthContext } from "../../context/authContext";
+import { useSelector } from "react-redux";
 
 export const ProtectedRoutes = ({ children }) => {
-  const { user, isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useSelector(state => state.auth)
   if (isAuthenticated === null) return (
     <Flex alignItems={'center'} justifyContent={'center'} >
       <Spinner m={4} />;

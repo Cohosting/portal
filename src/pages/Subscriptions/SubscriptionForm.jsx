@@ -5,9 +5,11 @@ import {
   PaymentElement,
 } from '@stripe/react-stripe-js';
 import { Button, Text } from '@chakra-ui/react';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   console.log(portal);
 
   const stripe = useStripe();

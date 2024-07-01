@@ -18,7 +18,6 @@ import {
   Progress,
 } from '@chakra-ui/react';
 import { Layout } from '../../Dashboard/Layout';
-import { AuthContext } from '../../../context/authContext';
 import { ActionButtons } from '../../../components/UI/ActionButtons';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { ProfilePicture } from './ProfilePicture';
@@ -28,6 +27,7 @@ import { signOut, updateEmail, updatePassword } from 'firebase/auth';
 import { ReLogin } from './ReLogin';
 import { useNavigate } from 'react-router-dom';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useSelector } from 'react-redux';
 
 export const AccountSettingsPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -42,7 +42,7 @@ export const AccountSettingsPage = () => {
   const [isPasswordVerificationModalOpen, setIsPasswordVerificationModalOpen] =
     useState(false);
   const [verificationError, setVerificationError] = useState('');
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector(state => state.auth);
   const [previousUserInfo, setPreviousUserInfo] = useState(null);
   const [userInfo, setUserInfo] = useState({
     firstName: '',

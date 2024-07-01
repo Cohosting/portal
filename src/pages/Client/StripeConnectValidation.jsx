@@ -4,8 +4,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { PortalContext } from '../../context/portalContext';
 import { useNavigate } from 'react-router-dom';
 
-export const StripeConnectValidation = ({ setShouldShowAddClient }) => {
-  const { portal } = useContext(PortalContext);
+export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [stripeUser, setStripeUser] = useState(null);
   const navigate = useNavigate();
@@ -14,8 +13,10 @@ export const StripeConnectValidation = ({ setShouldShowAddClient }) => {
     if (!stripeConnectAccountId) {
       setIsLoading(false);
 
-      throw new Error('No stripe connect account id found');
-    }
+      return
+
+/*       throw new Error('No stripe connect account id found');
+ */    }
     setIsLoading(true);
     try {
       const res = await fetch(
@@ -30,7 +31,7 @@ export const StripeConnectValidation = ({ setShouldShowAddClient }) => {
       const data = await res.json();
       const account = data.account;
       setShouldShowAddClient(
-        portal.stripeConnectAccountId && account.details_submitted
+        portal?.stripeConnectAccountId && account.details_submitted
       );
       setStripeUser(account);
       setIsLoading(false);
@@ -40,7 +41,7 @@ export const StripeConnectValidation = ({ setShouldShowAddClient }) => {
   };
   useEffect(() => {
     if (!portal) return;
-    getStripeUser(portal.stripeConnectAccountId);
+    getStripeUser(portal?.stripeConnectAccountId);
   }, [portal]);
   return (
     <Box p={3} borderBottom={'1px solid #eff1f4'}>

@@ -1,16 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { Box, Button, Text } from '@chakra-ui/react';
-import { AuthContext } from '../../context/authContext';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../lib/firebase';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 export const UploadAttachmentComponent = ({ setAttachments }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedPath, setUploadedPath] = useState('');
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(user?.portals);
 
   const handleFileChange = event => {
     const selectedFile = event.target.files[0];

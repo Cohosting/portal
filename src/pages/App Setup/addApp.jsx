@@ -20,10 +20,10 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { AuthContext } from '../../context/authContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PortalContext } from '../../context/portalContext';
 import queryString from 'query-string';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 export const AddApp = () => {
   const [appEditState, setAppEditState] = useState(null);
@@ -32,8 +32,8 @@ export const AddApp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals);
   const location = useLocation();
   const [appState, setAppState] = useState({
     name: '',

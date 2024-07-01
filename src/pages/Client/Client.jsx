@@ -11,89 +11,43 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { InviteForm } from './InviteForm';
 import { InviteSuccessModal } from './InviteSuccessModal';
-import {
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  where,
-  writeBatch,
-} from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { AuthContext } from '../../context/authContext';
-import { useNavigate } from 'react-router-dom';
+
+import { useNavigate, useParams } from 'react-router-dom';
 import Table from './ClientTable';
 import { AddIcon } from '@chakra-ui/icons';
-import { PortalContext } from '../../context/portalContext';
 import { StripeConnectValidation } from './StripeConnectValidation';
 import { usePlanName } from '../../hooks/usePlanName';
 import { prices } from '../../utils/prices';
 import { ClientUsageLimit } from '../../components/UI/ClientUsageLimit';
+import usePortalMembers from '../../hooks/usePortalMembers';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 export const Client = () => {
+  const { user } = useSelector((state) => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
+  const {
+    clients
+  } = usePortalMembers(portal)
+
+
   const [shouldShowAddClient, setShouldShowAddClient] = useState(false);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
   const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
   const [temporaryClient, setTemporaryClient] = useState(null);
-  const [clients, setClients] = useState([]);
   const { isOpen, onToggle } = useDisclosure();
   const { isOpen: isOpenSuccess, onToggle: onToggleSuccess } = useDisclosure();
   const [shouldLimitAddingClient, setShouldLimitAddingClient] = useState(false);
+
+
   const columns = ['Name', 'Status', 'Creation date', 'Email'];
   let sortableColumns = [];
-  useEffect(() => {
-    if (!portal) return;
-    const collecRef = collection(db, 'portalMembers');
-    const q = query(collecRef, where('portalId', '==', portal.id));
-    const unsubscribe = onSnapshot(q, querySnapshot => {
-      const clients = querySnapshot.docs.map(doc => doc.data());
-      let data = [];
-      clients.forEach(el => {
-        console.log({ el })
-        data.push({
-          Name: (
-            <Flex alignItems={'center'}>
-              <Flex
-                alignItems={'center'}
-                justifyContent={'center'}
-                w={'30px'}
-                h={'30px'}
-                bg={'#7cae7a'}
-                color={'white'}
-                borderRadius={'4px'}
-              >
-                {' '}
-                {el.name[0]}
-              </Flex>
-              <Box ml={3}>
-                <Text>{el.name}</Text>
-
-              </Box>
-            </Flex>
-          ),
-          Email: <Box>
-            <Text>{el.email}</Text>
-            {el.status === 'restricted' && (<Button mt={1} colorScheme='green' size={'xs'} onClick={onToggleSuccess}>Invite</Button>)}
-          </Box>,
-          Status: el.status,
-          'Creation date': el.createdAt,
-        });
-      });
-
-      setClients(data);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [portal]);
 
 
 
   return (
     <Layout>
       <StripeConnectValidation
+        portal={portal}
         setShouldShowAddClient={setShouldShowAddClient}
       />
       <ClientUsageLimit

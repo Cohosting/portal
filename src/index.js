@@ -1,32 +1,35 @@
 import { ColorModeScript } from '@chakra-ui/react';
 import React, { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App.js';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
-import { ChakraProvider, theme } from '@chakra-ui/react';
-import AuthContextProvider from './context/authContext';
+import { ChakraProvider } from '@chakra-ui/react';
 import { ClientAuthContextComponent } from './context/clientAuthContext';
-import { PortalContextProvider } from './context/portalContext';
 import { ClientPortalContextComponent } from './context/clientPortalContext';
-import { SignupStepContext } from './context/SignupContext';
+import { Provider } from 'react-redux';
+import store from './store/store.js';
+import AuthListener from './pages/Auth/AuthListener.jsx';
+import { QueryClientProvider } from 'react-query';
+
+import queryClient from './hooks/react-query/queryClient';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
   <ChakraProvider>
-    <ClientPortalContextComponent>
-      <ClientAuthContextComponent>
-        <SignupStepContext>
-          <AuthContextProvider>
-            <PortalContextProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <AuthListener>
+          <ClientPortalContextComponent>
+            <ClientAuthContextComponent>
               <App />
-            </PortalContextProvider>
-          </AuthContextProvider>
-        </SignupStepContext>
-      </ClientAuthContextComponent>
-    </ClientPortalContextComponent>
+            </ClientAuthContextComponent>
+          </ClientPortalContextComponent>
+        </AuthListener>
+      </QueryClientProvider>
+    </Provider>
   </ChakraProvider>
 );
 

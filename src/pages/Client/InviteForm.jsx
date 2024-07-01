@@ -4,7 +4,6 @@
 
 import { Box, Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Text, VStack } from '@chakra-ui/react'
 import React, { useContext, useState } from 'react';
-import { AuthContext } from '../../context/authContext';
 import {
   arrayUnion,
   collection,
@@ -16,7 +15,8 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 export const InviteForm = ({
   isOpen,
@@ -26,8 +26,8 @@ export const InviteForm = ({
 }) => {
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [inviteState, setInviteState] = useState({
     email: '',
     name: '',

@@ -10,12 +10,12 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import { AuthContext } from '../../context/authContext';
 import { db } from '../../lib/firebase';
-import { PortalContext } from '../../context/portalContext';
 import { ClientInvoiceItem } from '../Portal/Client/ClientInvoiceItem';
 import { MdEdit, } from 'react-icons/md';
 import { AddIcon } from '@chakra-ui/icons';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 
 const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
@@ -52,8 +52,8 @@ const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
 export const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(user?.portals)
   const { isOpen, onOpen, onClose } = useDisclosure({
     defaultIsOpen: true
   })

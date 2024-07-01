@@ -2,8 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { Box, Button, Checkbox, Divider, Flex, Text } from '@chakra-ui/react';
 import { prices } from '../../utils/prices';
-import { AuthContext } from '../../context/authContext';
-import { PortalContext } from '../../context/portalContext';
 import { UpgradeOrDowngrade } from './UpgradeOrDowngrade';
 import SubscriptionPage from './SubscriptionPage';
 import { unixToDateString } from '../../utils';
@@ -11,6 +9,8 @@ import PaymentMethodList from '../../components/PaymentMethodLists';
 import CurrentPlan from './CurrentPlan';
 import AddonsComponent from './AddonsComponent';
 import SubscriptionPaymentError from '../../components/SubscriptionPaymentError';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 const PricingItem = ({
   title,
   price,
@@ -85,8 +85,8 @@ const PricingItem = ({
 };
 
 export const Pricing = () => {
-  const { user } = useContext(AuthContext);
-  const { currentPortal, portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [selectedPeriod, setSelectedPeriod] = useState('monthly'); // ['monthly', 'yearly'
   const [priceId, setPriceId] = useState();
   const [isPoweredBy, setIsPoweredBy] = useState(false);
@@ -259,6 +259,7 @@ export const Pricing = () => {
 
   console.log(priceId)
 
+  let currentPortal = portal?.id
   return (
     <Layout>
       <Box fontSize={['15px','16px']}>

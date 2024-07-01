@@ -1,13 +1,13 @@
 import { Box, Button, Spinner, Text } from '@chakra-ui/react'
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../../context/authContext';
 import { createStripeConnectAccount } from '../../utils/stripe';
 import { useNavigate } from 'react-router-dom';
 import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
 
 export const Refresh = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector(state => state.auth);
   const { portal } = useContext(PortalContext);
   const navigate = useNavigate();
   return (

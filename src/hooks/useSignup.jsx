@@ -1,68 +1,37 @@
-import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../lib/firebase';
-import { getOrCreateUser } from '../lib/auth';
-import { handleFirebaseError } from '../utils/firebase';
-import useSignupContext from '../context/SignupContext';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+    setEmail,
+    setPassword,
+
+} from './../store/slices/authSlice';
+import { setError } from '../store/slices/authSlice';
+import { signupUser } from '../store/thunk/authThunks';
 
 export const useSignup = () => {
-
-    const { personalInfoStep, businessDetailsStep, step, setStep } = useSignupContext();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    useEffect(() => {
-        if (step === 1) setIsLoading(false);
-    }, [step]);
+    const dispatch = useDispatch();
+    const { personalInfoStep, businessDetailsStep, status, error, email, password } = useSelector((state) => state.auth);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'email') {
-            setEmail(value);
+            dispatch(setEmail(value));
         } else if (name === 'password') {
-            setPassword(value);
+            dispatch(setPassword(value));
         }
     };
 
     const signup = async () => {
         if (email && password) {
-            setIsLoading(true);
-            setError('');
-
-            try {
-                const { user } = await createUserWithEmailAndPassword(auth, email, password);
-                await getOrCreateUser(user, {
-                    ...personalInfoStep,
-                    ...businessDetailsStep,
-                    isProfileCompleted: false,
-                    uid: user.uid,
-                    portals: [],
-                    email
-                });
-
-                setStep(step + 1);
-                setIsLoading(false);
-            } catch (err) {
-                console.log(err)
-                setIsLoading(false);
-                handleFirebaseError(err.code, setError);
-            }
+            dispatch(signupUser({ email, password, personalInfoStep, businessDetailsStep }));
         } else {
-            setError('Please fill all the information.');
+            dispatch(setError('Please fill all the information.'));
         }
     };
 
-
-
     return {
         email,
-        setEmail,
         password,
-        setPassword,
-        isLoading,
+        isLoading: status === 'loading',
         error,
         handleChange,
         signup,

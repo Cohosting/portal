@@ -14,7 +14,6 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { AuthContext } from './../../context/authContext';
 import {
   Box,
   Button,
@@ -26,15 +25,16 @@ import {
 } from '@chakra-ui/react';
 import { ItemsComponent } from '../../components/UI/Items';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { generateInvoiceNumber } from '../../utils';
-import { PortalContext } from '../../context/portalContext';
 import queryString from 'query-string';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 export const InvoiceForm = () => {
   const [clients, setClients] = useState([]);
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals);
   const [isLoading, setIsLoading] = useState(false);
   const [lineItems, setLineItems] = useState([]);
   const [attachments, setAttachments] = useState([]);

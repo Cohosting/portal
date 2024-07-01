@@ -15,7 +15,7 @@ import {
 import React, { useContext } from 'react';
 import { auth } from '../../../lib/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { AuthContext } from '../../../context/authContext';
+import { useSelector } from 'react-redux';
 
 export const ReLogin = ({
   isPasswordVerificationModalOpen,
@@ -24,7 +24,7 @@ export const ReLogin = ({
 }) => {
   const [passwordVerification, setPasswordVerification] = React.useState('');
   const [verificationError, setVerificationError] = React.useState('');
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector(state => state.auth);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const passwordValidate = async () => {

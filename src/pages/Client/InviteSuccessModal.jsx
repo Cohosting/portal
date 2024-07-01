@@ -14,11 +14,11 @@ import bcrypt from 'bcryptjs';
 import { addMail } from './../../lib/email';
 import { db } from '../../lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { AuthContext } from '../../context/authContext';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 export const InviteSuccessModal = ({ isOpen, onClose, temporaryClient }) => {
-  const { user } = useContext(AuthContext);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [isLoading, setIsLoading] = useState(false);
   const sentMail = async () => {
     try {

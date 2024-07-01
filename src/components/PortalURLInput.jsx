@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Input, Flex, Button, Text, FormLabel } from '@chakra-ui/react';
 import { FaCheckCircle } from 'react-icons/fa';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
-import { handleError, handlePortalURLValidation } from '../utils/formValidation';
-import useSignupContext from '../context/SignupContext';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { handleError, } from '../utils/formValidation';
+import { setPersonalInfoStep } from '../store/slices/authSlice';
+import { validatePortalURL } from '../store/thunk/authThunks';
+
+import _ from 'lodash'
 
 const inputStyle = {
     border: '1px solid #eee',
@@ -11,8 +16,21 @@ const inputStyle = {
 };
 
 const PortalURLInput = ({ value, handleChange }) => {
+    const dispatch = useDispatch();
+    const { portalURLValidation, personalInfoStep } = useSelector((state) => state.auth);
 
-    const { portalURLValidation, setPortalURLValidation, personalInfoStep } = useSignupContext()
+    const debounceValidateURL = useCallback(_.debounce((url) => {
+        dispatch(validatePortalURL(url));
+    }, 500), [dispatch]);
+
+    const handleURLChange = (url) => {
+        handleChange(url);
+        dispatch(setPersonalInfoStep({
+            ...personalInfoStep,
+            portalURL: url,
+        }));
+        debounceValidateURL(url);
+    };
 
     return (
         <>
@@ -21,7 +39,6 @@ const PortalURLInput = ({ value, handleChange }) => {
             </FormLabel>
             <Flex align="center">
                 <Input
-
                     type="text"
                     height={'3rem'}
                     width={'70%'}
@@ -36,12 +53,7 @@ const PortalURLInput = ({ value, handleChange }) => {
                             : { border: '1px solid #FC8181', boxShadow: 'none' },
                     }}
                     value={personalInfoStep.portalURL}
-
-                    onChange={e => {
-                        handleChange(e.target.value);
-                        handlePortalURLValidation(e.target.value, setPortalURLValidation);
-
-                    }}
+                    onChange={(e) => handleURLChange(e.target.value)}
                 />
                 <Text as={'span'}>.copilot.app</Text>
                 <Button isLoading={portalURLValidation.isChecking}>

@@ -23,9 +23,10 @@ import {
   Text,
   FormErrorMessage,
 } from '@chakra-ui/react';
-import { PortalContext } from '../../context/portalContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { useSelector } from 'react-redux';
 
 export const CustomDomainForm = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -33,7 +34,8 @@ export const CustomDomainForm = () => {
   const [provider, setProvider] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals)
   const [error, setError] = useState({ domain: '', subdomain: '' });
   const [isLoading, setIsLoading] = useState(false);
 

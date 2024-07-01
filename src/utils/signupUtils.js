@@ -86,13 +86,21 @@ export const initializeOrganizationSetup = async (
   personalInfoStep,
   businessDetailsStep
 ) => {
+  console.log('Initializing organization setup', {
+    user,
+    personalInfoStep,
+    businessDetailsStep,
+  }); // Log initial input
   try {
     validateInput(user, personalInfoStep, businessDetailsStep); // Validate input data
+    console.log('Input validated successfully');
 
     const batch = writeBatch(db);
     const userRef = doc(db, 'users', user.uid);
     const portalRef = doc(collection(db, 'portals'));
     const memberRef = doc(collection(db, 'teamMembers'));
+
+    console.log('Database references', { userRef, portalRef, memberRef }); // Log database references
 
     const portalData = preparePortalData(
       user,
@@ -101,8 +109,12 @@ export const initializeOrganizationSetup = async (
     );
     const memberData = prepareTeamMemberData(portalRef, personalInfoStep, user);
 
+    console.log('Prepared data', { portalData, memberData }); // Log prepared data
+
     batch.set(portalRef, { ...portalData, id: portalRef.id });
     batch.set(memberRef, { ...memberData, id: memberRef.id });
+
+    console.log('Batch set operations completed'); // Log after setting data in batch
 
     // User Document Update
     batch.update(userRef, {
@@ -111,9 +123,13 @@ export const initializeOrganizationSetup = async (
       name: `${memberData.firstName} ${memberData.lastName}`,
     });
 
+    console.log('Batch update operations completed'); // Log after updating data in batch
+
     createSeats(batch, portalRef, user); // Creating seats in a separate function
+    console.log('createSeats function called');
 
     await batch.commit();
+    console.log('Batch commit successful'); // Log successful commit
   } catch (error) {
     console.error('Error persisting data:', error);
     throw error;

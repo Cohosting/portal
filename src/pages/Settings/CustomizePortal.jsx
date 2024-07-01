@@ -4,10 +4,11 @@ import { Box, Checkbox, Collapse, Flex, Text } from '@chakra-ui/react';
 import { ActionButtons } from '../../components/UI/ActionButtons';
 import { AssetItem } from './AssetItem';
 import { BrandColorPicker } from '../../components/UI/ColorPicker';
-import { PortalContext } from '../../context/portalContext';
 import TextInputField from '../../components/UI/TextInputField';
 import { useCustomizePortalLogic } from '../../hooks/useCustomizePortalLogic';
 import { portalTexts } from '../../utils/constant';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 const Heading = ({ text, subText }) => (
   <>
@@ -92,7 +93,8 @@ const PoweredBySection = ({ poweredByCopilot, handleUpdateState }) => (
 );
 
 export const CustomizePortal = () => {
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(user?.portals);
   const {
     isLoading,
     hasChanges,

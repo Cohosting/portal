@@ -4,17 +4,19 @@ import { foundOn } from "../../../utils/constant";
 import { boxStyle } from "../Signup";
 import { CustomInput } from "../../../components/CustomInput";
 import PortalURLInput from "../../../components/PortalURLInput";
-import useSignupContext from "../../../context/SignupContext";
+import { useSelector, useDispatch } from "react-redux";
+import { setPersonalInfoStep, setStep } from "../../../store/slices/authSlice";
 
 const PersonalInfoStep = ({ isLargerThan450 }) => {
-  const { personalInfoStep, setPersonalInfoStep, portalURLValidation, step, setStep } = useSignupContext();
-  const handleChange = e => {
+  const dispatch = useDispatch();
+  const { personalInfoStep, portalURLValidation, step } = useSelector((state) => state.auth);
 
-    const { value, name } = e.target
-    setPersonalInfoStep({
+  const handleChange = (e) => {
+    const { value, name } = e.target;
+    dispatch(setPersonalInfoStep({
       ...personalInfoStep,
       [name]: value,
-    });
+    }));
   };
 
   return (
@@ -46,7 +48,7 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
         <CustomSelect
           name={'foundOn'}
           options={foundOn}
-          value={'foundOn'}
+          value={personalInfoStep.foundOn}
           label={'How did you find us?'}
           handleChange={handleChange}
           errorMessage={'How you found'}
@@ -64,11 +66,11 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
         />
 
         <PortalURLInput
-          value={'portalUrl'}
-          handleChange={(url) => setPersonalInfoStep({
+          value={personalInfoStep.portalURL}
+          handleChange={(url) => dispatch(setPersonalInfoStep({
             ...personalInfoStep,
             portalURL: url
-          })}
+          }))}
         />
         <Button
           width={'100%'}
@@ -80,11 +82,8 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
           sx={{}}
           background={'#212B36'}
           onClick={() => {
-            console.log(!Object.values(personalInfoStep).includes(''))
-
             if (!Object.values(personalInfoStep).includes('')) {
-              setStep(preStep => preStep + 1)
-
+              dispatch(setStep(step + 1)); // Assuming step 2 is the next step
             }
           }}
           border={'1px solid #DFE1E4'}
@@ -98,4 +97,4 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
   );
 };
 
-export default PersonalInfoStep
+export default PersonalInfoStep;

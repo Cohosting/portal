@@ -2,19 +2,16 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import _ from 'lodash';
 
-export const handlePortalURLValidation = _.debounce(
-  async (val, setPortalURLValidation) => {
-    setPortalURLValidation({ isAvailable: false, isChecking: true });
-    const ref = collection(db, 'portals');
-    const q = query(ref, where('portalURL', '==', val));
-    const querySnapshot = await getDocs(q);
-    setPortalURLValidation({
-      isAvailable: querySnapshot.empty,
-      isChecking: false,
-    });
-  },
-  500
-);
+export const handlePortalURLValidation = async val => {
+  const ref = collection(db, 'portals');
+  const q = query(ref, where('portalURL', '==', val));
+  const querySnapshot = await getDocs(q);
+  return {
+    isAvailable: querySnapshot.empty,
+    isChecking: false,
+  };
+};
+
 
 export const handleError = (value, text) => {
   if (!text) return false;

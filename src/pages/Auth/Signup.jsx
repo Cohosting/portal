@@ -1,8 +1,10 @@
-import React, { useContext, } from 'react'
+import React from 'react'
 import SignupForm from './SignupForm';
 import SignupSteps from './SignupSteps';
 import { AuthBox, Layout } from './Layout';
-import useSignupContext from '../../context/SignupContext';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { setStep } from '../../store/slices/authSlice';
 
 export const boxStyle = {
   flexDirection: 'column',
@@ -19,8 +21,8 @@ export const boxStyle = {
  * signup process.
  */
 export const Signup = () => {
-  const { step, setStep } = useSignupContext()
-
+  const step = useSelector((state) => state.auth.step);
+  const dispatch = useDispatch();
   // Function to render the current step's component
 
   const renderCurrentStep = () => {
@@ -30,7 +32,7 @@ export const Signup = () => {
         return <SignupForm />;
       default:
         // Handles subsequent signup steps and onboarding questions
-        return <SignupSteps step={step} setStep={setStep} />;
+        return <SignupSteps step={step} setStep={(newStep) => dispatch(setStep(newStep))} />;
     }
   };
 

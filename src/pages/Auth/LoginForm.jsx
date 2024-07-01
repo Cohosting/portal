@@ -8,13 +8,13 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { handleFirebaseError } from '../../utils/firebase';
 import { getOrCreateUser } from '../../lib/auth';
-import { AuthContext } from '../../context/authContext';
+import { useSelector } from 'react-redux';
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [userCredentials, setUserCredentials] = useState({ email: '', password: '' });
-  const { setUser, setIsAuthenticated } = useContext(AuthContext)
+  const { setUser, setIsAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   // Validates if the input fields are not empty

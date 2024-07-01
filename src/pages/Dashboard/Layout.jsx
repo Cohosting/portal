@@ -2,17 +2,17 @@ import { Box, Button, Flex, Slide, useDisclosure, useMediaQuery, useOutsideClick
 import React, { useContext, useRef } from 'react';
 import { GiHamburgerMenu } from 'react-icons/gi';
 
-import { PortalContext } from '../../context/portalContext';
 import { Overlay } from '../../components/UI/Overlay';
-import { AuthContext } from '../../context/authContext';
 import SidebarContent from './SidebarContent';
+import { useSelector } from 'react-redux';
+import { usePortalData, usePortalTeamMember } from '../../hooks/react-query/usePortalData';
 
 // Layout component that wraps around the entire application UI, providing a sidebar and main content area.
 export const Layout = ({ children, }) => {
   const [isMobileView] = useMediaQuery('(max-width: 760px)')
-  const { user } = useContext(AuthContext)
-  const { portal, portalTeamMemberData } = useContext(PortalContext);
-
+  const { user } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(user?.portals)
+  const { data: portalTeamMemberData } = usePortalTeamMember(user?.portals[0])
   const ref = useRef();
   // Close sidebar when clicking outside of it
   useOutsideClick({

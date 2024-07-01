@@ -15,7 +15,6 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { useParams, useLocation } from 'react-router-dom';
-import { AuthContext } from '../../context/authContext';
 import { useContext, useEffect, useState } from 'react';
 import { Signup } from './Signup';
 import { Login } from './Login';
@@ -31,13 +30,14 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import queryString from 'query-string';
+import { useSelector } from 'react-redux';
 
 export const AcceptInvitationPage = () => {
   const { isOpen, onToggle } = useDisclosure();
   const [mode, setMode] = useState(null);
   const [inviteData, setInviteData] = useState();
   const [portal, setPortal] = useState(null);
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector(state => state.auth);
   const location = useLocation();
   const token = queryString.parse(location.search).token;
   const [error, setError] = useState(null);
