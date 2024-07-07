@@ -11,11 +11,12 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ClientInvoiceItem } from '../Portal/Client/ClientInvoiceItem';
+import { ClientInvoiceItem } from '../Portal/Client/InvoiceItem';
 import { MdEdit, } from 'react-icons/md';
 import { AddIcon } from '@chakra-ui/icons';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { supabase } from '../../lib/supabase';
 
 
 const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
@@ -61,16 +62,32 @@ export const Invoices = () => {
   // fetch invoices from firebase invoices collection
   useEffect(() => {
     if (!portal) return;
-    const collecRef = collection(db, 'invoices');
-    onOpen()
-    const q = query(collecRef, where('portalId', '==', portal.id));
-    const unsubscribe = onSnapshot(q, querySnapshot => {
-      const invoices = querySnapshot.docs.map(doc => doc.data());
-      setInvoices(invoices);
-    });
-    onClose()
+
+    const fetchInvoices = async () => {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('portal_id', portal.id);
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
+      } else {
+        setInvoices(data);
+      }
+    };
+
+    fetchInvoices();
+
+    // Optionally, you can use Supabase's real-time functionality to subscribe to changes in the 'invoices' table.
+    const subscription = supabase
+      .channel(`invoices:portal_id=eq.${portal.id}`)
+      .on('*', payload => {
+        fetchInvoices(); // Re-fetch invoices whenever there's a change
+      })
+      .subscribe();
+
     return () => {
-      unsubscribe();
+      subscription.unsubscribe();
     };
   }, [portal]);
 
@@ -110,6 +127,8 @@ export const Invoices = () => {
     });
   };
 
+
+  console.log(invoices)
   return (
     <Layout>
 

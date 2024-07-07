@@ -1,17 +1,12 @@
 import React from 'react'
 import SignupForm from './SignupForm';
 import SignupSteps from './SignupSteps';
-import { AuthBox, Layout } from './Layout';
+import { Layout } from './Layout';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setStep } from '../../store/slices/authSlice';
 
-export const boxStyle = {
-  flexDirection: 'column',
-  boxShadow: '0px 0px 24px rgba(0, 0, 0, 0.07)',
-  padding: '24px 28px 28px 40px',
-  border: '1px solid #EFF1F4',
-};
+
 
 
 /**
@@ -39,9 +34,7 @@ export const Signup = () => {
   return (
 
     <Layout>
-      <AuthBox>
-        {renderCurrentStep()}
-      </AuthBox>
+      {renderCurrentStep()}
     </Layout>
 
 

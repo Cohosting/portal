@@ -1,13 +1,13 @@
 // Import necessary hooks and libraries
-import { useContext, useEffect, useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { db } from '../lib/firebase';
 import { useSelector } from 'react-redux';
 import { usePortalData } from './react-query/usePortalData';
+import { supabase } from '../lib/supabase';
 
 export const useCustomizePortalLogic = () => {
     const { user } = useSelector(state => state.auth);
+    // WARNING: Maybe in future we switch between portals, so passing portals as an array and selecting the first one for now
     const { data: portal } = usePortalData(user?.portals);
     const [isLoading, setIsLoading] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
@@ -27,10 +27,15 @@ export const useCustomizePortalLogic = () => {
     const handleUpdatePortalBrand = async () => {
         try {
             setIsLoading(true);
-            const ref = doc(db, 'portals', portal.id);
-            await updateDoc(ref, {
-                brandSettings,
-            });
+            const { error } = await supabase.from('portals').update({
+                brand_settings: brandSettings,
+            }).eq('id', portal.id);
+
+            if (error) {
+                throw error;
+            }
+
+
             toast({
                 title: 'Settings updated.',
                 description: 'The Setting has been successfully updated.',
@@ -46,9 +51,9 @@ export const useCustomizePortalLogic = () => {
     };
 
     useEffect(() => {
-        if (portal && portal.brandSettings) {
-            setBrandSettings(portal.brandSettings);
-            setPreviousSetting(portal.brandSettings)
+        if (portal && portal.brand_settings) {
+            setBrandSettings(portal.brand_settings);
+            setPreviousSetting(portal.brand_settings)
         }
     }, [portal]);
     useEffect(() => {

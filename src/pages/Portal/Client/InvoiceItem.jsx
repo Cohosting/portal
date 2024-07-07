@@ -1,7 +1,6 @@
 import React from 'react';
-import { Box, Heading, Text, Button, Flex, Tag, StatNumber, StatHelpText, Stat, StatLabel } from '@chakra-ui/react';
-import { formattedMonthTime } from '../../../utils';
-import { MdEdit } from "react-icons/md";
+import { Box, Text, Flex, Tag, StatNumber, StatHelpText, Stat, StatLabel } from '@chakra-ui/react';
+import { formattedMonthTime } from '../../../utils/dateUtils';
 
 const isPendingOrPaid = (value) => {
   console.log(value)
@@ -24,7 +23,7 @@ const isPendingOrPaid = (value) => {
 
 export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, status }) => {
 
-  const total = invoice.lineItems.reduce((acc, item) => {
+  const total = invoice.line_items.reduce((acc, item) => {
     const itemTotal = (item.unit_amount) * Number(item.quantity);
     return acc + itemTotal;
   }, 0);
@@ -32,8 +31,8 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
   return (
     <>
     <Box my={2}  p={4} borderBottom={'1px solid'} borderColor={'gray.300'}>
-        <Text>{invoice.memo}</Text>
-    {invoice.lineItems.map(item => (
+        <Text>{invoice?.memo}</Text>
+        {invoice.line_items.map(item => (
 
         <Flex  my={2} pr={'12px'} fontFamily={'monospace'} alignItems={'center'} justifyContent={'space-between'} >
           <Text>
@@ -47,7 +46,7 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
    
    <Box>
        <Text color={'purple'} >Invoice no.</Text>
-       <Text>{invoice.invoiceNumber}</Text>
+            <Text>{invoice.invoice_number}</Text>
    </Box>
    <Box>
        <Text>
@@ -61,7 +60,7 @@ export const ClientInvoiceItem = ({ invoice, handleRedirectPayment, children, st
     Total
       </strong> </StatLabel>
 <StatNumber>${total}</StatNumber>
-<StatHelpText>{formattedMonthTime(invoice.createdOn)}</StatHelpText>
+              {/*  <StatHelpText>{formattedMonthTime(invoice.created_at)}</StatHelpText> */}
 </Stat>
    </Box>
  </Flex>

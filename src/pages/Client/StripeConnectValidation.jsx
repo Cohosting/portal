@@ -31,7 +31,7 @@ export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
       const data = await res.json();
       const account = data.account;
       setShouldShowAddClient(
-        portal?.stripeConnectAccountId && account.details_submitted
+        portal?.stripe_connect_account_id && account.details_submitted
       );
       setStripeUser(account);
       setIsLoading(false);
@@ -41,7 +41,7 @@ export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
   };
   useEffect(() => {
     if (!portal) return;
-    getStripeUser(portal?.stripeConnectAccountId);
+    getStripeUser(portal?.stripe_connect_account_id);
   }, [portal]);
   return (
     <Box p={3} borderBottom={'1px solid #eff1f4'}>
@@ -49,7 +49,7 @@ export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
         <Spinner />
       ) : (
         <Box>
-          {portal.stripeConnectAccountId && stripeUser.details_submitted ? (
+            {portal?.stripe_connect_account_id && stripeUser?.details_submitted ? (
             <Text>Stripe account connected</Text>
           ) : (
             <Flex direction={['column', 'row' ]} alignItems={['flex-start','center']} justifyContent={'space-between'}>

@@ -11,54 +11,6 @@ export const generateInvoiceNumber = () => {
   return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 };
 
-export const formattedMonthTime = (timestamp) => {
- 
-  const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
-  
-  const day = date.getDate().toString().padStart(2, '0'); // Ensure two digits with leading zero
-  const month = date.toLocaleString('default', { month: 'short' }); // Get the abbreviated month name
-  
-  return `${day} ${month}`;
-}
-
-export const isValidBrandUrl = url => {
-  if (url.includes('https://airtable.com')) {
-    let id = url.split('/')[3];
-    return `https://airtable.com/embed/${id}?backgroundColor=gray&viewControls=on`;
-  }
-
-  return url;
-};
-
-let generateRamdomId = () => {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
-};
-export const defaultAppList = [
-  {
-    name: 'Messages',
-    id: generateRamdomId(),
-    icon: 'messages',
-    index: 0,
-    isDefault: true,
-  },
-  {
-    name: 'Billing',
-    id: generateRamdomId(),
-    icon: 'billing',
-    index: 1,
-    isDefault: true,
-  },
-  {
-    name: 'Files',
-    id: generateRamdomId(),
-    icon: 'files',
-    index: 2,
-    isDefault: true,
-  },
-];
 
 export const sortAppWithAboveSettings = (apps, customerId) => {
   let sortedApps = apps
@@ -83,20 +35,6 @@ export const sortAppWithAboveSettings = (apps, customerId) => {
   return sortedApps;
 };
 
-export const unixToDateString = unixTimestamp => {
-  // Create a new Date object with the Unix timestamp (in milliseconds)
-  const dateObject = new Date(unixTimestamp * 1000);
-
-  // Get the day, month, and year from the date object
-  const day = dateObject.getDate();
-  const month = dateObject.getMonth() + 1; // Month starts from 0, so we add 1
-  const year = dateObject.getFullYear();
-
-  // Create the formatted date string
-  const dateString = `${day}-${month}-${year}`;
-  return dateString;
-};
-
 export const shuffleArray = array => {
   const shuffledArray = [...array];
   for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -106,11 +44,33 @@ export const shuffleArray = array => {
   return shuffledArray;
 };
 
-export function isValidEmail(email) {
-  // Regular expression pattern for email validation
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(email);
-}
+export const sortAndIndexData = data => {
+  // Separate non-null and null index elements
+  const nonNullIndexElements = data.filter(item => item.index !== null);
+  const nullIndexElements = data.filter(item => item.index === null);
 
-export const isSubdomain = domain =>
-  domain.includes('huehq.com') || domain.includes('localhost');
+  // Sort non-null index elements by their index
+  nonNullIndexElements.sort((a, b) => a.index - b.index);
+
+  // Assign new indices to null index elements
+  nullIndexElements.forEach((item, idx) => {
+    item.index = nonNullIndexElements.length + idx;
+  });
+
+  // Concatenate sorted non-null elements with newly indexed null elements
+  return [...nonNullIndexElements, ...nullIndexElements];
+};
+
+// Generate a more secure random password
+export const generateSecurePassword = () => {
+  const charset =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    // Generate 16 characters long password for more security
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+};
+

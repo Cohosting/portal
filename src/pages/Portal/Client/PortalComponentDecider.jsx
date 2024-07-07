@@ -1,7 +1,7 @@
 import React from 'react';
-import { PortalAppRender } from './PortalAppRender';
+import { PortalAppRender } from './AppRenderer';
 import { useParams } from 'react-router-dom';
-import { ClientBilling } from './ClientBilling';
+import { ClientBilling } from './Billing';
 
 export const PortalComponentDecider = ({}) => {
   const { portalName } = useParams();

@@ -4,11 +4,12 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { handleError, } from '../utils/formValidation';
+import { handleError, } from '../utils/validationUtils';
 import { setPersonalInfoStep } from '../store/slices/authSlice';
 import { validatePortalURL } from '../store/thunk/authThunks';
 
 import _ from 'lodash'
+import InputField from './InputField';
 
 const inputStyle = {
     border: '1px solid #eee',
@@ -27,18 +28,18 @@ const PortalURLInput = ({ value, handleChange }) => {
         handleChange(url);
         dispatch(setPersonalInfoStep({
             ...personalInfoStep,
-            portalURL: url,
+            portal_url: url,
         }));
         debounceValidateURL(url);
     };
 
     return (
         <>
-            <FormLabel>
+            {/*         <FormLabel>
                 Portal URL - <Text as="span" fontSize={'13px'} color="#6B6F76">You can connect a custom domain later</Text>
-            </FormLabel>
-            <Flex align="center">
-                <Input
+            </FormLabel> */}
+            <Flex align="flex-end">
+                {/*                 <Input
                     type="text"
                     height={'3rem'}
                     width={'70%'}
@@ -54,9 +55,19 @@ const PortalURLInput = ({ value, handleChange }) => {
                     }}
                     value={personalInfoStep.portalURL}
                     onChange={(e) => handleURLChange(e.target.value)}
+                /> */}
+                <InputField
+                    name={'portalURL'}
+                    value={personalInfoStep.portalURL}
+                    type="text"
+                    errorMessage={'Portal URL'}
+                    handleChange={(e) => handleURLChange(e.target.value)}
+                    label={(<div>
+                        Portal URL - <Text as="span" fontSize={'12px'} color="#6B6F76">You can connect a custom domain later</Text>
+                    </div>)}
                 />
-                <Text as={'span'}>.copilot.app</Text>
-                <Button isLoading={portalURLValidation.isChecking}>
+                <Text fontSize={'14px'} color={"#6B6F76"} as={'span'} mr={2}>.copilot.app</Text>
+                <Button ml={3} isLoading={portalURLValidation.isChecking}>
                     {portalURLValidation.isAvailable ? (
                         <FaCheckCircle color="green" fontSize={'1.2rem'} />
                     ) : !portalURLValidation.isChecking ? (

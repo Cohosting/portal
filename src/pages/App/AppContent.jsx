@@ -2,9 +2,9 @@ import { Box, Button, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { isValidBrandUrl } from '../../utils';
 import { ConnectAppModal } from './ConnectAppModal';
-import { ExtentionContent } from './ExtentionContent';
+import { ExtentionContent } from './AppView';
 
-export const ExtentionContentViewer = ({
+export const AppContent = ({
   extention,
   clientId,
   isConnected,
@@ -14,17 +14,17 @@ export const ExtentionContentViewer = ({
   console.log(extention)
   return (
     <Box h={'100%'}>
-      {extention.settings.setupType === 'automatic' && (
-        <ExtentionContent settings={extention.settings} />
+      {extention?.settings?.setupType === 'automatic' && (
+        <ExtentionContent settings={extention?.settings} />
       )}
 
-      {extention.settings.setupType === 'manual' && (
+      {extention?.settings?.setupType === 'manual' && (
         <>
           {isConnected ? (
             <ExtentionContent
               clientId={clientId}
               settingType={'manual'}
-              settings={extention.settings}
+              settings={extention?.settings}
             />
           ) : (
             <Box height={'100%'} p={'50px'}>
@@ -49,7 +49,7 @@ export const ExtentionContentViewer = ({
       {isOpen && (
         <ConnectAppModal
           clientId={clientId}
-          extentionId={extention.id}
+          extentionId={extention?.id}
           isOpen={isOpen}
           onClose={onToggle}
         />

@@ -1,14 +1,14 @@
-import { Box, Button, FormLabel, Text } from '@chakra-ui/react';
-import React, { useContext, useState } from 'react';
+import { Box, Text } from '@chakra-ui/react';
+import React, { useState } from 'react';
 
-import { CustomInput } from '../../components/CustomInput';
-import { AuthBox, Layout } from './Layout';
+import { Layout } from './Layout';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../lib/firebase';
-import { handleFirebaseError } from '../../utils/firebase';
+import { handleSupabaseError } from '../../utils/firebase';
 import { getOrCreateUser } from '../../lib/auth';
 import { useSelector } from 'react-redux';
+import Header from '../../components/Header';
+import InputField from '../../components/InputField';
+import { supabase } from '../../lib/supabase';
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,13 +35,23 @@ export const LoginForm = () => {
 
     setIsLoading(true);
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const { data: {
+        user
+      }, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
       const userData = await getOrCreateUser(user);
       setUser(userData);
       setIsAuthenticated(true);
       navigate('/'); // Redirect to home page
     } catch (error) {
-      handleFirebaseError(error.code, setError);
+      handleSupabaseError(error, setError);
     } finally {
       setIsLoading(false);
     }
@@ -56,79 +66,72 @@ export const LoginForm = () => {
 
   return (
     <>
-      {true ? (
+
         <Layout>
-          <AuthBox>
-            <CustomInput
-              label={'Work email'}
-              name={'email'}
+        <Header title="Sign in to your account" />
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
+          <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+            <InputField
               value={userCredentials.email}
-              handleChange={handleChange}
-              isInvalid={() => !isInputValid('email')}
-              type={'text'}
-            />
-            <CustomInput
-              label={'Work email'}
-              name={'password'}
-              formLabel={
-                <FormLabel
-                  display={'flex'}
-                  justifyContent={'space-between'}
-                  alignItems={'center'}
-                  m="0"
-                  fontSize={'13px'}
-                >
-                  <Text as="span">Password</Text>
-                  <Text as="span" color={'#6B6F76'} m="0">
-                    Forgot password?
-                  </Text>
-                </FormLabel>
-              }
+              id="email"
+              name="email"
+              type="email"
+              handleChange={(e) => handleChange(e, 'email')}
+              label="Email address"
+              errorMessage="Not a valid email address."
+              required
+            />  
+            <div className="mt-6 mb-8">
+
+              <InputField
               value={userCredentials.password}
-              handleChange={handleChange}
-              isInvalid={() => !isInputValid('email')}
-              type={'password'}
+                id="password"
+                name="password"
+                type="password"
+                handleChange={(e) => handleChange(e, 'password')}
+                label="Password"
+                errorMessage="Password is required."
+                required
+
             />
+            </div>
             {error && (
-              <Text color={'red'} fontSize={'13px'} mt={'1rem'}>
+              <Text color={'red'} fontSize={'13px'} mb={'1.2rem'}>
                 {error}
               </Text>
             )}
-            <Button
-              isLoading={isLoading}
-              isDisabled={isSignInDisabled()}
+            <button
               onClick={handleEmailPasswordLogin}
-              width={'100%'}
-              color={'#fff'}
-              marginTop={'2.3rem'}
-              height={'3rem'}
-              borderRadius={'4px'}
-              background={'#212B36'}
-              boxShadow={'0px 1px 2px rgba(0, 0, 0, 0.07)'}
-
-              _hover={{ background: '#27333F' }}
+              type="submit"
+              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Sign in
-            </Button>
-          </AuthBox>
+              {
+                isLoading ? 'Loading...' : 'Sign in'
+              }
+
+            </button>
+
           <Box
             maxW={'340px'}
-            mt={'1rem'}
-            textAlign={'center'}
+              m="auto"
+              mt={'1rem'}
+
+              textAlign={'center'}
             fontSize={'14px'}
           >
-            <Text
-              mt="1rem"
-              onClick={() => navigate('/signup')}
-              cursor={'pointer'}
+              <p
+                className='text-sm text-gray-500 cursor-pointer'
+
+                onClick={() => navigate('/signup')}
             >
               New to copilot?
-            </Text>
+              </p>
           </Box>
+          </div>
+        </div>
+
         </Layout>
-      ) : (
-        <Box></Box>
-      )}
+
     </>
   );
 };

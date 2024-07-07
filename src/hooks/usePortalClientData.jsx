@@ -1,41 +1,40 @@
-import { collection, onSnapshot, query, where, } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "../lib/firebase";
 import { Box, Button, Flex, Text, useDisclosure } from "@chakra-ui/react";
+import { supabase } from "../lib/supabase";
 
-const usePortalMembers = (portal) => {
-    const [clients, setClients] = useState([]);
-    const { isOpen: isOpenSuccess, onToggle: onToggleSuccess } = useDisclosure();
+const usePortalClientData = (portal) => {
+    const [clientData, setClientData] = useState([]);
+    const { isOpen: isNotificationOpen, onToggle: toggleNotification } = useDisclosure();
 
     useEffect(() => {
         if (!portal) return;
 
-        const collecRef = collection(db, 'portalMembers');
-        const q = query(collecRef, where('portalId', '==', portal.id));
+        const getClientData = async () => {
+            const { data: clients } = await supabase.from('clients').select('*').eq('portal_id', portal.id);
 
-        const unsubscribe = onSnapshot(q, querySnapshot => {
-            const clients = querySnapshot.docs.map(doc => {
-                const el = doc.data();
+            const formattedClientData = clients.map(client => {
                 return {
-                    Name: generateNameComponent(el),
-                    Email: generateEmailComponent(el, onToggleSuccess),
-                    Status: el.status,
-                    'Creation date': el.createdAt,
+                    Name: generateNameComponent(client),
+                    Email: generateEmailComponent(client, toggleNotification),
+                    Status: client.status,
+                    'Creation Date': client.created_at,
                 };
-            });
-            setClients(clients);
-        }, (error) => {
-            console.error("Failed to fetch portal members:", error);
-            // Handle the error appropriately
-        });
+            }
+            );
+            setClientData(formattedClientData);
 
-        return () => unsubscribe();
+        }
+        getClientData();
+
+
     }, [portal]);
 
+    console.log(clientData)
+
     return {
-        clients,
-        isOpenSuccess,
-        onToggleSuccess,
+        clientData,
+        isNotificationOpen,
+        toggleNotification,
     };
 }
 
@@ -74,4 +73,4 @@ function generateEmailComponent(el, onToggleSuccess) {
     );
 }
 
-export default usePortalMembers;
+export default usePortalClientData;

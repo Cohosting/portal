@@ -1,37 +1,29 @@
-import {
-  writeBatch,
-  doc,
-  collection,
-  arrayUnion,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { defaultAppList } from '.';
-import useCustomerOnDemand from '../hooks/useCustomerOnDemand';
+import { defaultAppList } from './constant';
+import { supabase } from '../lib/supabase';
+import { getCurrentTimestamp } from './dateUtils';
 
 // Standardizing date handling
-const getCurrentTimestamp = () => serverTimestamp();
 
 // Extracting seat creation into its own function
-const createSeats = (batch, portalRef, user) => {
+const createSeats = async (portalId, user) => {
+  const seats = [];
   for (let i = 0; i < 5; i++) {
-    const seatRef = doc(collection(db, 'seats'));
-    batch.set(seatRef, {
-      id: seatRef.id,
-      portalId: portalRef.id,
+    seats.push({
+      portal_id: portalId,
       status: i === 0 ? 'occupied' : 'available',
-      userId: i === 0 ? user.uid : null,
-      createdAt: getCurrentTimestamp(),
-      seatType: 'free',
+      user_id: i === 0 ? user.id : null,
+      seat_type: 'free',
     });
   }
+  const { error } = await supabase.from('seats').insert(seats);
+  if (error) throw error;
 };
 
 const validateInput = (user, personalInfoStep, businessDetailsStep) => {
-  if (!user || !user.uid) throw new Error('Invalid user data');
+  if (!user || !user.id) throw new Error('Invalid user data');
   if (!personalInfoStep.name)
     throw new Error('Personal info must include a name');
-  if (!personalInfoStep.portalURL)
+  if (!personalInfoStep.portal_url)
     throw new Error('Personal info must include a portal URL');
   if (!businessDetailsStep) throw new Error('Business details are required');
 };
@@ -45,43 +37,38 @@ export const preparePortalData = (
   const trialEndDate = new Date(trialStartDate);
   trialEndDate.setDate(trialStartDate.getDate() + 7);
   return {
-    subscriptionType: 'freemium',
-    others: {
-      ...personalInfoStep,
-      ...businessDetailsStep,
-    },
-    portalURL: personalInfoStep.portalURL,
-    createdBy: user.uid,
+    subscription_type: 'freemium',
+    portal_url: personalInfoStep.portalURL,
+    created_by: user.id,
     settings: {
-      achDebit: true,
+      ach_debit: true,
       card: false,
-      autoImport: false,
+      auto_import: false,
     },
-    apps: defaultAppList,
-    trialStartDate,
-    trialEndDate,
-    isSubscribed: false,
-    isExpiryCount: true,
+    trial_start_date: trialStartDate,
+    trial_end_date: trialEndDate,
+    is_subscribed: false,
+    is_expiry_count: true,
   };
 };
 
-export const prepareTeamMemberData = (portalRef, personalInfoStep, user) => {
-  let [firstName, lastName] = personalInfoStep.name.split(' ');
-  // Explicitly check for undefined and replace with an empty string
-  firstName = firstName !== undefined ? firstName : '';
-  lastName = lastName !== undefined ? lastName : '';
+export const prepareTeamMemberData = (portalId, personalInfoStep, user) => {
+  let [first_name, last_name] = personalInfoStep.name.split(' ');
+  first_name = first_name !== undefined ? first_name : '';
+  last_name = last_name !== undefined ? last_name : '';
 
   return {
-    portalId: portalRef.id,
-    firstName: firstName,
-    lastName: lastName,
+    portal_id: portalId,
+    first_name: first_name,
+    last_name: last_name,
     email: user.email,
-    uid: user.uid,
+    uid: user.id,
     status: 'active',
     role: 'owner',
-    createdAt: getCurrentTimestamp(),
+    created_at: getCurrentTimestamp(),
   };
 };
+
 export const initializeOrganizationSetup = async (
   user,
   personalInfoStep,
@@ -92,47 +79,66 @@ export const initializeOrganizationSetup = async (
     user,
     personalInfoStep,
     businessDetailsStep,
-  }); // Log initial input
+  });
   try {
-    validateInput(user, personalInfoStep, businessDetailsStep); // Validate input data
+    validateInput(user, personalInfoStep, businessDetailsStep);
     console.log('Input validated successfully');
-
-    const batch = writeBatch(db);
-    const userRef = doc(db, 'users', user.uid);
-    const portalRef = doc(collection(db, 'portals'));
-    const memberRef = doc(collection(db, 'teamMembers'));
-
-    console.log('Database references', { userRef, portalRef, memberRef }); // Log database references
 
     const portalData = preparePortalData(
       user,
       personalInfoStep,
       businessDetailsStep
     );
-    const memberData = prepareTeamMemberData(portalRef, personalInfoStep, user);
-    console.log('Prepared data', { portalData, memberData }); // Log prepared data
 
-    batch.set(portalRef, { ...portalData, id: portalRef.id });
-    batch.set(memberRef, { ...memberData, id: memberRef.id });
+    console.log('Inserting portal data', portalData);
+    const { data: portal, error: portalError } = await supabase
+      .from('portals')
+      .insert([portalData])
+      .select()
+      .single();
+    if (portalError) throw portalError;
+    console.log('Portal data inserted successfully', portal);
 
-    console.log('Batch set operations completed'); // Log after setting data in batch
+    const memberData = prepareTeamMemberData(portal.id, personalInfoStep, user);
+    console.log('Inserting team member data', memberData);
+    const { error: memberError } = await supabase
+      .from('team_members')
+      .insert([memberData]);
+    if (memberError) throw memberError;
+    console.log('Team member data inserted successfully');
 
-    // User Document Update
-    batch.update(userRef, {
-      isProfileCompleted: true,
-      portals: arrayUnion(portalRef.id),
-      name: `${memberData.firstName} ${memberData.lastName}`,
+    console.log('Inserting default app list', defaultAppList);
+    const { error: portalAppError } = await supabase.from('portal_apps').insert(
+      defaultAppList.map(app => ({
+        ...app,
+        portal_id: portal.id,
+      }))
+    );
+    if (portalAppError) throw portalAppError;
+    console.log('Default app list inserted successfully');
+
+    console.log('Updating user portals', {
+      user_id: user.id,
+      portal_id: portal.id,
+      first_name: memberData.first_name,
+      last_name: memberData.last_name,
     });
+    const { error: userError } = await supabase.rpc('update_user_portals', {
+      user_id: user.id,
+      portal_id: portal.id,
+      first_name: memberData.first_name,
+      last_name: memberData.last_name,
+    });
+    if (userError) throw userError;
+    console.log('User portals updated successfully');
 
-    console.log('Batch update operations completed'); // Log after updating data in batch
+    console.log('Creating seats for portal', portal.id);
+    await createSeats(portal.id, user);
+    console.log('Seats created successfully');
 
-    createSeats(batch, portalRef, user); // Creating seats in a separate function
-    console.log('createSeats function called');
-
-    await batch.commit();
-
-    await createCustomer(portalData, memberData, portalRef.id);
-    console.log('Batch commit successful'); // Log successful commit
+    console.log('Creating customer', portalData, memberData, portal.id);
+    await createCustomer(portalData, memberData, portal.id);
+    console.log('Organization setup successful');
   } catch (error) {
     console.error('Error persisting data:', error);
     throw error;

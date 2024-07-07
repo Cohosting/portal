@@ -5,15 +5,15 @@ const initialState = {
   isAuthenticated: null,
   personalInfoStep: {
     name: '',
-    foundOn: 'Tiktok',
-    companyName: '',
-    portalURL: '',
+    found_on: 'Tiktok',
+    company_name: '',
+    portal_url: '',
   },
   businessDetailsStep: {
     industry: 'Accounting and bookkeeping',
-    companySize: 'Just me',
+    company_size: 'Just me',
     clients: `I don't have any clients yet`,
-    typeOfService: 'Companies',
+    type_of_service: 'Companies',
   },
   portalURLValidation: {
     isAvailable: false,

@@ -68,6 +68,27 @@ export const clients = [
 
 export const types = ['Companies', 'Individuals', 'A mix of both'];
 
+export const defaultAppList = [
+  {
+    name: 'Messages',
+    icon: 'messages',
+    index: 0,
+    is_default: true,
+  },
+  {
+    name: 'Billing',
+    icon: 'billing',
+    index: 1,
+    is_default: true,
+  },
+  {
+    name: 'Files',
+    icon: 'files',
+    index: 2,
+    is_default: true,
+  },
+];
+
 export const property = [
   {
     id: 1,

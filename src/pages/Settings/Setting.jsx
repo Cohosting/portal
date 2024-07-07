@@ -1,14 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { Box, Button, Checkbox, Flex, Spinner, Text } from '@chakra-ui/react';
 import { createStripeConnectAccount } from '../../utils/stripe';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { CustomDomainForm } from './CustomDomainForm';
 import { CheckDomainConfiguration } from './CheckDomainConfig';
 import { useStripeUser } from '../../hooks/useStripeUser';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { supabase } from '../../lib/supabase';
 
 // SettingItem component
 const SettingItem = React.memo(({ label, isChecked, onChange }) => (
@@ -60,7 +59,7 @@ const StripeAccountVerification = ({ stripeUser, isLoading, portal, createStripe
 };
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
-  if (portal && !portal.stripeConnectAccountId) {
+  if (portal && !portal.stripe_connect_account_id) {
     return (
       <>
         <Text mt={4}>Connect your stripe to get payouts</Text>
@@ -79,42 +78,61 @@ const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
   return null;
 };
 
-const PaymentSettings = ({ portal, updateSetting }) => {
-  if (!portal) {
-    return <Spinner />;
-  }
+const PaymentSettings = ({ settings, updateSetting }) => {
+  if (!settings) return null; // Add a check to ensure settings are available
+
   return (
     <Box>
-      <SettingItem label="Enable ACH Debit payment" isChecked={portal.settings.achDebit} onChange={() => updateSetting('achDebit')} />
-      <SettingItem label="Enable Card payment" isChecked={portal.settings.card} onChange={() => updateSetting('card')} />
+      <SettingItem label="Enable ACH Debit payment" isChecked={settings.ach_debit} onChange={() => updateSetting('ach_debit')} />
+      <SettingItem label="Enable Card payment" isChecked={settings.card} onChange={() => updateSetting('card')} />
     </Box>
   );
 };
 
 export const Settings = () => {
-
   const { user } = useSelector((state) => state.auth);
-  const { data: portal } = usePortalData(user?.portals)
+  const { data: portal } = usePortalData(user?.portals);
   const [isLoading, setIsLoading] = useState(false);
-  const { stripeUser, isLoading: stripeUserLoading, error } = useStripeUser(portal?.stripeConnectAccountId);
+  const { stripeUser, isLoading: stripeUserLoading, error } = useStripeUser(portal?.stripe_connect_account_id);
+  const [settings, setSettings] = useState(portal?.settings || {});
 
   const togglePortalSetting = useCallback(async (setting) => {
+    if (!portal) return;
+
     try {
-      const ref = doc(db, 'portals', portal.id);
-      await updateDoc(ref, {
-        settings: {
-          ...portal.settings,
-          [setting]: !portal.settings[setting],
-        },
-      });
+      const newSettings = {
+        ...settings,
+        [setting]: !settings[setting],
+      };
+      console.log({ newSettings })
+
+      setSettings(newSettings);
+
+      // update postgress in supabase
+      const { data, error } = await supabase
+        .from('portals')
+        .update({
+          settings: newSettings,
+        })
+        .eq('id', portal.id)
+        .single();
+
+      if (error) throw error;
+
     } catch (err) {
       console.error('Error updating portal setting', err);
     }
-  }, [portal]);
+  }, [portal, settings]);
 
   const createStripeAccount = () => {
-    createStripeConnectAccount(portal.createdBy, portal.stripeConnectAccountId, portal.id, setIsLoading);
+    createStripeConnectAccount(portal.created_by, portal.stripe_connect_account_id, portal.id, setIsLoading);
   };
+
+  useEffect(() => {
+    if (portal && portal.settings) {
+      setSettings(portal.settings);
+    }
+  }, [portal]);
 
   // Adjusted spinner logic to show spinner if portal is not loaded or stripeUser is loading.
   if (!portal || stripeUserLoading) {
@@ -124,6 +142,7 @@ export const Settings = () => {
       </Layout>
     );
   }
+
   return (
     <Layout>
       <Box p={[2, 4]} pt={4}>
@@ -143,11 +162,11 @@ export const Settings = () => {
           <Box mt={4} fontSize={['15px', '16px']}>
             <Text>Default setting for invoice payment</Text>
             <PaymentSettings
-              portal={portal}
+              settings={settings}
               updateSetting={togglePortalSetting}
             />
           </Box>
-          {!portal.customDomain ? <CustomDomainForm /> : <CheckDomainConfiguration defaultDomain={portal.customDomain} />}
+          {!portal.settings.customDomain ? <CustomDomainForm /> : <CheckDomainConfiguration defaultDomain={portal.settings.customDomain} />}
         </>
       </Box>
     </Layout>

@@ -1,35 +1,34 @@
-import { Box, Spinner } from '@chakra-ui/react';
 import React from 'react';
-import { useSubdomain } from '../../hooks/useSubdomain';
+import { Box, Spinner } from '@chakra-ui/react';
+import { useDomainInfo } from '../../hooks/useDomainInfo';
 import { LoginForm } from './LoginForm';
-import { ClientLogin } from '../Portal/Client/ClientLogin';
+import { ClientLogin } from '../Portal/Client/Login';
+import { useClientPortalData } from '../../hooks/react-query/usePortalData';
 
 export const Login = () => {
-  const { domain, isValid, isLoading } = useSubdomain();
+  const { domain, isLoading } = useDomainInfo(true);
+  const { data: portal } = useClientPortalData(domain);
 
   // Function to determine which component to render based on the current state
   const renderContent = () => {
-    // If the domain includes 'dashboard', show the LoginForm
-    if (domain && domain.includes('dashboard')) {
+    if (domain.name && domain.name.includes('dashboard')) {
       return <LoginForm />;
     }
 
-    // For other domains, show loading, invalid subdomain message, or the ClientLogin based on the state
-    if (domain) {
+    if (domain.name) {
       if (isLoading) {
         return <Spinner />;
       }
-      if (!isValid) {
+      if (!domain.existsInDb) {
         return <Box>Invalid subdomain</Box>;
       }
-      return <ClientLogin />;
+      return <ClientLogin portalId={portal.id} />;
     }
 
-    // Default case when there's no domain
     return null;
   };
 
-    return (
+  return (
     <Box>
         {renderContent()}
     </Box>

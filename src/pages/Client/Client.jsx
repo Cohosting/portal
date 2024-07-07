@@ -7,27 +7,29 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { InviteForm } from './InviteForm';
-import { InviteSuccessModal } from './InviteSuccessModal';
+import { ClientInviteSuccessModal } from './ClientInviteSuccessModal';
 
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Table from './ClientTable';
 import { AddIcon } from '@chakra-ui/icons';
 import { StripeConnectValidation } from './StripeConnectValidation';
 import { usePlanName } from '../../hooks/usePlanName';
 import { prices } from '../../utils/prices';
 import { ClientUsageLimit } from '../../components/UI/ClientUsageLimit';
-import usePortalMembers from '../../hooks/usePortalMembers';
+import usePortalClientData from '../../hooks/usePortalClientData';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 export const Client = () => {
   const { user } = useSelector((state) => state.auth);
   const { data: portal } = usePortalData(user?.portals)
   const {
-    clients
-  } = usePortalMembers(portal)
+    clientData: clients,
+    isNotificationOpen,
+    toggleNotification
+  } = usePortalClientData(portal)
 
 
   const [shouldShowAddClient, setShouldShowAddClient] = useState(false);
@@ -35,17 +37,24 @@ export const Client = () => {
   const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
   const [temporaryClient, setTemporaryClient] = useState(null);
   const { isOpen, onToggle } = useDisclosure();
-  const { isOpen: isOpenSuccess, onToggle: onToggleSuccess } = useDisclosure();
-  const [shouldLimitAddingClient, setShouldLimitAddingClient] = useState(false);
+/*   const { isOpen: isOpenSuccess, onToggle: onToggleSuccess } = useDisclosure();
+ */  const [shouldLimitAddingClient, setShouldLimitAddingClient] = useState(false);
 
 
   const columns = ['Name', 'Status', 'Creation date', 'Email'];
   let sortableColumns = [];
 
 
-
+  console.log(clients)
   return (
     <Layout>
+
+      <Button onClick={() => {
+        console.log(`${portal.portal_url}.localhost:3000/login`)
+        window.location.href = `http://${portal.settings.subdomain}.localhost:3000/login`
+      }}>
+        Demo client page
+      </Button>
       <StripeConnectValidation
         portal={portal}
         setShouldShowAddClient={setShouldShowAddClient}
@@ -78,7 +87,7 @@ export const Client = () => {
         <Divider />
 
         <Box>
-          {!clients ? (
+          {!clients?.length ? (
             <Flex alignItems={'center'} justifyContent={'center'}>
               <Spinner />
             </Flex>
@@ -94,13 +103,13 @@ export const Client = () => {
       <InviteForm
         isOpen={isOpen}
         onClose={onToggle}
-        onToggleSuccess={onToggleSuccess}
+        onToggleSuccess={toggleNotification}
         setTemporaryClient={setTemporaryClient}
       />
-      <InviteSuccessModal
+      <ClientInviteSuccessModal
         temporaryClient={temporaryClient}
-        isOpen={isOpenSuccess}
-        onClose={onToggleSuccess}
+        isOpen={isNotificationOpen}
+        onClose={toggleNotification}
       />
     </Layout>
   );

@@ -1,11 +1,13 @@
 import { Box, Button, Divider, Flex, Text } from "@chakra-ui/react";
 import CustomSelect from "../../../components/CustomSelect";
 import { foundOn } from "../../../utils/constant";
-import { boxStyle } from "../Signup";
 import { CustomInput } from "../../../components/CustomInput";
 import PortalURLInput from "../../../components/PortalURLInput";
 import { useSelector, useDispatch } from "react-redux";
 import { setPersonalInfoStep, setStep } from "../../../store/slices/authSlice";
+import InputField from "../../../components/InputField";
+import Header from "../../../components/Header";
+import Select from "../../../components/Select";
 
 const PersonalInfoStep = ({ isLargerThan450 }) => {
   const dispatch = useDispatch();
@@ -25,40 +27,39 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
       alignItems={'center'}
       flexDirection={'column'}
       justify={'center'}
-      height={'100vh'}
     >
-      <Box my="4rem" textAlign={'center'}>
-        <Text fontSize={'24px'} mb=".5rem" fontWeight={'400'}>
-          Finish creating your account
-        </Text>
-        <Text fontSize={'13px'}>
-          First things first, tell us a bit about yourself
-        </Text>
-      </Box>
-      <Flex sx={{ ...boxStyle, minWidth: isLargerThan450 ? '460px' : '100%' }}>
-        <CustomInput
+      <Header title="Finish creating your account"
+        subTitle="First things first, tell us a bit about yourself"
+
+      />
+      <div className=" flex flex-col gap-y-5 mt-5 ">
+        <InputField
           name={'name'}
           value={personalInfoStep.name}
           type="text"
-          errorMessage={'Full Name'}
+          errorMessage={'Full name'}
           handleChange={handleChange}
-          label={'Full Name'}
+          label={'Full name'}
         />
+        <div>
+          <Select
+            list={foundOn}
+            selected={personalInfoStep.found_on}
+            setSelected={(value) => dispatch(setPersonalInfoStep({
+              ...personalInfoStep,
+              found_on: value
+            }))
+            }
+          />
+        </div>
 
-        <CustomSelect
-          name={'foundOn'}
-          options={foundOn}
-          value={personalInfoStep.foundOn}
-          label={'How did you find us?'}
-          handleChange={handleChange}
-          errorMessage={'How you found'}
-        />
 
-        <Divider />
 
-        <CustomInput
-          name={'companyName'}
-          value={personalInfoStep.companyName}
+
+
+        <InputField
+          name={'company_name'}
+          value={personalInfoStep.company_name}
           type="text"
           errorMessage={'Company Name'}
           handleChange={handleChange}
@@ -66,33 +67,20 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
         />
 
         <PortalURLInput
-          value={personalInfoStep.portalURL}
+          value={personalInfoStep.portal_url}
           handleChange={(url) => dispatch(setPersonalInfoStep({
             ...personalInfoStep,
-            portalURL: url
+            portal_url: url
           }))}
         />
-        <Button
-          width={'100%'}
-          color={'#fff'}
-          isDisabled={Object.values(personalInfoStep).includes('') || !portalURLValidation.isAvailable}
-          marginTop={'2.3rem'}
-          height={'3rem'}
-          borderRadius={'4px'}
-          sx={{}}
-          background={'#212B36'}
-          onClick={() => {
+
+        <button onClick={() => {
             if (!Object.values(personalInfoStep).includes('')) {
               dispatch(setStep(step + 1)); // Assuming step 2 is the next step
             }
-          }}
-          border={'1px solid #DFE1E4'}
-          _hover={{ background: '#27333F' }}
-          _disabled={{ background: '#fff', color: '#90959D' }}
-        >
-          Continue
-        </Button>
-      </Flex>
+        }} className={` mt-3  btn-indigo ${Object.values(personalInfoStep).includes('') || !portalURLValidation.isAvailable ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' : ''} `}>Continue</button>
+
+      </div>
     </Flex>
   );
 };

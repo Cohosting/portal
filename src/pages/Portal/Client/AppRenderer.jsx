@@ -4,13 +4,12 @@ import { useParams } from 'react-router-dom';
 import { ClientPortalContext } from '../../../context/clientPortalContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
-import { ExtentionContent } from '../../App Setup/ExtentionContent';
-import { ClientAuthContext } from '../../../context/clientAuthContext';
+import { AppView } from '../../App/AppView';
 
 export const PortalAppRender = () => {
   const { portalName } = useParams();
   const { clientPortal } = useContext(ClientPortalContext);
-  const { clientUser } = useContext(ClientAuthContext);
+  const { clientUser } = {}
   const [app, setApp] = useState(null);
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export const PortalAppRender = () => {
       {!app ? (
         <Text>Loading...</Text>
       ) : (
-        <ExtentionContent
+        <AppView
           clientId={clientUser.id}
           settingType={app.settings.setupType}
           settings={app.settings}

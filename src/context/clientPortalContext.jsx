@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { useSubdomain } from '../hooks/useSubdomain';
+import { useDomainInfo } from '../hooks/useDomainInfo';
 import {
   collection,
   getDocs,
@@ -11,7 +11,7 @@ import { db } from '../lib/firebase';
 
 export const ClientPortalContext = createContext();
 export const ClientPortalContextComponent = ({ children }) => {
-  const { domain, isSubdomainValid, portalData } = useSubdomain();
+  const { domain, isSubdomainValid, portalData } = useDomainInfo();
   const [clientPortal, setClientPortal] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 

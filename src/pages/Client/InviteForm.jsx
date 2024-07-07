@@ -1,22 +1,11 @@
 
-//create a invite modal  form with email name and account type(client or member) using chakra UI
-
-
 import { Box, Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Text, VStack } from '@chakra-ui/react'
-import React, { useContext, useState } from 'react';
-import {
-  arrayUnion,
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import React, { useState } from 'react';
+
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { supabase } from '../../lib/supabase';
+import { registerClientWithStripe } from '../../services/stripeConnect';
 
 export const InviteForm = ({
   isOpen,
@@ -31,7 +20,6 @@ export const InviteForm = ({
   const [inviteState, setInviteState] = useState({
     email: '',
     name: '',
-    accountType: 'client',
   });
 
   const handleChange = e => {
@@ -41,56 +29,78 @@ export const InviteForm = ({
     });
   };
 
-  const handleAddMember = async () => {
+  const addNewClientToPortal = async () => {
     try {
       setIsLoading(true);
-      // need to change
-      const memberRef = query(
-        collection(db, 'portalMembers'),
-        where('portalId', '==', portal.id),
-        where('email', '==', inviteState.email)
-      );
-      const memberSnapshot = await getDocs(memberRef);
-      if (!memberSnapshot.empty) {
-        setIsError('Member already exists');
+      console.log('Starting to add new client to portal');
+
+      // Check if member already exists
+      console.log(`Checking if client with email ${inviteState.email} already exists in portal ${portal.id}`);
+      const { data: clientData, error: memberError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('portal_id', portal.id)
+        .eq('email', inviteState.email);
+
+      if (memberError) {
+        console.error('Error checking for existing client:', memberError);
+        throw memberError;
+      }
+
+      if (clientData && clientData.length > 0) {
+        console.log('Client already exists. Aborting operation.');
+        setIsError('Client already exists');
         setIsLoading(false);
         return;
       }
-      const ref = doc(collection(db, 'portalMembers'));
 
-      let member = {
+      // Prepare new client data
+      console.log('Preparing new client data');
+      const newClient = {
         ...inviteState,
-        addedBy: user.uid,
         status: 'restricted',
-        portalId: portal.id,
-        id: ref.id,
-        createdAt: new Date().toDateString(),
+        portal_id: portal.id,
       };
-      await setDoc(ref, member);
-      await updateDoc(doc(db, 'portals', portal.id), {
-        // member or client
-        members: arrayUnion(ref.id),
+
+      // Add new member
+      console.log('Adding new client to the database');
+      const { data: insertedClient, error: insertError } = await supabase
+        .from('clients')
+        .insert([newClient])
+        .select('*')
+        .single();
+
+      if (insertError) {
+        console.error('Error inserting new client:', insertError);
+        throw insertError;
+      }
+
+      // Update portal's member list
+      console.log(`Updating portal ${portal.id} members list with new client ${insertedClient.id}`);
+      const { error: updateError } = await supabase
+        .rpc('add_member_to_portal', {
+          portal_id: portal.id,
+          member_id: insertedClient.id
       });
-      await fetch(
-        `${process.env.REACT_APP_NODE_URL}/connect/create-connected-customer`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: inviteState.email,
-            id: ref.id,
-            stripeConnectAccountId: portal.stripeConnectAccountId,
-          }),
-        }
-      );
-      setTemporaryClient(member);
+
+
+      if (updateError) {
+        console.error('Error updating portal members list:', updateError);
+        throw updateError;
+      }
+
+      // Register client with Stripe
+      console.log(`Registering client ${insertedClient.id} with Stripe`);
+      await registerClientWithStripe(insertedClient.email, insertedClient.id, portal.stripe_connect_account_id);
+
+      // Finalize operation
+      console.log('Client added successfully. Finalizing operation.');
+      setTemporaryClient(insertedClient);
       onClose();
       onToggleSuccess();
       setIsLoading(false);
     } catch (err) {
-      console.log(err.message);
+      console.error('An error occurred during the addNewClientToPortal operation:', err.message);
       setIsLoading(false);
     }
   };
@@ -119,17 +129,7 @@ export const InviteForm = ({
                 onChange={handleChange}
               />
             </Box>
-            <Box>
-              <Text mb={1}>Account type</Text>
-              <Select
-                isReadOnly={true}
-                defaultValue={inviteState.accountType}
-                name="accountType"
-                placeholder="Select option"
-              >
-                <option value="client">Client</option>
-              </Select>
-            </Box>
+
           </VStack>
           {isError && (
             <Text my={3} color={'red'} fontSize={'14px'}>
@@ -142,7 +142,7 @@ export const InviteForm = ({
           <Button variant={'ghost'} onClick={onClose}>
             Close
           </Button>
-          <Button isLoading={isLoading} onClick={handleAddMember}>
+          <Button isLoading={isLoading} onClick={addNewClientToPortal}>
             Add
           </Button>
         </ModalFooter>

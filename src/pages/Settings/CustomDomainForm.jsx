@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -23,10 +23,9 @@ import {
   Text,
   FormErrorMessage,
 } from '@chakra-ui/react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useSelector } from 'react-redux';
+import { supabase } from '../../lib/supabase';
 
 export const CustomDomainForm = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -115,17 +114,20 @@ export const CustomDomainForm = () => {
 
     try {
       // Then, save the cleaned and formatted data
-      const ref = doc(db, 'portals', portal.id);
-      await updateDoc(ref, {
-        customDomain: `${subdom}.${dom}`,
-        settings: {
+      const { error: portalError } = await supabase.from('portals').update({
+        settings: { 
           ...portal.settings,
           domain: dom,
           provider,
           subdomain: subdom,
-          customDomain: `${subdom}.${dom}`, // constructed FQDN
+          customDomain: `${subdom}.${dom}`,
         },
-      });
+      }
+      ).eq('id', portal.id);
+
+      if (portalError) throw portalError;
+
+
       const response = await fetch(
         'https://api.vercel.com/v10/projects/portal/domains?teamId=team_X4iVsHVRDNhpdBRTph9ykl2S',
         {

@@ -1,13 +1,13 @@
-import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CustomSelect from "../../../components/CustomSelect";
 import { clients, industries, sizes, types } from "../../../utils/constant";
-import { boxStyle } from "../Signup";
 import { useNavigate } from 'react-router-dom';
 import { setBusinessDetailsStep } from "../../../store/slices/authSlice";
 import { initializeOrganizationSetup } from "../../../utils/signupUtils";
 import useCustomerOnDemand from "../../../hooks/useCustomerOnDemand";
+import Header from "../../../components/Header";
+import Select from "../../../components/Select";
 
 const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const navigate = useNavigate();
@@ -17,12 +17,6 @@ const BusinessDetailsStep = ({ isLargerThan450 }) => {
   const [error, setError] = useState(false);
   const createCustomer = useCustomerOnDemand()
 
-  const handleChange = (e) => {
-    dispatch(setBusinessDetailsStep({
-      ...businessDetailsStep,
-      [e.target.name]: e.target.value,
-    }));
-  };
 
   const setupOrganizationAndNavigate = async () => {
     try {
@@ -42,68 +36,66 @@ const BusinessDetailsStep = ({ isLargerThan450 }) => {
       alignItems={'center'}
       flexDirection={'column'}
       justify={'center'}
-      height={'100vh'}
     >
-      <Box my="4rem" textAlign={'center'}>
-        <Text fontSize={'24px'} mb=".5rem" fontWeight={'400'}>
-          Tell us more about your company
-        </Text>
-        <Text fontSize={'13px'}>
-          This information lets us customize your experience
-        </Text>
-      </Box>
-      <Flex sx={{ ...boxStyle, minWidth: isLargerThan450 ? '460px' : '100%' }}>
-        <CustomSelect
-          name={'industry'}
-          options={industries}
-          value={businessDetailsStep.industry}
+
+      <Header title="Finish creating your account"
+        subTitle="First things first, tell us a bit about your business"
+      />
+
+      <div className=" w-100 flex flex-col gap-y-5 mt-5 ">
+
+        <Select
           label={'Which industry are you in?'}
-          errorMessage={'Industry'}
-          handleChange={handleChange}
+          list={industries}
+          selected={businessDetailsStep.industry}
+          setSelected={(value) => dispatch(setBusinessDetailsStep({
+            ...businessDetailsStep,
+            industry: value
+          }))
+          }
         />
-        <CustomSelect
-          name={'companySize'}
-          options={sizes}
-          value={businessDetailsStep.companySize}
+
+
+        <Select
           label={'How large is your company?'}
-          errorMessage={'Company size'}
-          handleChange={handleChange}
+          list={sizes}
+          selected={businessDetailsStep.company_size}
+          setSelected={(value) => dispatch(setBusinessDetailsStep({
+            ...businessDetailsStep,
+            company_size: value
+          }))
+          }
         />
-        <CustomSelect
-          options={clients}
-          name={'clients'}
-          value={businessDetailsStep.clients}
+
+        <Select
           label={'How many clients do you have?'}
-          errorMessage={'Clients count'}
-          handleChange={handleChange}
+          list={clients}
+          selected={businessDetailsStep.clients}
+          setSelected={(value) => dispatch(setBusinessDetailsStep({
+            ...businessDetailsStep,
+            clients: value
+          }))
+          }
         />
-        <CustomSelect
-          options={types}
-          name={'typeOfService'}
-          value={businessDetailsStep.typeOfService}
+
+        <Select
           label={'Do you serve companies, individuals, or a mix of both?'}
-          errorMessage={'Client type'}
-          handleChange={handleChange}
+          list={types}
+          selected={businessDetailsStep.type_of_service}
+          setSelected={(value) => dispatch(setBusinessDetailsStep({
+            ...businessDetailsStep,
+            type_of_service: value
+          }))
+          }
         />
         {error && <Text color={'red'}>{error}</Text>}
 
-        <Button
-          isLoading={isLoading}
-          width={'100%'}
-          color={'#fff'}
-          isDisabled={Object.values(businessDetailsStep).includes('')}
-          marginTop={'2.3rem'}
-          height={'3rem'}
-          borderRadius={'4px'}
-          background={'#212B36'}
-          onClick={setupOrganizationAndNavigate}
-          border={'1px solid #DFE1E4'}
-          _hover={{ background: '#27333F' }}
-          _disabled={{ background: '#fff', color: '#90959D' }}
-        >
-          Launch Portal
-        </Button>
-      </Flex>
+        <button onClick={setupOrganizationAndNavigate} className={` mt-3  btn-indigo ${Object.values(businessDetailsStep).includes('') ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' : ''} `}>{
+          isLoading ? 'Loading...' : 'Continue'
+        }</button>
+
+
+      </div>
     </Flex>
   );
 };

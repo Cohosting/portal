@@ -34,7 +34,6 @@ export const ItemsComponent = ({ defaultValue, onUpdateItems }) => {
   const { description, unit_amount, quantity } = currentItem;
 
   const handleRemoveItem = (item) => {
-    console.log(item)
     const filteredItems = defaultValue.filter((el) => el.uiid !== item.uiid);
 
     onUpdateItems(filteredItems)

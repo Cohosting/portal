@@ -14,12 +14,10 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { db } from '../../lib/firebase';
-import queryString from 'query-string';
+import { supabase } from '../../lib/supabase';
 
-export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
+export const AppConfigurationModal = ({ isOpen, onClose, appId, clientId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [appSettings, setAppSettings] = useState({
     viewType: 'embedded',
@@ -33,21 +31,31 @@ export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
     setIsLoading(true);
     try {
       if (!editAppSettings) {
-        const ref = doc(db, 'apps', extentionId);
-        const snapshot = await getDoc(ref);
-        const app = snapshot.data();
-        await updateDoc(doc(db, 'apps', app.id), {
-          settings: {
-            ...app.settings,
-            clientsSettings: [
-              ...(app.settings.clientsSettings || []),
-              {
-                ...appSettings,
-                clientId,
-              },
-            ],
-          },
-        });
+
+
+        // convert above code to supabase
+        const { data: app } = await supabase
+          .from('portal_apps')
+          .select('*')
+          .eq('id', appId)
+          .single();
+        await supabase
+          .from('portal_apps')
+          .update({
+            settings: {
+              ...app.settings,
+              clientsSettings: [
+                ...(app.settings.clientsSettings || []),
+                {
+                  ...appSettings,
+                  clientId,
+                },
+              ],
+            },
+          })
+          .eq('id', app.id);
+
+
       } else {
         let newClientsSettings = [...editAppSettings.settings.clientsSettings];
         const clientSettingsIndex = newClientsSettings.findIndex(
@@ -67,12 +75,22 @@ export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
             },
           ];
         }
-        await updateDoc(doc(db, 'apps', extentionId), {
-          settings: {
-            ...editAppSettings.settings,
-            clientsSettings: newClientsSettings,
-          },
-        });
+
+        const { error } = await supabase
+          .from('portal_apps')
+          .update({
+            settings: {
+              ...editAppSettings.settings,
+              clientsSettings: newClientsSettings,
+            },
+          })
+          .eq('id', editAppSettings.id);
+
+        if (error) {
+          throw error;
+        }
+
+
       }
 
       setIsLoading(false);
@@ -84,9 +102,14 @@ export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
 
   useEffect(() => {
     if (editAppSettings) return;
-    const getExtention = async () => {
-      const extention = await getDoc(doc(db, 'apps', extentionId));
-      let data = extention.data();
+    const getAppData = async () => {
+
+      const { data } = await supabase
+        .from('portal_apps')
+        .select('*')
+        .eq('id', appId)
+        .single();
+
       setEditAppSettings(data);
 
       // get settings for specific client
@@ -99,9 +122,9 @@ export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
         console.log('no client settings');
       }
     };
-    getExtention();
+    getAppData();
 
-    return () => {};
+    return () => { };
   }, []);
 
   return (
@@ -125,7 +148,7 @@ export const ConnectAppModal = ({ isOpen, onClose, extentionId, clientId }) => {
         <ModalHeader p={3} borderBottom={'1px solid gray'}>
           <Text>Embed App</Text>
         </ModalHeader>
-        <ModalCloseButton onClick={() => {}} />
+        <ModalCloseButton onClick={() => { }} />
         <ModalBody p={2} px={5}>
           <Box my={2}>
             <Text>View type</Text>

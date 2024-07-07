@@ -1,19 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { useEffect } from 'react';
 import { SearchDropdown } from '../../components/UI/searchDropdown';
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+
 import {
   Box,
   Button,
@@ -25,131 +13,32 @@ import {
 } from '@chakra-ui/react';
 import { ItemsComponent } from '../../components/UI/Items';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
-import { useNavigate, useParams } from 'react-router-dom';
-import { generateInvoiceNumber } from '../../utils';
-import queryString from 'query-string';
+import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { useRealtimePortalClients } from '../../hooks/useRealtimePortalClients';
+import useInvoice from '../../hooks/useInvoice';
 
 export const InvoiceForm = () => {
-  const [clients, setClients] = useState([]);
   const { user } = useSelector(state => state.auth);
   const { data: portal } = usePortalData(user?.portals);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lineItems, setLineItems] = useState([]);
-  const [attachments, setAttachments] = useState([]);
-  const [settings, setSettings] = useState({});
-  const [memo, setMemo] = useState('')
-  const [invoiceData, setInvoiceData] = useState();
-  const { mode } = useParams()
+  const { mode } = useParams();
+  const clientsData = useRealtimePortalClients(user, portal);
 
-  const [stripeUser, setStripeUser] = useState(null);
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!user || !portal) return;
-    const collecRef = collection(db, 'portalMembers');
-    const q = query(collecRef, where('portalId', '==', portal.id));
-    const unsubscribe = onSnapshot(q, querySnapshot => {
-      const clients = querySnapshot.docs.map(doc => doc.data());
-      setClients(clients);
-    });
+  const { invoiceState, setInvoiceState, saveInvoice, updateInvoice } = useInvoice({
+    settings: {
+      card: portal?.settings?.card,
+      achDebit: portal?.settings?.ach_debit,
+    }
 
-    return () => {
-      unsubscribe();
-    };
-  }, [user, portal]);
+  })
+
 
   const handleSelectUser = user => {
-    setStripeUser(user);
+    setInvoiceState(prevState => ({ ...prevState, client: user, client_id: user.id }));
   };
 
 
-  const saveFiretoreInvoice = async () => {
-    try {
-      setIsLoading(true);
-      const ref = doc(collection(db, 'invoices'));
-      await setDoc(ref, {
-        lineItems,
-        memo,
-        attachments: attachments,
-        status: 'draft',
-        createdBy: user.uid,
-        createdOn: new Date(),
-        client: stripeUser,
-        id: ref.id,
-        invoiceNumber: generateInvoiceNumber(),
-        settings: {
-          achDebit: settings.achDebit,
-          card: settings.card
-        },
-        portalId: portal.id,
-        customerId: stripeUser.customerId,
-        email: stripeUser.email,
-        userId: user.id,
-      });
-      setIsLoading(false);
-
-      setTimeout(() => {
-        navigate('/billing');
-      }, 900);
-    } catch (err) {
-      console.log(`Error creating invoice: ${err}`);
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!portal) return;
-    setSettings(portal.settings);
-  }, [portal]);
-
-  useEffect(() => {
-    if (mode === 'edit') {
-
-      (async () => {
-        const id = queryString.parse(window.location.search).id;
-        const ref = doc(db, 'invoices', id);
-        const snapshot = await getDoc(ref);
-        const data = snapshot.data();
-        setInvoiceData(data);
-        setStripeUser(data.client);
-        setAttachments(data.attachments);
-        setLineItems(data.lineItems);
-        setMemo(data.memo);
-        setSettings(data.settings)
-        console.log(data)
-
-
-      })();
-
-
-    }
-  }, [])
-
-
-  const updateInvoiceDB = async () => {
-
-    const id = queryString.parse(window.location.search).id;
-    setIsLoading(true);
-    try {
-
-      const ref = doc(db, 'invoices', id);
-      await updateDoc(ref, {
-        lineItems,
-        attachments,
-        client: stripeUser,
-        customerId: stripeUser.customerId,
-        email: stripeUser.email,
-        settings,
-        memo
-      });
-      navigate('/billing')
-    } catch (err) {
-      console.log(err);
-    }
-    setIsLoading(false);
-
-  };
 
 
   return (
@@ -162,12 +51,12 @@ export const InvoiceForm = () => {
             <Button onClick={() => {
 
               if (mode === 'edit') {
-                updateInvoiceDB()
+                updateInvoice()
               } else {
-                saveFiretoreInvoice()
+                saveInvoice()
 
               }
-            }} isLoading={isLoading}>
+            }} isLoading={invoiceState.isLoading}>
               {mode === 'edit' ? 'update' : 'create'}
             </Button>
           </Box>
@@ -175,15 +64,28 @@ export const InvoiceForm = () => {
         <Text mt={'20px'} mb={'10px'}>
           Select client from dropdown
         </Text>
-        <SearchDropdown defaultValue={stripeUser} users={clients} onSelectUser={handleSelectUser} />
-        <ItemsComponent defaultValue={lineItems} onUpdateItems={val => setLineItems(val)} />
+        <SearchDropdown defaultValue={invoiceState.client} users={clientsData} onSelectUser={handleSelectUser} />
+        <ItemsComponent defaultValue={invoiceState.line_items} onUpdateItems={val => setInvoiceState({
+          ...invoiceState,
+          line_items: val,
+
+        })} />
         <Box mt={'20px'}>
           <Text>Memo</Text>
-          <Textarea value={memo} onChange={(e) => setMemo(e.target.value)} />
+          <Textarea value={invoiceState.memo} onChange={(e) => setInvoiceState({
+            ...invoiceState,
+            memo: e.target.value,
+
+          })} />
         </Box>
 
         <UploadAttachmentComponent
-          setAttachments={val => setAttachments(val)}
+          setAttachments={val => {
+            setInvoiceState({
+              ...invoiceState,
+              attachments: val,
+            });
+          }}
         />
 
         <Box mt={4}>
@@ -201,10 +103,16 @@ export const InvoiceForm = () => {
                 <Text fontSize={'17px'}>Enable ACH Debit payment</Text>
                 <Checkbox
                   onChange={() =>
-                    setSettings({ ...settings, achDebit: !settings.achDebit })
+                      setInvoiceState({
+                        ...invoiceState,
+                        settings: {
+                          ...invoiceState.settings,
+                          achDebit: !invoiceState.settings.achDebit,
+                        },
+                      })
                   }
                   colorScheme="green"
-                  isChecked={settings.achDebit}
+                    isChecked={invoiceState.settings.achDebit}
                 />
               </Flex>
               <Flex
@@ -216,10 +124,17 @@ export const InvoiceForm = () => {
                 <Text fontSize={'17px'}>Card</Text>
                 <Checkbox
                   onChange={() =>
-                    setSettings({ ...settings, card: !settings.card })
+                      // setSettings({ ...settings, card: !settings.card })
+                      setInvoiceState({
+                        ...invoiceState,
+                        settings: {
+                          ...invoiceState.settings,
+                          card: !invoiceState.settings.card,
+                        },
+                      })
                   }
                   colorScheme="green"
-                  isChecked={settings.card}
+                    isChecked={invoiceState.settings.card}
                 />
               </Flex>
             </Box>

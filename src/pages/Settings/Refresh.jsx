@@ -24,7 +24,7 @@ export const Refresh = () => {
               onClick={() =>
                 createStripeConnectAccount(
                   portal.createdBy,
-                  portal.stripeConnectAccountId,
+                  portal.stripe_connect_account_id,
                   portal.id,
                   setIsLoading
                 )

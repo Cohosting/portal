@@ -48,7 +48,6 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
 
   }, [defaultValue])
 
-  console.log(filteredUsers)
   return (
     <Box my={2} position="relative" zIndex={99}>
       <InputGroup>

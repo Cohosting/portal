@@ -36,7 +36,7 @@ export const StripeReturn = () => {
 
   useEffect(() => {
     if (!portal) return;
-    getStripeUser(portal.stripeConnectAccountId);
+    getStripeUser(portal.stripe_connect_account_id);
   }, [portal]);
 
   console.log({
@@ -85,7 +85,7 @@ export const StripeReturn = () => {
             onClick={() =>
               createStripeConnectAccount(
                 portal.uid,
-                portal.stripeConnectAccountId,
+                portal.stripe_connect_account_id,
                 portal.id,
                 setIsLoadingFill
               )

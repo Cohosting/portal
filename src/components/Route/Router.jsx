@@ -11,20 +11,19 @@ import { Settings } from '../../pages/Settings/Setting';
 import { Refresh } from '../../pages/Settings/Refresh';
 import { StripeReturn } from '../../pages/Settings/StripeReturn';
 import { Client } from '../../pages/Client/Client';
-import { ClientLogin } from '../../pages/Portal/Client/ClientLogin';
-import { ClientPortal } from '../../pages/Portal/Client/ClientPortal';
+import { ClientLogin } from '../../pages/Portal/Client/Login';
+import { ClientPortal } from '../../pages/Portal/Client/Portal';
 import { ClientDetails } from '../../pages/Client/ClientDetails';
 import { Invoices } from '../../pages/Invoices/Invoices';
 import { InvoiceForm } from '../../pages/Invoices/InvoiceForm';
-import { AddApp } from '../../pages/App Setup/addApp';
-import { Extentions } from '../../pages/App Setup/Extentions';
-import { AppSetup } from '../../pages/App Setup/appSetup';
+import { AppForm } from '../../pages/App/AppForm';
+import { AppsList } from '../../pages/App/AppsList';
 import { CustomizePortal } from '../../pages/Settings/CustomizePortal';
 import { Team } from '../../pages/Team/Team';
 import { AccountSettingsPage } from '../../pages/Settings/Profile/Profile';
 import { AcceptInvitationPage } from '../../pages/Team/AcceptInvitationPage';
 import SubdomainWrapper from '../UI/SubdomainWrapper';
-import { SubdomainCheck } from '../SubdomainCheck';
+import { AppConfigurations } from '../../pages/App/AppConfigurations';
 
 const router = createBrowserRouter([
   {
@@ -76,7 +75,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/client',
+    path: '/clients',
     element: (
       <ProtectedRoutes>
         <SubdomainWrapper>
@@ -148,31 +147,41 @@ const router = createBrowserRouter([
   },
 
   {
-    path: '/module-management',
+    path: '/apps',
     element: (
       <ProtectedRoutes>
         <SubdomainWrapper>
-          <AppSetup />
+          <AppsList />
         </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
   {
-    path: '/module-management/setup',
+    path: '/apps/new',
     element: (
       <ProtectedRoutes>
         <SubdomainWrapper>
-          <AddApp />
+          <AppForm />
         </SubdomainWrapper>
       </ProtectedRoutes>
     ),
   },
   {
-    path: '/extentions',
+    path: '/apps/:appId/edit',
     element: (
       <ProtectedRoutes>
         <SubdomainWrapper>
-          <Extentions />
+          <AppForm />
+        </SubdomainWrapper>
+      </ProtectedRoutes>
+    ),
+  },
+  {
+    path: '/apps/:appId/app-configurations',
+    element: (
+      <ProtectedRoutes>
+        <SubdomainWrapper>
+          <AppConfigurations />
         </SubdomainWrapper>
       </ProtectedRoutes>
     ),

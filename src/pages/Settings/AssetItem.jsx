@@ -3,6 +3,7 @@ import { Box, Flex, Image, Progress, Text } from '@chakra-ui/react';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import React, { useEffect, useRef, useState } from 'react';
 import { storage } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
 
 export const AssetItem = ({
   field,
@@ -13,46 +14,53 @@ export const AssetItem = ({
 }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [downloadURL, setDownloadURL] = useState(initialDownloadUrl || '');
+  const fileInputRef = useRef(null);
 
-  const handleUpload = selectedImage => {
+  const handleUpload = async (selectedImage) => {
     if (selectedImage) {
-      const storageRef = ref(storage, selectedImage.name);
-      const uploadTask = uploadBytesResumable(storageRef, selectedImage);
+      const fileExt = selectedImage.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `public/${field}/${fileName}`;
 
-      uploadTask.on('state_changed', snapshot => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setUploadProgress(progress);
-      });
-
-      uploadTask
-        .then(() => {
-          getDownloadURL(uploadTask.snapshot.ref).then(url => {
-            setDownloadURL(url);
-            onUpload(field, url);
-            console.log('Upload complete');
-          });
+      let { error, data } = await supabase.storage
+        .from('portal_bucket') // Replace 'your-bucket-name' with your actual bucket name
+        .upload(`${filePath}`, selectedImage, {
+          cacheControl: '3600',
+          upsert: false
         })
-        .catch(error => {
-          console.error(error);
-        });
+
+
+      if (error) {
+        console.error('Upload error', error.message);
+      } else {
+        // Assuming 'data' contains the file metadata including the path
+        const { data: {
+          publicUrl
+        } } = supabase
+          .storage
+          .from('portal_bucket')
+          .getPublicUrl(filePath)
+        console.log({ publicUrl })
+        setDownloadURL(publicUrl);
+        onUpload(field, publicUrl);
+        console.log('Upload complete');
+      }
     }
   };
-  const fileInputRef = useRef(null);
 
   const handleFileOpen = () => {
     fileInputRef.current.click();
   };
+
   const handleFileChange = event => {
-    /*     if (downloadURL) return;
-     */ const file = event.target.files[0];
+    const file = event.target.files[0];
     handleUpload(file);
   };
 
   useEffect(() => {
     setDownloadURL(initialDownloadUrl);
   }, [initialDownloadUrl]);
+
   return (
     <Flex
       p={3}

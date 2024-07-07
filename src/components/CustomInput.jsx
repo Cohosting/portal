@@ -1,6 +1,6 @@
 import { Box, FormControl, FormErrorMessage, FormLabel, Input } from '@chakra-ui/react'
 import React from 'react'
-import { handleError } from '../utils/formValidation';
+import { handleError } from '../utils/validationUtils';
 
 export const CustomInput = ({
 

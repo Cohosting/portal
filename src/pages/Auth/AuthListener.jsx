@@ -1,43 +1,72 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../../lib/firebase';
 import { setError, setIsAuthenticated, setStatus, setStep, setUser } from '../../store/slices/authSlice';
-;
+import { supabase } from '../../lib/supabase';
 
 const AuthListener = ({ children }) => {
     const dispatch = useDispatch();
+    const [session, setSession] = useState(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                onSnapshot(
-                    doc(db, 'users', user.uid),
-                    (snapshot) => {
-                        const userData = { ...snapshot.data() };
-                        if (userData.isProfileCompleted === false) {
-                            dispatch(setStep(2));
-                        }
-                        dispatch(setUser(userData));
-                        dispatch(setIsAuthenticated(true));
-                        dispatch(setStatus('succeeded'));
-                    },
-                    (error) => {
-                        dispatch(setError(error.message));
-                        dispatch(setStatus('failed'));
-                    }
-                );
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+
+            if (session) {
+                setSession(session)
+
             } else {
+                console.log('No session found');
                 dispatch(setUser(null));
                 dispatch(setIsAuthenticated(false));
                 dispatch(setStatus('succeeded'));
             }
         });
 
-        return () => unsubscribe();
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
     }, [dispatch]);
 
+    useEffect(() => {
+
+        const fetchUserData = async () => {
+            try {
+                if (session) {
+                    console.log('session found', session)
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single(); // Assuming you want a single user record
+
+                    // console.log('Supabase query result:', { data, error });
+
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+
+                    if (!data) {
+                        throw new Error('No user data found');
+                    }
+
+                    const userData = { ...data };
+                    if (userData.is_profile_completed === false) {
+                        dispatch(setStep(2));
+                    }
+                    dispatch(setUser(userData));
+                    dispatch(setIsAuthenticated(true));
+                    dispatch(setStatus('succeeded'));
+                }
+            } catch (err) {
+                console.error('Error fetching user data:', err);
+                dispatch(setError(err.message));
+                dispatch(setStatus('failed'));
+            }
+        };
+
+
+        fetchUserData();
+    }, [session, dispatch]);
+    console.log(session)
     return <>{children}</>;
 };
 

@@ -6,6 +6,7 @@ import {
 } from './../store/slices/authSlice';
 import { setError } from '../store/slices/authSlice';
 import { signupUser } from '../store/thunk/authThunks';
+import { useEffect } from 'react';
 
 export const useSignup = () => {
     const dispatch = useDispatch();
@@ -27,6 +28,13 @@ export const useSignup = () => {
             dispatch(setError('Please fill all the information.'));
         }
     };
+
+
+    useEffect(() => {
+        if (error) {
+            dispatch(setError(''));
+        }
+    }, [email, password, dispatch]);
 
     return {
         email,

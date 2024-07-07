@@ -15,17 +15,21 @@ export const SubdomainCheck = ({
     if (!token) return navigate('/login');
   }
 
-  return (
-    <>
-      {!domain && mainDomainComponent}
 
-      {domain && (
-        <Box>
-          {isLoading && <Spinner />}
-          {!isLoading && !isValid && <Box>Invalid subdomain</Box>}
-          {isValid && !isLoading && children}
-        </Box>
-      )}
-    </>
-  );
+  if (!domain && !mainDomainComponent) return null;
+
+  if (!domain && mainDomainComponent) return mainDomainComponent;
+
+  if (domain && isLoading) {
+
+    return <Spinner />
+  }
+
+  if (domain && !isValid) return <Box>Invalid subdomain</Box>
+
+  if (domain && isValid && !isLoading) {
+    return children;
+  };
+
+
 };

@@ -1,6 +1,7 @@
 import { Button } from '@chakra-ui/react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { PersonalInfoStep, BusinessDetailsStep } from './SignupSteps/index';
+import Header from '../../components/Header';
 
 /**
  * Component to manage and display the different steps in the signup process.
@@ -22,27 +23,16 @@ const SignupSteps = ({ isLargerThan450, step, setStep }) => {
     };
     return (
         <>
-            {/* Render a "Back" button if not on the first step */}
-            {step !== 1 && (
-                <Button
-                    color={'#263238'}
-                    onClick={() => setStep(step - 1)}
-                    justifySelf={'start'}
-                    gap=".5rem"
-                    align="center"
-                    fontSize={'14px'}
-                    top="50px"
-                    left={'40px'}
-                    position={'absolute'}
-                    zIndex={100}
-                >
-                    <FaChevronLeft />
-                    Back
-                </Button>
-            )}
+
+            <div className="mt-10 h-screen sm:mx-auto sm:w-full sm:max-w-[480px]">
+                <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+
+                    {renderStepComponent(step, isLargerThan450)}
+
+                </div>
+            </div>
 
             {/* Call the function to render the current step's component */}
-            {renderStepComponent(step, isLargerThan450)}
         </>
     );
 };

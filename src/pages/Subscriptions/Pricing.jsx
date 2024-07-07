@@ -4,7 +4,7 @@ import { Box, Button, Checkbox, Divider, Flex, Text } from '@chakra-ui/react';
 import { prices } from '../../utils/prices';
 import { UpgradeOrDowngrade } from './UpgradeOrDowngrade';
 import SubscriptionPage from './SubscriptionPage';
-import { unixToDateString } from '../../utils';
+import { unixToDateString } from '../../utils/dateUtils';
 import PaymentMethodList from '../../components/PaymentMethodLists';
 import CurrentPlan from './CurrentPlan';
 import AddonsComponent from './AddonsComponent';

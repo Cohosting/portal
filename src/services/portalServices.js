@@ -1,35 +1,73 @@
 // portalService.js
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
-export const fetchPortalData = async portalId => {
-  const ref = doc(db, 'portals', portalId);
-  const snapshot = await getDoc(ref);
-  return snapshot.data();
+//Fetch portal data by either ID or URL.
+export const fetchPortalDataByIdOrUrl = async (identifier, identifierType = 'id') => {
+  if (identifierType === 'url' && identifier === 'dashboard') {
+    return {
+      id: 'dashboard',
+      name: 'Dashboard',
+      portal_apps: [],
+    };
+  }
+  const column = identifierType === 'url' ? 'portal_url' : 'id';
+  console.log(`Fetching portal data by ${column}: ${identifier}`);
+
+  const query = supabase
+    .from('portals')
+    .select(
+      `
+      *,
+      portal_apps(*)
+    `
+    )
+    .eq(column, identifier)
+    .single();
+
+  const { data, error } = await query;
+
+  console.log({ data, error });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (data && data.portal_apps) {
+    console.log('portal_apps data:', data.portal_apps);
+  } else {
+    console.log('No portal_apps data found for this portal.');
+  }
+
+  // filter default app from portal_apps
+
+  console.log({ data });
+  return data;
 };
-
 export const fetchTeamMemberData = async (portalId, userEmail) => {
-  const ref = collection(db, 'teamMembers');
-  const q = query(
-    ref,
-    where('portalId', '==', portalId),
-    where('email', '==', userEmail)
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => doc.data())[0]; // Assuming there's only one match
-};
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('portal_id', portalId)
+    .eq('email', userEmail)
+    .single();
 
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
 export const updateTeamMemberStatus = async (memberId, status) => {
-  const ref = doc(db, 'teamMembers', memberId);
-  await updateDoc(ref, { status });
+  const { error } = await supabase
+    .from('teamMembers')
+    .update({ status })
+    .eq('id', memberId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
 export const createCustomer = async (uid, email) => {
@@ -57,4 +95,85 @@ export const updateSubscriptionStatus = async (
   await updateDoc(doc(db, 'portals', portalId), {
     'addOnSubscription.items.removeBranding': subscriptionDetails,
   });
+};
+
+export const redirectToStripeCheckoutSession = async invoice => {
+  const res = await fetch(
+    `${process.env.REACT_APP_NODE_URL}/connect/create-connect-checkout`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customerId: invoice.client.customerId,
+        stripeConnectAccountId: 'acct_1N8TK0QEKRwEVaAN',
+        line_items: invoice.lineItems,
+      }),
+    }
+  );
+  const { session } = await res.json();
+  window.location.href = session.url;
+};
+
+export const fetchFinalizedInvoicesByDomain = async (isValid, id) => {
+  try {
+    let query = supabase.from('invoices').select('*, clients(*)');
+
+    query = query.eq('portal_id', id);
+
+    let { data: invoices, error } = await query;
+    if (error) throw error;
+
+    return invoices.map(invoice => {
+      const { clients, ...rest } = invoice;
+      return {
+        ...rest,
+        client: clients,
+      };
+    });
+  } catch (err) {
+    console.log('Error getting invoices', err);
+  }
+};
+
+export const createStripeBillingSessionAndReturn = async customerId => {
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-billing-session`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: customerId,
+          stripeConnectAccountId: 'acct_1N8TK0QEKRwEVaAN',
+        }),
+      }
+    );
+    const { session } = await res.json();
+
+    return session;
+  } catch (err) {
+    console.log('Error creating billing session', err);
+    throw err;
+  }
+};
+
+export const fetchPortalClients = async portal_id => {
+  console.log({
+    portal_id,
+  });
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('portal_id', portal_id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 };

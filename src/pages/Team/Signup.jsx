@@ -17,7 +17,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { isValidEmail, shuffleArray } from '../../utils';
+import { isValidEmail } from '../../utils/validationUtils';
 
 export const Signup = ({ portal, inviteData }) => {
   const navigate = useNavigate();

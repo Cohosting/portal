@@ -5,7 +5,6 @@ import App from './App.js';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
 import { ChakraProvider } from '@chakra-ui/react';
-import { ClientAuthContextComponent } from './context/clientAuthContext';
 import { ClientPortalContextComponent } from './context/clientPortalContext';
 import { Provider } from 'react-redux';
 import store from './store/store.js';
@@ -13,20 +12,25 @@ import AuthListener from './pages/Auth/AuthListener.jsx';
 import { QueryClientProvider } from 'react-query';
 
 import queryClient from './hooks/react-query/queryClient';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
-  <ChakraProvider>
+  <ChakraProvider
+  // theme={{
+  //   //set global font
+
+  //   fonts: {
+  //     body: 'Inter, sans-serif',
+  //   },
+  // }}
+  >
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <AuthListener>
           <ClientPortalContextComponent>
-            <ClientAuthContextComponent>
-              <App />
-            </ClientAuthContextComponent>
+            <App />
           </ClientPortalContextComponent>
         </AuthListener>
       </QueryClientProvider>

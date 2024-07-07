@@ -28,6 +28,7 @@ import { ReLogin } from './ReLogin';
 import { useNavigate } from 'react-router-dom';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { useSelector } from 'react-redux';
+import { supabase } from '../../../lib/supabase';
 
 export const AccountSettingsPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -122,18 +123,19 @@ export const AccountSettingsPage = () => {
       setIsUpdating(false);
     }
   };
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Implement your logout logic here
     console.log('Logging out...');
-    signOut(auth)
-      .then(() => {
-        console.log('Logged out successfully.');
-        navigate('/login');
-      })
-      .catch(error => {
-        console.log(`Error logging out: ${error}`);
-      });
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error('Error logging out:', error.message);
+      return;
+    }
+
+    console.log('Logged out successfully.');
+    navigate('/login');
   };
+
 
   useEffect(() => {
     if (!user) return;

@@ -22,42 +22,7 @@ import {
 import { getOrCreateUser } from '../../lib/auth';
 import { handleFirebaseError } from '../../utils/firebase';
 import { auth, db } from '../../lib/firebase';
-
-export const checkAuthState = createAsyncThunk(
-  'auth/checkAuthState',
-  async (_, { dispatch }) => {
-    dispatch(setStatus('loading'));
-    return new Promise((resolve, reject) => {
-      onAuthStateChanged(auth, async user => {
-        if (user) {
-          onSnapshot(
-            doc(db, 'users', user.uid),
-            snapshot => {
-              const userData = { ...snapshot.data() };
-              if (userData.isProfileCompleted === false) {
-                dispatch(setStep(2));
-              }
-              dispatch(setUser(userData));
-              dispatch(setIsAuthenticated(true));
-              dispatch(setStatus('succeeded'));
-              resolve();
-            },
-            error => {
-              dispatch(setError(error.message));
-              dispatch(setStatus('failed'));
-              reject(error);
-            }
-          );
-        } else {
-          dispatch(setUser(null));
-          dispatch(setIsAuthenticated(false));
-          dispatch(setStatus('succeeded'));
-          resolve();
-        }
-      });
-    });
-  }
-);
+import { supabase } from '../../lib/supabase';
 
 export const signupUser = createAsyncThunk(
   'auth/signupUser',
@@ -66,33 +31,36 @@ export const signupUser = createAsyncThunk(
     { dispatch, getState }
   ) => {
     try {
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password
-      );
+        password,
+      });
+      const { user } = data;
+
+      if (error) {
+        throw error;
+      }
+
       const cUser = await getOrCreateUser(user, {
         ...personalInfoStep,
         ...businessDetailsStep,
-        isProfileCompleted: false,
-        uid: user.uid,
+        is_profile_completed: false,
+        uid: user.id,
         portals: [],
         email,
       });
+      console.log({ cUser });
 
       dispatch(setUser(cUser));
       dispatch(setIsAuthenticated(true));
-      dispatch(setStep(getState().auth.step));
+      dispatch(setStep(/* getState().auth.step */ 2));
     } catch (err) {
       console.error(err);
-      handleFirebaseError(err.code, message => {
-        dispatch(setError(message));
-      });
+      dispatch(setError(err.message));
       throw err;
     }
   }
 );
-
 export const validatePortalURL = createAsyncThunk(
   'auth/validatePortalURL',
   async (url, { dispatch }) => {

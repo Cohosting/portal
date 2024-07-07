@@ -15,13 +15,14 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import DragDropList from '../../components/DragDropList';
 import { useApps } from '../../hooks/useApps';
 
-export const AppSetup = () => {
+export const AppsList = () => {
   const navigate = useNavigate();
 
   const { user } = useSelector(state => state.auth);
   const { data: portal } = usePortalData(user?.portals);
 
-  const { list,
+  const {
+    list,
     setList,
     handleDeleteApp,
     handleUpdate,
@@ -52,6 +53,8 @@ export const AppSetup = () => {
   if (!portal) {
     return <Layout>Loading...</Layout>;
   }
+
+  console.log({ list })
 
   return (
     <Layout>
@@ -90,9 +93,9 @@ export const AppSetup = () => {
             pb={4}
             borderBottom={'1px solid gray'}
           >
-            <Text fontSize={['lg', "xl"]}>App Setup</Text>
+            <Text fontSize={['lg', "xl"]}>App</Text>
             <IconButton
-              onClick={() => navigate('/setup')}
+              onClick={() => navigate('new')}
               icon={<MdAdd />}
               aria-label="Add New"
             />
