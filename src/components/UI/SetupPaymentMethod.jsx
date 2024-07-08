@@ -15,7 +15,8 @@ import {
     EmbeddedCheckoutProvider,
     EmbeddedCheckout
 } from '@stripe/react-stripe-js';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
@@ -24,7 +25,8 @@ const stripePromise = loadStripe('pk_test_51N43KcG6ekPTMWCwR2197fOHN32C1E5jNzPRm
 
 export const SetupPaymentMethod = ({ isOpen, handleClose, forFailedPayment }) => {
     const [clientSecret, setClientSecret] = useState('');
-    const { portal } = useContext(PortalContext)
+    const { user } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(user.portals)
     useEffect(() => {
         if (!portal) return;
         // Create a Checkout Session as soon as the page loads

@@ -12,20 +12,13 @@ import AuthListener from './pages/Auth/AuthListener.jsx';
 import { QueryClientProvider } from 'react-query';
 
 import queryClient from './hooks/react-query/queryClient';
+import { theme } from './theme.js';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
-  <ChakraProvider
-  // theme={{
-  //   //set global font
-
-  //   fonts: {
-  //     body: 'Inter, sans-serif',
-  //   },
-  // }}
-  >
+  <ChakraProvider theme={theme}>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <AuthListener>

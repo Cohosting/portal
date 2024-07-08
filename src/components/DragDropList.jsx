@@ -14,6 +14,8 @@ const DragDropList = ({ list, onDragEnd, markAsDisabled, handleDeleteApp }) => {
                         align="stretch"
                         spacing={4}
                     >
+                        <div className='divide-y divide-gray-100'>
+
                         {list.map((item, index) => (
                             <Draggable key={item.id} draggableId={item.id} index={index}>
                                 {(provided) => (
@@ -24,9 +26,11 @@ const DragDropList = ({ list, onDragEnd, markAsDisabled, handleDeleteApp }) => {
                                         markAsDisabled={markAsDisabled}
                                         handleDeleteApp={handleDeleteApp}
                                     />
+
                                 )}
                             </Draggable>
                         ))}
+                        </div>
                         {provided.placeholder}
                     </VStack>
                 )}

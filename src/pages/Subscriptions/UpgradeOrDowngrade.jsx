@@ -1,10 +1,11 @@
 import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import { prices } from '../../utils/prices';
-import { PortalContext } from '../../context/portalContext';
 import { SubscriptionAlert } from './SubscriptionAlert';
 import { usePlanName } from '../../hooks/usePlanName';
 import useAsyncLoading from '../../hooks/useAsyncFunc';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 export const UpgradeOrDowngrade = () => {
   const { isLoading: isSubscriptionCancel, runAsyncFunction: runSubscriptionCancel } = useAsyncLoading();
   const { isLoading: isReactivateLoading, runAsyncFunction: runReactivateAsync } = useAsyncLoading();
@@ -13,7 +14,8 @@ export const UpgradeOrDowngrade = () => {
 
   const [isCancelLoading, setIsCancelLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false);
-  const { portal } = useContext(PortalContext);
+  const { user } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(user.portals)
   const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [currentSelectedPlan, setCurrentSelectedPlan] = useState(null);

@@ -13,6 +13,7 @@ export function useApps(portal) {
 
     // Effect to track previous list and detect changes
     useEffect(() => {
+        if (!previousList) return;
         if (JSON.stringify(previousList) !== JSON.stringify(list)) {
             setHasChanges(true);
         } else {

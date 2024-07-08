@@ -13,6 +13,43 @@ function isValidURL(url) {
 }
 
 
+
+export const renderAppText = (settings) => {
+  // Input validation
+  if (!settings) {
+    return <p className="whitespace-nowrap">This is default app.</p>;
+  }
+
+
+  const EllipsisText = ({ setupText, viewText }) => (
+    <>
+      <p className="whitespace-nowrap">{setupText}</p>
+      <svg viewBox="0 0 2 2" className=" max-md:hidden h-0.5 w-0.5 fill-current">
+        <circle r={1} cx={1} cy={1} />
+      </svg>
+      <p className="whitespace-nowrap  visible max-sm:hidden overflow-hidden text-ellipsis max-w-full">
+        {viewText}
+      </p>
+    </>
+  );
+
+  if (settings.setupType === 'automatic' && settings.viewType === 'embedded') {
+    return <EllipsisText setupText={'All client see the same app content'} viewText={'Connected as embedded content'} />
+
+
+  } else if (settings.setupType === 'automatic' && settings.viewType === 'link') {
+    return <EllipsisText setupText={'All client see the same app content'} viewText={'Connected as link'} />
+
+
+  } else if (settings.setupType === 'manual') {
+    return <EllipsisText setupText={'Manually connect content for each client'} viewText={'Connected as embedded content'} />
+
+
+  }
+};
+
+
+
 export const renderAppContent = (settings, isLoading, handleIframeLoad) => {
   return (
     <Box height={'100%'}>

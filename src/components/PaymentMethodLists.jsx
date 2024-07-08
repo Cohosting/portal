@@ -2,8 +2,9 @@ import { Flex, Box, Text, Icon, Stack, Divider, Button, useDisclosure } from "@c
 import { useContext, useEffect, useState } from "react";
 import { AiFillBank } from "react-icons/ai";
 import { FaPlus, FaRegCreditCard } from "react-icons/fa";
-import { PortalContext } from "../context/portalContext";
 import { SetupPaymentMethod } from "./UI/SetupPaymentMethod";
+import { useSelector } from "react-redux";
+import { usePortalData } from "../hooks/react-query/usePortalData";
 
 const PaymentMethodList = ({ }) => {
     const [paymentMethods, setPaymentMethods] = useState([]);
@@ -12,7 +13,8 @@ const PaymentMethodList = ({ }) => {
 
     const { isOpen, onToggle } = useDisclosure();
 
-    const { portal } = useContext(PortalContext)
+    const { user } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(user.portals)
     useEffect(() => {
         if (!portal) return;
 

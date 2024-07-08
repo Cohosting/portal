@@ -12,16 +12,8 @@ const usePortalClientData = (portal) => {
         const getClientData = async () => {
             const { data: clients } = await supabase.from('clients').select('*').eq('portal_id', portal.id);
 
-            const formattedClientData = clients.map(client => {
-                return {
-                    Name: generateNameComponent(client),
-                    Email: generateEmailComponent(client, toggleNotification),
-                    Status: client.status,
-                    'Creation Date': client.created_at,
-                };
-            }
-            );
-            setClientData(formattedClientData);
+
+            setClientData(clients);
 
         }
         getClientData();
@@ -38,39 +30,8 @@ const usePortalClientData = (portal) => {
     };
 }
 
-// Helper Functions
-function generateNameComponent(el) {
-    return (
-        <Flex alignItems={'center'}>
-            <Flex
-                alignItems={'center'}
-                justifyContent={'center'}
-                w={'30px'}
-                h={'30px'}
-                bg={'#7cae7a'}
-                color={'white'}
-                borderRadius={'4px'}
-            >
-                {el.name[0]}
-            </Flex>
-            <Box ml={3}>
-                <Text>{el.name}</Text>
-            </Box>
-        </Flex>
-    );
-}
 
-function generateEmailComponent(el, onToggleSuccess) {
-    return (
-        <Box>
-            <Text>{el.email}</Text>
-            {el.status === 'restricted' && (
-                <Button mt={1} colorScheme='green' size={'xs'} onClick={onToggleSuccess}>
-                    Invite
-                </Button>
-            )}
-        </Box>
-    );
-}
+
+
 
 export default usePortalClientData;

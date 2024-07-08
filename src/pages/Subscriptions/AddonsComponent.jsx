@@ -11,12 +11,14 @@ import {
     Divider,
     useColorModeValue,
 } from '@chakra-ui/react';
-import { PortalContext } from '../../context/portalContext';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 const AddonsComponent = ({ isSubscribed, expirationDate }) => {
     const [isLoading, setIsLoading] = useState(false);
     const textColor = useColorModeValue('gray.700', 'white');
-    const { portal } = useContext(PortalContext)
+    const { user } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(user.portals)
     const handleSubscribe = async () => {
         setIsLoading(true);
 

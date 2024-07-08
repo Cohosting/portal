@@ -35,26 +35,30 @@ export const BrandColorPicker = ({
       borderTop={'1px solid gray'}
       justifyContent={'space-between'}
       p={3}
+      py={5}
+      pl={0}
       flexDir={['column', 'row']}
       alignItems={['flex-start', 'center']}
     >
-      <Text my={1}>{title}</Text>
+      <p className='text-sm font-semibold leading-6 text-gray-900'>{title}</p>
       <Box display="flex" alignItems="center" position={'relative'}>
         <Square
           onClick={() => setShowPicker(!showPicker)}
-          size="45px"
+          size="35px"
           bg={color}
           border="1px solid #cacaca"
           borderRadius={'6px'}
           cursor="pointer"
         />
-        <Input type="text" value={color} readOnly ml="10px" w="110px" />
+        <Input type="text" value={color} readOnly ml="10px" h={'35px'} bg={'white'} w="105px" />
         {showPicker && (
           <Box ref={ref}>
             <SketchPicker
               styles={{
                 default: {
+
                   picker: {
+
                     position: 'absolute',
                     top: '50px',
                     left: '0px',

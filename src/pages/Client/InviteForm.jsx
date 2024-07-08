@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 import { registerClientWithStripe } from '../../services/stripeConnect';
+import InputField from '../../components/InputField';
 
 export const InviteForm = ({
   isOpen,
@@ -30,11 +31,16 @@ export const InviteForm = ({
   };
 
   const addNewClientToPortal = async () => {
+
+    // validate input
+    if (!inviteState.email || !inviteState.name) {
+      setIsError('Please enter a valid email and name');
+      return;
+    }
     try {
       setIsLoading(true);
       console.log('Starting to add new client to portal');
 
-      // Check if member already exists
       console.log(`Checking if client with email ${inviteState.email} already exists in portal ${portal.id}`);
       const { data: clientData, error: memberError } = await supabase
         .from('clients')
@@ -109,32 +115,48 @@ export const InviteForm = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Modal Title</ModalHeader>
+        <ModalHeader>
+          {/* modal header text style */}
+          <p className=' text-base font-semibold leading-6 text-gray-900 ' >Add New Client</p>
+          <Text className=' font-normal  text-sm mt-1 ' >Provide the client's email and name.</Text>
+
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack align="stretch">
             <Box>
-              <Text mb={1}>Email</Text>
-              <Input
-                name="email"
-                value={inviteState.email}
-                onChange={handleChange}
+
+              <InputField
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Name"
+                label="Name"
+                errorMessage="Please enter a valid name"
+                value={inviteState.name}
+                required
+                handleChange={handleChange}
               />
             </Box>
             <Box>
-              <Text mb={1}>Name</Text>
-              <Input
-                name="name"
-                value={inviteState.name}
-                onChange={handleChange}
+
+              <InputField
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email"
+                label="Email"
+                errorMessage="Please enter a valid email address"
+                value={inviteState.email}
+                required
+                handleChange={handleChange}
               />
+
             </Box>
 
           </VStack>
           {isError && (
-            <Text my={3} color={'red'} fontSize={'14px'}>
-              {isError}
-            </Text>
+            <p className='error-text mt-2' >{isError}</p>
           )}
         </ModalBody>
 
@@ -142,9 +164,9 @@ export const InviteForm = ({
           <Button variant={'ghost'} onClick={onClose}>
             Close
           </Button>
-          <Button isLoading={isLoading} onClick={addNewClientToPortal}>
-            Add
-          </Button>
+          <button onClick={addNewClientToPortal} className='btn-indigo w-[5.5rem]'>
+            {isLoading ? 'Adding...' : 'Add'}
+          </button>
         </ModalFooter>
       </ModalContent>
     </Modal>

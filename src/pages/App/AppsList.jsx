@@ -57,49 +57,24 @@ export const AppsList = () => {
   console.log({ list })
 
   return (
-    <Layout>
+    <Layout headerName='Apps'>
       <Box p={[2, 4]} mt={4}>
-        <Collapse in={hasChanges} animateOpacity>
-          <Flex
-            alignItems={'center'}
-            justifyContent={'flex-end'}
-            borderBottom={'1px solid #ccc'}
-            p={2}
-          >
-            <Button
-              variant={'outline'}
-              size={'md'}
-              onClick={() => {
-                setList(previousList);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              isLoading={isLoading}
-              onClick={handleUpdate}
-              ml={3}
-              size={'md'}
-            >
-              Update
-            </Button>
-          </Flex>
-        </Collapse>
-
         <Box>
-          <Flex
-            justifyContent="space-between"
-            mb={4}
-            pb={4}
-            borderBottom={'1px solid gray'}
-          >
-            <Text fontSize={['lg', "xl"]}>App</Text>
-            <IconButton
-              onClick={() => navigate('new')}
-              icon={<MdAdd />}
-              aria-label="Add New"
-            />
-          </Flex>
+
+          <div className="-ml-4 -mt-2 flex flex-wrap items-center justify-between sm:flex-nowrap">
+            <div className="ml-4 mt-2">
+              <h3 className="text-base font-semibold leading-6 text-gray-900">App lists</h3>
+            </div>
+            <div className="ml-4 mt-2 flex-shrink-0">
+              <button
+                onClick={() => navigate('new')}
+                type="button"
+                className="btn-indigo"
+              >
+                Create new app
+              </button>
+            </div>
+          </div>
 
           <DragDropList
             list={list}
@@ -107,8 +82,41 @@ export const AppsList = () => {
             handleDeleteApp={handleDeleteApp}
             markAsDisabled={markAsDisabled}
           />
+          <div>
+          </div>
         </Box>
       </Box>
+
+      <Collapse style={{
+        position: 'absolute',
+        bottom: 0,
+        width: '100%'
+      }} in={hasChanges} animateOpacity>
+        <Flex
+          alignItems={'center'}
+          justifyContent={'flex-end'}
+          className=' border-t border-gray-20'
+          p={5}
+        >
+          <Button
+            variant={'unstyled'}
+            mr={'1rem'}
+            size={'sm'}
+            onClick={() => {
+              setList(previousList);
+            }}
+          >
+            Cancel
+          </Button>
+          <button onClick={handleUpdate} className='btn-indigo'>
+            {
+              isLoading ? 'Loading...' : 'Save Changes'
+            }
+
+          </button>
+
+        </Flex>
+      </Collapse>
     </Layout>
   );
 };

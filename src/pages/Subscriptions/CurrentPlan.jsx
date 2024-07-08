@@ -9,16 +9,18 @@ import {
     useDisclosure,
 } from '@chakra-ui/react';
 import { prices } from '../../utils/prices';
-import { PortalContext } from '../../context/portalContext';
 import { SubscriptionAlert } from './SubscriptionAlert';
 import { usePlanName } from '../../hooks/usePlanName';
 import { useCancel, useCancelDowngrade, useReactivate, useUpdateSubscription } from '../../hooks/useSubscription';
+import { useSelector } from 'react-redux';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 
 function CurrentPlan() {
     const [isDesktop, setIsDesktop] = useState(true);
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { portal } = useContext(PortalContext);
+    const { user } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(user.portals)
     const [currentSelectedPlan, setCurrentSelectedPlan] = useState(null);
 
     const planName = usePlanName(prices, portal?.subscriptions?.current?.priceId);

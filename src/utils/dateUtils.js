@@ -24,3 +24,12 @@ export const unixToDateString = unixTimestamp => {
   const dateString = `${day}-${month}-${year}`;
   return dateString;
 };
+
+// Function to format dates
+export function formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+ 

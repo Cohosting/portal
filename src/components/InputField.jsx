@@ -38,7 +38,7 @@ const InputField = ({
             )}
         </div>
         {ariaInvalid && (
-            <p id={`${id}-error`} className="mt-2 text-sm text-red-600">
+            <p id={`${id}-error`} className="error-text">
                 {errorMessage}
             </p>
         )}

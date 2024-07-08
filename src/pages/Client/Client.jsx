@@ -1,10 +1,6 @@
 import {
   Box,
-  Button,
-  Divider,
-  Flex,
-  Spinner,
-  Text,
+
   useDisclosure,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
@@ -13,8 +9,6 @@ import { InviteForm } from './InviteForm';
 import { ClientInviteSuccessModal } from './ClientInviteSuccessModal';
 
 import { useNavigate } from 'react-router-dom';
-import Table from './ClientTable';
-import { AddIcon } from '@chakra-ui/icons';
 import { StripeConnectValidation } from './StripeConnectValidation';
 import { usePlanName } from '../../hooks/usePlanName';
 import { prices } from '../../utils/prices';
@@ -22,6 +16,7 @@ import { ClientUsageLimit } from '../../components/UI/ClientUsageLimit';
 import usePortalClientData from '../../hooks/usePortalClientData';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import ClientTable from '../../components/table/ClientTable';
 export const Client = () => {
   const { user } = useSelector((state) => state.auth);
   const { data: portal } = usePortalData(user?.portals)
@@ -45,11 +40,10 @@ export const Client = () => {
   let sortableColumns = [];
 
 
-  console.log(clients)
   return (
-    <Layout>
+    <Layout headerName='Clients'>
 
-      <Button onClick={() => {
+      {/* <Button onClick={() => {
         console.log(`${portal.portal_url}.localhost:3000/login`)
         window.location.href = `http://${portal.settings.subdomain}.localhost:3000/login`
       }}>
@@ -63,8 +57,8 @@ export const Client = () => {
         portal={portal}
         clients={clients}
         setShouldLimitAddingClient={setShouldLimitAddingClient}
-      />
-      <Box>
+      /> */}
+      {/*       <Box>
         <Box pt={3} px={'20px'}>
           <Flex alignItems={'center'} justifyContent={'space-between'}>
             <Text fontSize={'14px'}>Client</Text>
@@ -98,7 +92,30 @@ export const Client = () => {
               sortableColumns={sortableColumns}
             />
           )}
-        </Box>
+        </Box> */}
+      <Box>
+        <div className="px-4 sm:px-6 lg:px-8 pt-7">
+          <div className="sm:flex sm:items-center">
+            <div className="sm:flex-auto">
+              <h1 className="text-base font-semibold leading-6 text-gray-900">Clients</h1>
+              <p className="mt-2 text-sm text-gray-700">
+                A list of all the clients in your portal including their name,  email and status.
+              </p>
+            </div>
+            <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+              <button
+                onClick={onToggle}
+                type="button"
+                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Add client
+              </button>
+            </div>
+          </div>
+          <ClientTable
+            clients={clients}
+          />
+        </div>
       </Box>
       <InviteForm
         isOpen={isOpen}

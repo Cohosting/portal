@@ -62,15 +62,20 @@ export const AssetItem = ({
   }, [initialDownloadUrl]);
 
   return (
-    <Flex
+/*     <Flex
       p={3}
       borderTop={'1px solid gray'}
       alignItems={'center'}
       justifyContent={'space-between'}
-    >
+    > */
+    <li className="flex items-center justify-between gap-x-6 py-5">
+
       <Box>
-        <Text fontSize={['15px', '16px']} fontWeight={700}>{text}</Text>
-        <Text fontSize={['14px', '15px']} >{subText}</Text>
+        <p className="text-sm font-semibold leading-6 text-gray-900">{text}</p>
+        <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
+
+          <p className="truncate">{subText}</p>
+        </div>
       </Box>
       {/* Sqaure box for image */}
       <Flex
@@ -110,6 +115,7 @@ export const AssetItem = ({
           <Progress value={uploadProgress} size="sm" mt={2} />
         </Box>
       )}
-    </Flex>
+    </li>
+    // </Flex>
   );
 };

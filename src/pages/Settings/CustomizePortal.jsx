@@ -9,13 +9,14 @@ import { useCustomizePortalLogic } from '../../hooks/useCustomizePortalLogic';
 import { portalTexts } from '../../utils/constant';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import SwitchComponent from '../../components/SwitchComponent';
 
 const Heading = ({ text, subText }) => (
   <>
-    <Text fontSize={['15px', '16px']}>{text}</Text>
-    <Text fontSize={['13px', '14px']} my={2}>
-      {subText}
-    </Text>
+    <div className="border-b-0 border-gray-200 pb-5">
+      <h3 className="text-base font-semibold leading-6 text-gray-900">{text}</h3>
+      <p className="mt-2 max-w-4xl text-sm text-gray-500">{subText}</p>
+    </div>
   </>
 );
 
@@ -29,7 +30,8 @@ const BrandNameSection = ({ brandName, handleUpdateState }) => (
 const ImageAssetSection = ({ handleUpdateState, squareIcon, fullLogo, squareLoginImage }) => (
   <Box my={3}>
     <Heading text={portalTexts.imageAsset.heading} subText={portalTexts.imageAsset.subText} />
-    <AssetItem
+    <ul className='divide-y divide-gray-300 '>
+      <AssetItem
       text={portalTexts.imageAsset.squareIcon}
       subText={portalTexts.imageAsset.squareIconSubText}
       onUpload={handleUpdateState}
@@ -50,12 +52,15 @@ const ImageAssetSection = ({ handleUpdateState, squareIcon, fullLogo, squareLogi
       field="squareLoginImage"
       initialDownloadUrl={squareLoginImage}
     />
+    </ul>
+
   </Box>
 );
 
 const BrandColorSection = ({ handleUpdateState, sidebarBgColor, sidebarTextColor, accentColor }) => (
   <Box my={3} fontSize={['15px', '16px']}>
     <Heading text={portalTexts.brandColors.heading} subText={portalTexts.brandColors.subText} />
+    <ul className='divide-y divide-gray-300 '>
     <BrandColorPicker
       title={portalTexts.brandColors.sidebarBgColor}
       defaultColor={sidebarBgColor}
@@ -74,6 +79,8 @@ const BrandColorSection = ({ handleUpdateState, sidebarBgColor, sidebarTextColor
       field="accentColor"
       onCompletePick={handleUpdateState}
     />
+    </ul>
+
   </Box>
 );
 
@@ -83,10 +90,12 @@ const PoweredBySection = ({ poweredByCopilot, handleUpdateState }) => (
     <Flex pb="50px" alignItems="center" justifyContent="space-between">
       <Text>Powered by Copilot</Text>
       <Box>
-        <Checkbox
-          onChange={e => handleUpdateState('poweredByCopilot', e.target.checked)}
-          isChecked={poweredByCopilot}
+
+        <SwitchComponent
+          enabled={poweredByCopilot}
+          setEnabled={value => handleUpdateState('poweredByCopilot', value)}
         />
+
       </Box>
     </Flex>
   </Box>
@@ -107,7 +116,7 @@ export const CustomizePortal = () => {
   if (!portal) return <Layout>Loading...</Layout>;
 
   return (
-    <Layout>
+    <Layout headerName='Customizations'>
       <Box>
         <Collapse in={hasChanges} animateOpacity>
           <ActionButtons isLoading={isLoading} onUpdate={handleUpdatePortalBrand} shouldShow />

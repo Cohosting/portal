@@ -17,9 +17,11 @@ import { AddIcon } from '@chakra-ui/icons';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
+import EmptyStateFeedback from '../../components/EmptyStateFeedback';
+import { BanknotesIcon, SquaresPlusIcon } from '@heroicons/react/24/outline';
 
 
-const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
+const InvoiceItem = ({ invoice, updateInvoiceStatusFirebase }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate()
   return (
@@ -32,8 +34,8 @@ const InvoiceItem  = ({invoice, updateInvoiceStatusFirebase}) => {
               await updateInvoiceStatusFirebase(invoice);
               onClose()
             }}>
-            Finalized
-          </Button>
+              Finalized
+            </Button>
           )
         }
 
@@ -128,47 +130,32 @@ export const Invoices = () => {
   };
 
 
-  console.log(invoices)
+
   return (
-    <Layout>
+    <Layout headerName='Invoices'>
+      {
+        !invoices.length && (
+          <div className="mt-[100px]">
+            <EmptyStateFeedback
+              IconComponent={BanknotesIcon}
+              title={'Create Your First Invoice'}
+              message={
+                `It looks like you haven't created any invoices yet. Click the button below to create your first invoice.`
+              }
+              buttonText={'Create invoice'}
 
-
+              onButtonClick={() => navigate('/billing/add')}
+            />
+          </div>
+        )
+      }
       <Box p={4}>
-
         <Box>
-          <Flex justifyContent={'space-between'} alignItems={'center'}>
-            <Text my={3}>Invoices</Text>
-
-            {invoices.length > 0 && (
-              <Button mt={4} onClick={() => navigate('create')}>
-                Create Invoice
-              </Button>
-            )}
-          </Flex>
-
-          {!invoices.length && (
-            <Flex flexDir={'column'} alignItems={'center'} justifyContent={'center'} >
-              <Text> You dont have any invoices. </Text>
-              <Button onClick={() => navigate('create')} my={3} >
-                <Text >Create one</Text>
-                <AddIcon />
-              </Button>
-            </Flex>
-          )}
           {invoices.map(invoice => (
-
             <InvoiceItem updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} invoice={invoice} />
-
-
           ))}
         </Box>
-
-
       </Box>
-
-
-
-
     </Layout>
   );
 };
