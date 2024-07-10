@@ -60,8 +60,9 @@ export const fetchInvoiceData = async invoiceId => {
     if (error) {
       throw error;
     }
-    const { clients, ...rest } = data;
+console.log({ data });
 
+const { clients, ...rest } = data;
     if (data) {
       return {
         ...rest,

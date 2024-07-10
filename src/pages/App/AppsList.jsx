@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import DragDropList from '../../components/DragDropList';
 import { useApps } from '../../hooks/useApps';
+import SectionHeader from '../../components/SectionHeader';
 
 export const AppsList = () => {
   const navigate = useNavigate();
@@ -61,28 +62,20 @@ export const AppsList = () => {
       <Box p={[2, 4]} mt={4}>
         <Box>
 
-          <div className="-ml-4 -mt-2 flex flex-wrap items-center justify-between sm:flex-nowrap">
-            <div className="ml-4 mt-2">
-              <h3 className="text-base font-semibold leading-6 text-gray-900">App lists</h3>
-            </div>
-            <div className="ml-4 mt-2 flex-shrink-0">
-              <button
-                onClick={() => navigate('new')}
-                type="button"
-                className="btn-indigo"
-              >
-                Create new app
-              </button>
-            </div>
-          </div>
+          <SectionHeader
+            heading="Apps"
+            description="Here you can see all the apps you have created. You can also edit or delete them."
+            buttonText="Create new app"
+            onClick={() => navigate('new')}
+          />
+          <div className='mt-3'>
 
           <DragDropList
             list={list}
             onDragEnd={handleDragEnd}
             handleDeleteApp={handleDeleteApp}
             markAsDisabled={markAsDisabled}
-          />
-          <div>
+            />
           </div>
         </Box>
       </Box>

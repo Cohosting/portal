@@ -1,17 +1,17 @@
 import React from 'react';
 import {
   Box,
-  Checkbox,
   Flex,
-  Input,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
+  Heading,
   Text,
   Textarea,
 } from '@chakra-ui/react';
 import IconPicker from '../../components/IconPicker';
+import InputField from '../../components/InputField';
+import Example from '../../components/Example';
+import AppRadio from '../../components/Radio/AppRadio';
+import { Switch } from '@headlessui/react';
+import Select from '../../components/Select';
 
 export const AppFormFields = ({ mode, appState, setAppState }) => {
   const { name, icon, settings } = appState;
@@ -36,35 +36,47 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
   };
 
   return (
-    <Box w={['100%', '80%']} margin={'auto'} fontSize={['15px', '16px']} mt={5}>
-      <Text>{mode} App</Text>
+    <>
+      <h1 className=' font-semibold text-xl mb-7 '>
+        {mode === 'edit' ? 'Edit' : 'Create New Application'}
+      </h1>
 
       <Box my={4}>
-        <Text>Name - How it should appear in the sidebar</Text>
-        <Input onChange={handleInputChange} name="name" value={name} />
+        <Text className='block text-sm font-medium leading-6 text-gray-900'>Name - How it should appear in the sidebar</Text>
+        <InputField
+          name="name"
+          value={name}
+          handleChange={handleInputChange}
+          required
+        />
+
       </Box>
 
       <Box my={4}>
-        <Text mb={1}>Select sidebar icon</Text>
+        <Text mb={1} className='block text-sm font-medium leading-6 text-gray-900' >Select sidebar icon</Text>
         <IconPicker icon={icon} onIconSelect={handleIconSelect} />
       </Box>
 
       {mode !== 'edit' && (
         <Box my={4}>
-          <Text>Setup type</Text>
           <Box mt={2} pos={'relative'}>
             <Select
-              value={setupType}
-              placeholder="Select option"
-              onChange={e => handleSettingsChange('setupType', e.target.value)}
-            >
-              <option value="automatic">
-                Automatic — All clients see the same content
-              </option>
-              <option value="manual">
-                Manual — Manually connect content for each client
-              </option>
-            </Select>
+              list={['Automatic — All clients see the same content', 'Manual — Manually connect content for each client',]}
+              selected={
+                setupType === 'automatic'
+                  ? 'Automatic — All clients see the same content'
+                  : 'Manual — Manually connect content for each client'
+              }
+              setSelected={value => {
+                if (value === 'Automatic — All clients see the same content') {
+                  value = 'automatic';
+                } else if (value === 'Manual — Manually connect content for each client') {
+                  value = 'manual';
+                }
+                handleSettingsChange('setupType', value);
+              }}
+              label="Select setup type"
+            />
           </Box>
         </Box>
       )}
@@ -72,63 +84,60 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
       {setupType !== 'manual' && (
         <>
           <Box my={4}>
-            <Text pb={2} borderBottom={'1px solid #eee'}>
-              View Type
-            </Text>
-            <RadioGroup value={viewType}>
-              <Stack>
-                <Flex
-                  borderBottom={'1px solid #eee'}
-                  py={'10px'}
-                  onClick={() => handleSettingsChange('viewType', 'embedded')}
-                  cursor={'pointer'}
-                >
-                  <Radio value="embedded" />
-                  <Box ml={2}>
-                    <Text>Connected as embedded content</Text>
-                    <Text fontSize={'14px'}>Shows directly into the portal</Text>
-                  </Box>
-                </Flex>
-                <Flex
-                  onClick={() => handleSettingsChange('viewType', 'link')}
-                  borderBottom={'1px solid #eee'}
-                  py={'10px'}
-                  cursor={'pointer'}
-                >
-                  <Radio value="link" />
-                  <Box ml={2}>
-                    <Text>Connected as link</Text>
-                    <Text fontSize={'14px'}>App opens in a new browser tab</Text>
-                  </Box>
-                </Flex>
-              </Stack>
-            </RadioGroup>
+            <div className='mt-2.5 divide-y divide-gray-20'>
+              <AppRadio
+                value="embedded"
+                label="Connected as embedded content"
+                description="Shows directly into the portal"
+                handleChange={(e) => handleSettingsChange('viewType', e.target.value)}
+              />
+              <AppRadio
+                value="link"
+                label="Connected as link"
+                description="App opens in a new browser tab"
+                handleChange={(e) => handleSettingsChange('viewType', e.target.value)}
+              />
+            </div>
           </Box>
 
-          <Box my={4}>
-            <Text>Content - can be public url</Text>
-            <Textarea
-              value={content}
-              name="content"
-              onChange={e => handleSettingsChange('content', e.target.value)}
-              mt={1}
-            />
-          </Box>
+
+          <div>
+            <label htmlFor="comment" className="block text-sm font-medium leading-6 text-gray-900">
+              Content - can be public url
+            </label>
+            <div className="mt-2">
+              <textarea
+                id="comment"
+                name="comment"
+                rows={4}
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                defaultValue={''}
+                onChange={e => handleSettingsChange('content', e.target.value)}
+
+              />
+            </div>
+          </div>
 
           {viewType === 'embedded' && (
-            <Box my={4}>
-              <Checkbox
-                isChecked={autoSize}
-                onChange={e =>
-                  handleSettingsChange('autoSize', e.target.checked)
+            <Flex alignItems={'center'} my={4}>
+              <Switch
+                checked={autoSize}
+                onChange={value =>
+                  handleSettingsChange('autoSize', value)
                 }
+                className="group relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 data-[checked]:bg-indigo-600"
               >
-                Auto size embed
-              </Checkbox>
-            </Box>
+                <span className="sr-only">Use setting</span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5"
+                />
+              </Switch>
+              <p className='ml-4' >Auto size</p>
+            </Flex>
           )}
         </>
       )}
-    </Box>
+    </>
   );
 };

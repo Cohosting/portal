@@ -49,7 +49,7 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
   }, [defaultValue])
 
   return (
-    <Box my={2} position="relative" zIndex={99}>
+    <Box my={2} position="relative"  >
       <InputGroup>
         <Input
           type="text"
@@ -60,7 +60,6 @@ export const SearchDropdown = ({ users, defaultValue, onSelectUser }) => {
         {showDropdown && (
           <List
             ref={ref}
-            zIndex={9999999}
             spacing={1}
             mt={2}
             w={'100%'}

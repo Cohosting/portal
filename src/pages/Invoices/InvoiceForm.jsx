@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { SearchDropdown } from '../../components/UI/searchDropdown';
 
@@ -11,13 +11,19 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import { ItemsComponent } from '../../components/UI/Items';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useRealtimePortalClients } from '../../hooks/useRealtimePortalClients';
 import useInvoice from '../../hooks/useInvoice';
+import Example from '../../components/Example';
+import Breadcrumb from '../../components/Breadcrumb';
+import Select from '../../components/Select';
+import InvoicePaymentSettings from '../../components/InvoicePaymentSettings';
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import InvoiceLineItemsTable from '../../components/table/InvoiceLineItemsTable';
 
 export const InvoiceForm = () => {
   const { user } = useSelector(state => state.auth);
@@ -25,10 +31,10 @@ export const InvoiceForm = () => {
   const { mode } = useParams();
   const clientsData = useRealtimePortalClients(user, portal);
 
-  const { invoiceState, setInvoiceState, saveInvoice, updateInvoice } = useInvoice({
+  const { invoiceState, setInvoiceState, saveInvoice, isClientError, updateInvoice } = useInvoice({
     settings: {
       card: portal?.settings?.card,
-      achDebit: portal?.settings?.ach_debit,
+      ach_debit: portal?.settings?.ach_debit,
     }
 
   })
@@ -39,12 +45,47 @@ export const InvoiceForm = () => {
   };
 
 
+  const handleSettingUpdate = (key, value) => {
+    setInvoiceState(prevState => ({ ...prevState, settings: { ...prevState.settings, [key]: value } }));
+  }
 
 
+  console.log(invoiceState)
   return (
-    <Layout>
-      <Box p={5}   >
-        <Flex alignItems={'center'} justifyContent={'space-between'}>
+    <Layout hideMobileNav={true}>
+
+      <Box py={5}    >
+
+        <div className="lg:w-[calc(100%-288px)] w-full px-5 items-center justify-between fixed top-0 py-4 border-b border-gray-200 bg-white  ">
+          <div className='flex  items-center  '>
+            <Breadcrumb
+              pages={[
+                {
+                  name: 'Invoices', href: '#', current: false, settings: {
+                    breakPointStyle: 'lg-m:block hidden ',
+                  }
+                },
+                { name: 'New Invoices', href: '#', current: true, },
+
+              ]}
+            />
+            <div className='flex ml-auto  items-center text-sm '>
+              <button className='w-16 h-6.5'>Cancel</button>
+              <button className=' btn-indigo   px-20    ml-2 text-[12px]' onClick={saveInvoice} >
+                {/* Mode and loading indicator */}
+                {
+                  mode === 'edit' ? (invoiceState.isLoading ? 'loading...' : 'Update') : (invoiceState.isLoading ? 'loading...' : 'Create')
+                }
+
+              </button>
+            </div>
+          </div>
+
+        </div>
+        <div className='pt-0 pb-100px  w-[800px] max-w-full mx-auto lg:mt-[70px] px-5'>
+
+
+          {/*       <Flex alignItems={'center'} justifyContent={'space-between'}>
           <h1>Invoice Form</h1>
           <Box>
             <Button variant={'ghost'}>Cancel</Button>
@@ -60,24 +101,50 @@ export const InvoiceForm = () => {
               {mode === 'edit' ? 'update' : 'create'}
             </Button>
           </Box>
-        </Flex>
-        <Text mt={'20px'} mb={'10px'}>
-          Select client from dropdown
-        </Text>
-        <SearchDropdown defaultValue={invoiceState.client} users={clientsData} onSelectUser={handleSelectUser} />
-        <ItemsComponent defaultValue={invoiceState.line_items} onUpdateItems={val => setInvoiceState({
+        </Flex> */}
+
+          {/* <SearchDropdown defaultValue={invoiceState.client} users={clientsData} onSelectUser={handleSelectUser} /> */}
+          <Select
+            list={clientsData}
+            placeholder={'Select Client'}
+            selected={invoiceState.client}
+            setSelected={handleSelectUser}
+            label="Select Client"
+            renderItem={(client) => <p className='block truncate font-normal group-data-[selected]:font-semibold'>{client?.name}</p>}
+          />
+          {isClientError && <p className='text-sm mt-1 font-semibold text-red-500 ' >Please select a client</p>}
+          <InvoiceLineItemsTable lineItems={invoiceState.line_items} setLineItems={(val) => {
+
+            setInvoiceState({
+              ...invoiceState,
+              line_items: val,
+            });
+          }} />
+          {/* <ItemsComponent defaultValue={invoiceState.line_items} onUpdateItems={val => setInvoiceState({
           ...invoiceState,
           line_items: val,
 
-        })} />
-        <Box mt={'20px'}>
-          <Text>Memo</Text>
-          <Textarea value={invoiceState.memo} onChange={(e) => setInvoiceState({
-            ...invoiceState,
-            memo: e.target.value,
+        })} /> */}
 
-          })} />
-        </Box>
+          <div>
+            <label htmlFor="comment" className="block text-sm font-medium leading-6 text-gray-900">
+              Add your comment
+            </label>
+            <div className="mt-2">
+              <textarea
+                id="comment"
+                name="comment"
+                rows={4}
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                defaultValue={''}
+                value={invoiceState.memo} onChange={(e) => setInvoiceState({
+                  ...invoiceState,
+                  memo: e.target.value,
+
+                })}
+              />
+            </div>
+          </div>
 
         <UploadAttachmentComponent
           setAttachments={val => {
@@ -86,61 +153,25 @@ export const InvoiceForm = () => {
               attachments: val,
             });
           }}
-        />
+          /> 
 
-        <Box mt={4}>
-          <Text>Default setting for invoice payment</Text>
-          {!portal ? (
-            <Spinner />
-          ) : (
-            <Box>
-              <Flex
-                py={1}
-                borderBottom={'1px solid #dfe9e6'}
-                alignItems={'center'}
-                justifyContent={'space-between'}
-              >
-                <Text fontSize={'17px'}>Enable ACH Debit payment</Text>
-                <Checkbox
-                  onChange={() =>
-                      setInvoiceState({
-                        ...invoiceState,
-                        settings: {
-                          ...invoiceState.settings,
-                          achDebit: !invoiceState.settings.achDebit,
-                        },
-                      })
-                  }
-                  colorScheme="green"
-                    isChecked={invoiceState.settings.achDebit}
-                />
-              </Flex>
-              <Flex
-                py={1}
-                borderBottom={'1px solid #dfe9e6'}
-                alignItems={'center'}
-                justifyContent={'space-between'}
-              >
-                <Text fontSize={'17px'}>Card</Text>
-                <Checkbox
-                  onChange={() =>
-                      // setSettings({ ...settings, card: !settings.card })
-                      setInvoiceState({
-                        ...invoiceState,
-                        settings: {
-                          ...invoiceState.settings,
-                          card: !invoiceState.settings.card,
-                        },
-                      })
-                  }
-                  colorScheme="green"
-                    isChecked={invoiceState.settings.card}
-                />
-              </Flex>
-            </Box>
-          )}
-        </Box>
+
+          <Disclosure  >
+            <DisclosureButton className="py-2 group flex items-center space-x-2">
+              <p className='text-[14px] font-semibold'>Advance Settings</p>
+              <ChevronDownIcon className="w-5 group-data-[open]:rotate-180" />
+
+            </DisclosureButton>
+            <DisclosurePanel transition className="  text-gray-500 origin-top transition duration-200 ease-out data-[closed]:-translate-y-6 data-[closed]:opacity-0">
+              <InvoicePaymentSettings handleSettingUpdate={handleSettingUpdate} settings={invoiceState?.settings} />
+
+            </DisclosurePanel>
+          </Disclosure>
+        </div>
+
+
       </Box>
     </Layout>
+
   );
 };

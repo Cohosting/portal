@@ -19,6 +19,8 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
 import { BanknotesIcon, SquaresPlusIcon } from '@heroicons/react/24/outline';
+import Example from '../../components/Example';
+import InvoiceTable from '../../components/table/InvoicesTable';
 
 
 const InvoiceItem = ({ invoice, updateInvoiceStatusFirebase }) => {
@@ -66,16 +68,29 @@ export const Invoices = () => {
     if (!portal) return;
 
     const fetchInvoices = async () => {
+      onOpen()
+
       const { data, error } = await supabase
         .from('invoices')
-        .select('*')
+        .select('*, clients(email)')
         .eq('portal_id', portal.id);
 
+
+      console.log({ data })
       if (error) {
         console.error('Error fetching invoices:', error);
       } else {
-        setInvoices(data);
+        const invoices = data.map(invoice => {
+          const { clients, ...rest } = invoice;
+          return {
+            ...invoice,
+            client: clients,
+          }
+        });
+
+        setInvoices(invoices);
       }
+      onClose()
     };
 
     fetchInvoices();
@@ -129,12 +144,12 @@ export const Invoices = () => {
     });
   };
 
-
+  console.log(invoices)
 
   return (
     <Layout headerName='Invoices'>
       {
-        !invoices.length && (
+        !invoices.length && !isOpen && (
           <div className="mt-[100px]">
             <EmptyStateFeedback
               IconComponent={BanknotesIcon}
@@ -150,11 +165,13 @@ export const Invoices = () => {
         )
       }
       <Box p={4}>
-        <Box>
+        {/* <Box>
           {invoices.map(invoice => (
             <InvoiceItem updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} invoice={invoice} />
           ))}
-        </Box>
+        </Box> */}
+
+        <InvoiceTable invoices={invoices} />
       </Box>
     </Layout>
   );

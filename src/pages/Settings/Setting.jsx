@@ -8,6 +8,8 @@ import { useStripeUser } from '../../hooks/useStripeUser';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
+import InvoicePaymentSettings from '../../components/InvoicePaymentSettings';
+import SectionHeader from '../../components/SectionHeader';
 
 // SettingItem component
 const SettingItem = React.memo(({ label, isChecked, onChange }) => (
@@ -83,8 +85,16 @@ const PaymentSettings = ({ settings, updateSetting }) => {
 
   return (
     <Box>
-      <SettingItem label="Enable ACH Debit payment" isChecked={settings.ach_debit} onChange={() => updateSetting('ach_debit')} />
-      <SettingItem label="Enable Card payment" isChecked={settings.card} onChange={() => updateSetting('card')} />
+      <SectionHeader hideButton heading="Invoice Payment Settings" description="Customize your invoice payment settings" />
+      <InvoicePaymentSettings settings={settings} handleSettingUpdate={(key, value) => {
+        updateSetting({
+          ...settings,
+          [key]: value
+        });
+
+      }
+      } />
+
     </Box>
   );
 };
@@ -160,7 +170,6 @@ export const Settings = () => {
             createStripeAccount={createStripeAccount}
           />
           <Box mt={4} fontSize={['15px', '16px']}>
-            <Text>Default setting for invoice payment</Text>
             <PaymentSettings
               settings={settings}
               updateSetting={togglePortalSetting}

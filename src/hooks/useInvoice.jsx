@@ -4,12 +4,17 @@ import queryString from 'query-string';
 import { createInvoice, fetchInvoiceData, updateClientInvoice } from '../services/invoiceService';
 import { useSelector } from 'react-redux';
 import { usePortalData } from './react-query/usePortalData';
-
+import { v4 as uuidv4 } from 'uuid';
 
 
 const defaultInvoiceState = {
   isLoading: false,
-  line_items: [],
+  line_items: [{
+    id: uuidv4(),
+    description: '',
+    quantity: 1,
+    unit_amount: 0,
+  }],
   attachments: [],
   settings: {
     card: false,
@@ -29,8 +34,8 @@ const useInvoice = (defaultValue = {}) => {
   const location = useLocation();
   const { user } = useSelector(state => state.auth);
   const { data: portal } = usePortalData(user?.portals);
+  const [isClientError, setIsClientError] = useState(false);
   const prevDefaultValueRef = useRef();
-
   const isEditMode = mode === 'edit';
 
   useEffect(() => {
@@ -47,6 +52,8 @@ const useInvoice = (defaultValue = {}) => {
             ...prevState,
             ...invoices,
             isLoading: false,
+
+
           }));
         } else {
           console.error('No such document!');
@@ -64,7 +71,13 @@ const useInvoice = (defaultValue = {}) => {
   }, [isEditMode, location.search]);
 
   const saveInvoice = async (invoiceData) => {
+    // Input validation
+    if (!invoiceState.client) {
+      return setIsClientError(true);
+    };
+
     setInvoiceState(prevState => ({ ...prevState, isLoading: true }));
+
     try {
       // remove client object before persisting
       const { client, isLoading, ...rest } = invoiceState;
@@ -102,11 +115,21 @@ const useInvoice = (defaultValue = {}) => {
       prevDefaultValueRef.current = defaultValue; // Update the ref to the new value
     }
   }, [defaultValue]); // Dependency array
+
+
+  useEffect(() => {
+    if (!isClientError) return;
+
+    setIsClientError(false);
+
+  }
+    , [invoiceState]);
   return {
     invoiceState,
     setInvoiceState,
     saveInvoice,
     updateInvoice,
+    isClientError
   };
 };
 
