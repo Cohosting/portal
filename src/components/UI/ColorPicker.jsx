@@ -1,26 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Flex, Input, Square, Text, useOutsideClick } from '@chakra-ui/react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Box, Flex, Input, Square, useOutsideClick } from '@chakra-ui/react';
 import { SketchPicker } from 'react-color';
 
 export const BrandColorPicker = ({
   onCompletePick, field, defaultColor, title
 }) => {
-  const [color, setColor] = React.useState(defaultColor);
+  const [color, setColor] = useState(defaultColor);
   const [showPicker, setShowPicker] = useState(false);
-  // Outside click
+  const ref = useRef();
 
-  const ref = React.useRef();
   useOutsideClick({
     ref: ref,
     handler: () => setShowPicker(false),
   });
-  const handleChangeComplete = color => {
+
+  const handleChangeComplete = (color) => {
     setColor(color.hex);
     onCompletePick(field, color.hex);
   };
 
-  const handleChange = color => {
+  const handleChange = (color) => {
     setColor(color.hex);
+  };
+
+  const handleInputChange = (event) => {
+    const newColor = event.target.value;
+    setColor(newColor);
+    // Optionally, you can add validation for the input value to be a valid hex color
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(newColor)) {
+      onCompletePick(field, newColor);
+    }
   };
 
   useEffect(() => {
@@ -29,10 +38,7 @@ export const BrandColorPicker = ({
   }, [defaultColor]);
 
   return (
-
-
     <Flex
-      borderTop={'1px solid gray'}
       justifyContent={'space-between'}
       p={3}
       py={5}
@@ -50,24 +56,20 @@ export const BrandColorPicker = ({
           borderRadius={'6px'}
           cursor="pointer"
         />
-        <Input type="text" value={color} readOnly ml="10px" h={'35px'} bg={'white'} w="105px" />
+        <Input
+          type="text"
+          value={color}
+          onChange={handleInputChange}
+          ml="10px"
+          h={'35px'}
+          bg={'white'}
+          w="105px"
+        />
         {showPicker && (
           <Box ref={ref}>
             <SketchPicker
-              styles={{
-                default: {
-
-                  picker: {
-
-                    position: 'absolute',
-                    top: '50px',
-                    left: '0px',
-                    zIndex: '1',
-                  },
-                },
-              }}
-              onChange={handleChange}
               color={color}
+              onChange={handleChange}
               onChangeComplete={handleChangeComplete}
             />
           </Box>

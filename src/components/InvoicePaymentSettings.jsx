@@ -8,7 +8,9 @@ const InvoicePaymentSettings = () => {
 
 export default InvoicePaymentSettings */
 
+import { Switch } from "@headlessui/react";
 import SectionHeader from "./SectionHeader";
+import SwitchComponent from "./SwitchComponent";
 
 /*
   This example requires some changes to your config:
@@ -47,7 +49,7 @@ export default function InvoicePaymentSettings({
                             </p>
                         </div>
                         <div className="ml-3 flex h-6 items-center">
-                            <input
+                            {/*  <input
                                 id="comments"
                                 name="comments"
                                 type="checkbox"
@@ -55,7 +57,8 @@ export default function InvoicePaymentSettings({
                                 className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                                 checked={settings.ach_debit}
                                 onChange={(e) => handleSettingUpdate('ach_debit', e.target.checked)}
-                            />
+                            /> */}
+                            <SwitchComponent enabled={settings.ach_debit} setEnabled={(e) => handleSettingUpdate('ach_debit', e)} />
                         </div>
                     </div>
                     <div className="relative flex items-start pb-4 pt-3.5">
@@ -71,7 +74,7 @@ export default function InvoicePaymentSettings({
                             </p>
                         </div>
                         <div className="ml-3 flex h-6 items-center">
-                            <input
+                            {/*                             <input
                                 id="candidates"
                                 name="candidates"
                                 type="checkbox"
@@ -80,7 +83,9 @@ export default function InvoicePaymentSettings({
                                 checked={settings.card}
                                 onChange={(e) => handleSettingUpdate('card', e.target.checked)}
 
-                            />
+                            /> */}
+                            <SwitchComponent enabled={settings.card} setEnabled={(e) => handleSettingUpdate('card', e)} />
+
                         </div>
                     </div>
 

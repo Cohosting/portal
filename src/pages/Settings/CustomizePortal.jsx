@@ -57,7 +57,7 @@ const ImageAssetSection = ({ handleUpdateState, squareIcon, fullLogo, squareLogi
   </Box>
 );
 
-const BrandColorSection = ({ handleUpdateState, sidebarBgColor, sidebarTextColor, accentColor }) => (
+const BrandColorSection = ({ handleUpdateState, sidebarBgColor, sidebarActiveTextColor, sidebarTextColor, accentColor }) => (
   <Box my={3} fontSize={['15px', '16px']}>
     <Heading text={portalTexts.brandColors.heading} subText={portalTexts.brandColors.subText} />
     <ul className='divide-y divide-gray-300 '>
@@ -73,7 +73,13 @@ const BrandColorSection = ({ handleUpdateState, sidebarBgColor, sidebarTextColor
       field="sidebarTextColor"
       onCompletePick={handleUpdateState}
     />
-    <BrandColorPicker
+      <BrandColorPicker
+        title={portalTexts.brandColors.sidebarActiveTextColor}
+        defaultColor={sidebarActiveTextColor}
+        field="sidebarActiveTextColor"
+        onCompletePick={handleUpdateState}
+      />
+      <BrandColorPicker
       title={portalTexts.brandColors.accentColor}
       defaultColor={accentColor}
       field="accentColor"
@@ -111,7 +117,9 @@ export const CustomizePortal = () => {
     handleUpdateState,
     handleUpdatePortalBrand,
   } = useCustomizePortalLogic();
-  const { brandName, squareIcon, fullLogo, squareLoginImage, poweredByCopilot, sidebarBgColor, sidebarTextColor, accentColor } = brandSettings;
+  const { brandName, squareIcon, fullLogo, squareLoginImage, poweredByCopilot, sidebarBgColor, sidebarTextColor, sidebarActiveTextColor, accentColor } = brandSettings
+
+  console.log(brandName)
 
   if (!portal) return <Layout>Loading...</Layout>;
 
@@ -140,6 +148,7 @@ export const CustomizePortal = () => {
           handleUpdateState={handleUpdateState}
           sidebarBgColor={sidebarBgColor}
           sidebarTextColor={sidebarTextColor}
+          sidebarActiveTextColor={sidebarActiveTextColor}
           accentColor={accentColor}
         />
         <PoweredBySection

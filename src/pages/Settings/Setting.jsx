@@ -156,7 +156,7 @@ export const Settings = () => {
   return (
     <Layout>
       <Box p={[2, 4]} pt={4}>
-        <Text>Settings</Text>
+        <h1 className='text-xl font-semibold'>Settings</h1>
         <>
           <StripeAccountVerification
             stripeUser={stripeUser}

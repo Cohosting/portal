@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 
 //Fetch portal data by either ID or URL.
 export const fetchPortalDataByIdOrUrl = async (identifier, identifierType = 'id') => {
+  console.log('getting refetched');
   if (identifierType === 'url' && identifier === 'dashboard') {
     return {
       id: 'dashboard',

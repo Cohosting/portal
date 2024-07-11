@@ -12,6 +12,7 @@ export const usePortalData = portals => {
     () => fetchPortalDataByIdOrUrl(portals[0]),
     {
       enabled: !!portals[0],
+      refetchInterval: 60000,
     }
   );
 };
@@ -42,6 +43,7 @@ export const useClientPortalData = domain => {
     () => fetchPortalDataByIdOrUrl(domain.name, 'url'),
     {
       enabled: !!domain.name,
+      refetchInterval: 60000,
     }
   );
 };

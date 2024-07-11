@@ -26,6 +26,7 @@ import {
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useSelector } from 'react-redux';
 import { supabase } from '../../lib/supabase';
+import SectionHeader from '../../components/SectionHeader';
 
 export const CustomDomainForm = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -159,20 +160,22 @@ export const CustomDomainForm = () => {
   return (
     <>
       <Flex flexDir={'column'} my={5}>
-        <Text fontSize={'15px'} fontWeight={500}>
+        {/*         <Text fontSize={'15px'} fontWeight={500}>
           {' '}
           Portal domain
         </Text>
         <Text fontWeight={600} py={2}>
           {' '}
           Customize the domain used when clients visit your portal.{' '}
-        </Text>
+        </Text> */}
+        <SectionHeader hideButton heading="Custom Domain" description="Customize the domain used when clients visit your portal." />
 
         <Button
           fontSize={'15px'}
           bg={'black'}
           color={'white'}
           w={'min-content'}
+          mt={3}
           onClick={onOpen}
         >
           Connect Custom Domain

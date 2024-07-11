@@ -56,7 +56,7 @@ export const InvoiceForm = () => {
 
       <Box py={5}    >
 
-        <div className="lg:w-[calc(100%-288px)] w-full px-5 items-center justify-between fixed top-0 py-4 border-b border-gray-200 bg-white  ">
+        <div className="lg:w-[calc(100%-288px)] z-10 w-full px-5 items-center justify-between fixed top-0 py-4 border-b border-gray-200 bg-white  ">
           <div className='flex  items-center  '>
             <Breadcrumb
               pages={[

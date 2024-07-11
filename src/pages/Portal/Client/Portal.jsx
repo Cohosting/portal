@@ -6,6 +6,7 @@ import { ClientDashboardLayout } from './DashboardLayout';
 import { createStripeBillingSessionAndReturn, fetchFinalizedInvoicesByDomain, redirectToStripeCheckoutSession } from '../../../services/portalServices';
 import { useClientAuth } from '../../../hooks/useClientAuth';
 import { PortalComponentDecider } from './PortalComponentDecider';
+import Layout from './Layout/Layout';
 
 // TODO: Update the logic for the subdomain because it now return domain and also update the fetching logic for the invoices 
 export const ClientPortal = () => {
@@ -43,11 +44,11 @@ export const ClientPortal = () => {
 
   return (
     <SubdomainCheck domain={domain.name} isValid={domain.existsInDb} isLoading={isDomainLoading}>
-      <ClientDashboardLayout>
+      <Layout>
         <Box flex={1} overflowY="auto">
           <PortalComponentDecider />
         </Box>
-      </ClientDashboardLayout>
+      </Layout>
     </SubdomainCheck>
   );
 };

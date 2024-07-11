@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { storage } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
 
+import { v4 as uuidv4 } from 'uuid';
 export const AssetItem = ({
   field,
   onUpload,
@@ -18,9 +19,10 @@ export const AssetItem = ({
 
   const handleUpload = async (selectedImage) => {
     if (selectedImage) {
+      const randomId = uuidv4()
       const fileExt = selectedImage.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `public/${field}/${fileName}`;
+      const filePath = `public/${fileName}-${randomId}.${fileExt}`;
 
       let { error, data } = await supabase.storage
         .from('portal_bucket') // Replace 'your-bucket-name' with your actual bucket name

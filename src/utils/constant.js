@@ -200,7 +200,7 @@ export const portalTexts = {
     squareIconSubText: 'Used in the navbar and on mobile',
     fullLogo: 'Full logo',
     fullLogoSubText: 'Used on login pages and invoices',
-    squareLoginImage: 'Square login image',
+    squareLoginImage: 'Login image',
     squareLoginImageSubText: 'Used on the side of your login page',
   },
   brandColors: {
@@ -209,6 +209,7 @@ export const portalTexts = {
       'Customize the colors in your portal. Note that these colors only affect your portal and not the internal user experience. The accent is used for buttons, tags, and other UI elements.',
     sidebarBgColor: 'Sidebar background color',
     sidebarTextColor: 'Sidebar text color',
+    sidebarActiveTextColor: 'Sidebar active text color',
     accentColor: 'Accent color',
   },
   poweredBy: {

@@ -7,6 +7,7 @@ const TextInputField = ({
     brandName,
     handleUpdateState
 }) => {
+    console.log({ brandName })
 
     return (
         <Box>
@@ -18,8 +19,8 @@ const TextInputField = ({
 
             <InputField
                 value={brandName}
-                name={'brand_name'}
-                onChange={e => handleUpdateState('brand_name', e.target.value)}
+                name={'brandName'}
+                handleChange={e => handleUpdateState('brandName', e.target.value)}
                 placeholder={'Brand name'}
             />
             <Text textAlign={'right'} fontSize={'14px'}>

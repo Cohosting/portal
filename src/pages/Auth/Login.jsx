@@ -7,8 +7,6 @@ import { useClientPortalData } from '../../hooks/react-query/usePortalData';
 
 export const Login = () => {
   const { domain, isLoading } = useDomainInfo(true);
-  const { data: portal } = useClientPortalData(domain);
-
   // Function to determine which component to render based on the current state
   const renderContent = () => {
     if (domain.name && domain.name.includes('dashboard')) {
@@ -22,7 +20,7 @@ export const Login = () => {
       if (!domain.existsInDb) {
         return <Box>Invalid subdomain</Box>;
       }
-      return <ClientLogin portalId={portal.id} />;
+      return <ClientLogin portal={domain.portalData} />;
     }
 
     return null;
