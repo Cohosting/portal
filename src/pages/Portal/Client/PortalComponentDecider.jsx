@@ -1,7 +1,7 @@
 import React from 'react';
 import { PortalAppRender } from './AppRenderer';
 import { useParams } from 'react-router-dom';
-import { ClientBilling } from './Billing';
+import ClientBillingActivity from './ClientBillingActivity';
 
 export const PortalComponentDecider = ({}) => {
   const { portalName } = useParams();
@@ -19,7 +19,7 @@ export const PortalComponentDecider = ({}) => {
         </div>
       );
     case 'billing':
-      return <ClientBilling />;
+      return <ClientBillingActivity />;
 
     default:
       return <PortalAppRender />;

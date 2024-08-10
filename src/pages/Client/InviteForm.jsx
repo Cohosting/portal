@@ -90,9 +90,22 @@ export const InviteForm = ({
       });
 
 
+
       if (updateError) {
         console.error('Error updating portal members list:', updateError);
         throw updateError;
+      }
+      const { error: userError } = await supabase.from('users').insert([{
+        id: insertedClient.id,
+        email: insertedClient.email,
+        name: insertedClient.name,
+        role: 'client',
+        portal_id: portal.id,
+        avatar_url: ''
+      }])
+      if (userError) {
+        console.error('Error adding user:', userError);
+        throw userError;
       }
 
       // Register client with Stripe

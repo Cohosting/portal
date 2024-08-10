@@ -4,6 +4,7 @@ import { useClientAuth } from '../../../hooks/useClientAuth';
 import InputField from '../../../components/InputField';
 import { useDomainInfo } from '../../../hooks/useDomainInfo';
 import { useClientPortalData } from '../../../hooks/react-query/usePortalData';
+import { darken } from 'polished';
 
 export const ClientLogin = ({
   portal
@@ -19,31 +20,40 @@ export const ClientLogin = ({
 
   const { email, password } = clientLoginCredentials;
 
+  let {
+    sidebarBgColor,
+    sidebarTextColor = 'rgb(79, 70, 229)',
+    accentColor = 'rgb(79, 70, 229)',
+    sidebarActiveTextColor,
+
+  } = portal?.brand_settings || {};
+
+  sidebarTextColor = darken(0.4, sidebarTextColor);
+
   const handleLogin = (e) => {
     e.preventDefault()
     authenticate(email, password, portal.id);
   }
   return (
-
-    <div className="flex  h-screen flex-1">
+    <div className="flex h-screen flex-1" style={{
+      backgroundColor: sidebarBgColor,
+    }}>
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
             <img
               alt="Your Company"
-              src={brand_settings.fullLogo || "https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"}
+              src={brand_settings?.fullLogo || "https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"}
               className="h-10 w-auto"
             />
-            <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
+            <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight" style={{ color: sidebarTextColor }}>
               Sign in to your account
             </h2>
-
           </div>
 
           <div className="mt-10">
             <div>
               <form onSubmit={handleLogin} className="space-y-6">
-
                 <InputField
                   id="email"
                   name="email"
@@ -69,12 +79,11 @@ export const ClientLogin = ({
                   />
                 </div>
 
-                {
-                  authenticationError && (<p id="email-error" className="mt-2 text-sm text-red-600">
+                {authenticationError && (
+                  <p id="email-error" className="mt-2 text-sm" style={{ color: 'red' }}>
                     Not a valid email address.
-                  </p>)
-
-                }
+                  </p>
+                )}
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -82,15 +91,16 @@ export const ClientLogin = ({
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-gray-300"
+                      style={{ accentColor }}
                     />
-                    <label htmlFor="remember-me" className="ml-3 block text-sm leading-6 text-gray-700">
+                    <label htmlFor="remember-me" className="ml-3 block text-sm leading-6" style={{ color: sidebarTextColor }}>
                       Remember me
                     </label>
                   </div>
 
                   <div className="text-sm leading-6">
-                    <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                    <a href="#" className="font-semibold" style={{ color: accentColor }}>
                       Forgot password?
                     </a>
                   </div>
@@ -99,15 +109,17 @@ export const ClientLogin = ({
                 <div>
                   <button
                     type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm"
+                    style={{
+                      backgroundColor: accentColor,
+                      color: sidebarActiveTextColor,
+                    }}
                   >
                     {isLoading ? 'Loading...' : 'Sign in'}
                   </button>
                 </div>
               </form>
             </div>
-
-
           </div>
         </div>
       </div>
@@ -119,6 +131,7 @@ export const ClientLogin = ({
         />
       </div>
     </div>
+
 
   );
 };

@@ -1,29 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { SearchDropdown } from '../../components/UI/searchDropdown';
 
 import {
   Box,
-  Button,
-  Checkbox,
-  Flex,
-  Spinner,
-  Text,
-  Textarea,
+
 } from '@chakra-ui/react';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useRealtimePortalClients } from '../../hooks/useRealtimePortalClients';
-import useInvoice from '../../hooks/useInvoice';
-import Example from '../../components/Example';
 import Breadcrumb from '../../components/Breadcrumb';
 import Select from '../../components/Select';
 import InvoicePaymentSettings from '../../components/InvoicePaymentSettings';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import InvoiceLineItemsTable from '../../components/table/InvoiceLineItemsTable';
+import useInvoice from '../../hooks/invoice/useInvoice';
+import InputField from '../../components/InputField';
 
 export const InvoiceForm = () => {
   const { user } = useSelector(state => state.auth);
@@ -31,11 +25,10 @@ export const InvoiceForm = () => {
   const { mode } = useParams();
   const clientsData = useRealtimePortalClients(user, portal);
 
+  const settings = portal?.settings
+
   const { invoiceState, setInvoiceState, saveInvoice, isClientError, updateInvoice } = useInvoice({
-    settings: {
-      card: portal?.settings?.card,
-      ach_debit: portal?.settings?.ach_debit,
-    }
+    settings 
 
   })
 
@@ -83,34 +76,47 @@ export const InvoiceForm = () => {
 
         </div>
         <div className='pt-0 pb-100px  w-[800px] max-w-full mx-auto lg:mt-[70px] px-5'>
+          {/* Title and description input */}
+          <div className='space-y-3 mb-4'>
+            <InputField
+              id="title"
+              name="title"
+              type="text"
+              placeholder="Enter title"
+              label="Title"
+              value={invoiceState.title}
+              handleChange={(e) => setInvoiceState({
+                ...invoiceState,
+                title: e.target.value,
+              })}
+            />
+            <InputField
+              id="description"
+              name="description"
+              type="text"
+              placeholder="Enter description"
+              label="Description"
+              value={invoiceState.description}
+              handleChange={(e) => setInvoiceState({
+                ...invoiceState,
+                description: e.target.value,
+              })}
+            />
+          </div>
 
-
-          {/*       <Flex alignItems={'center'} justifyContent={'space-between'}>
-          <h1>Invoice Form</h1>
-          <Box>
-            <Button variant={'ghost'}>Cancel</Button>
-            <Button onClick={() => {
-
-              if (mode === 'edit') {
-                updateInvoice()
-              } else {
-                saveInvoice()
-
-              }
-            }} isLoading={invoiceState.isLoading}>
-              {mode === 'edit' ? 'update' : 'create'}
-            </Button>
-          </Box>
-        </Flex> */}
-
-          {/* <SearchDropdown defaultValue={invoiceState.client} users={clientsData} onSelectUser={handleSelectUser} /> */}
           <Select
             list={clientsData}
             placeholder={'Select Client'}
             selected={invoiceState.client}
             setSelected={handleSelectUser}
             label="Select Client"
-            renderItem={(client) => <p className='block truncate font-normal group-data-[selected]:font-semibold'>{client?.name}</p>}
+            renderItem={(client) => (
+
+              <>
+                <p className='block truncate font-normal group-data-[selected]:font-semibold'>{client?.name}</p>
+                <p className='block truncate text-sm text-gray-500 group-data-[selected]:text-gray-900'>{client?.email}</p>
+              </>
+            )}
           />
           {isClientError && <p className='text-sm mt-1 font-semibold text-red-500 ' >Please select a client</p>}
           <InvoiceLineItemsTable lineItems={invoiceState.line_items} setLineItems={(val) => {
@@ -120,11 +126,6 @@ export const InvoiceForm = () => {
               line_items: val,
             });
           }} />
-          {/* <ItemsComponent defaultValue={invoiceState.line_items} onUpdateItems={val => setInvoiceState({
-          ...invoiceState,
-          line_items: val,
-
-        })} /> */}
 
           <div>
             <label htmlFor="comment" className="block text-sm font-medium leading-6 text-gray-900">

@@ -23,36 +23,7 @@ import Example from '../../components/Example';
 import InvoiceTable from '../../components/table/InvoicesTable';
 
 
-const InvoiceItem = ({ invoice, updateInvoiceStatusFirebase }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const navigate = useNavigate()
-  return (
-    <ClientInvoiceItem invoice={invoice} >
-      <Flex alignItems={'center'} >
-        {
-          invoice.status === 'draft' && (
-            <Button isLoading={isOpen} w={'150px'} size={'sm'} colorScheme="blue" onClick={async () => {
-              onOpen()
-              await updateInvoiceStatusFirebase(invoice);
-              onClose()
-            }}>
-              Finalized
-            </Button>
-          )
-        }
 
-        {
-          invoice.status !== 'finalized' && invoice.status !== 'paid' && (
-            <Button onClick={() => navigate(`/billing/edit?id=${invoice.id}`)} ml={3} leftIcon={<MdEdit />
-            } >edit</Button>
-
-          )
-        }
-
-      </Flex>
-    </ClientInvoiceItem>
-  )
-}
 
 export const Invoices = () => {
   const navigate = useNavigate();
@@ -72,7 +43,7 @@ export const Invoices = () => {
 
       const { data, error } = await supabase
         .from('invoices')
-        .select('*, clients(email)')
+        .select('*, clients(*)')
         .eq('portal_id', portal.id);
 
 
@@ -108,41 +79,7 @@ export const Invoices = () => {
     };
   }, [portal]);
 
-  const updateInvoiceStatusFirebase = async invoice => {
-    let paymentMethodArray = [];
-    if (invoice.settings.achDebit) {
-      paymentMethodArray.push('us_bank_account');
-    }
-    if (invoice.settings.card) {
-      paymentMethodArray.push('card');
-    }
-    const res = await fetch(
-      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-invoice`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId: invoice.client.customerId,
-          stripeConnectAccountId: portal.stripeConnectAccountId,
-          line_items: invoice.lineItems,
-          payment_settings: {
-            payment_method_types: paymentMethodArray,
-          },
-          invoiceId: invoice.id,
-          isFromApp: 'true',
-          memo: invoice.memo
-        }),
-      }
-    );
-    await res.json();
-    const ref = doc(db, 'invoices', invoice.id);
 
-    await updateDoc(ref, {
-      status: 'finalized',
-    });
-  };
 
   console.log(invoices)
 
@@ -171,7 +108,11 @@ export const Invoices = () => {
           ))}
         </Box> */}
 
-        <InvoiceTable invoices={invoices} />
+        {
+          invoices.length > 0 && <InvoiceTable invoices={invoices} stripe_connect_account_id={portal.stripe_connect_account_id} />
+        }
+
+
       </Box>
     </Layout>
   );

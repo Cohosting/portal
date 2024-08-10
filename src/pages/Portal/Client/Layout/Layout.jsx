@@ -13,21 +13,41 @@ const Layout = ({ children }) => {
 
     const portal_apps = portal?.portal_apps || [];
     return (
-        <>
-            {
-                isLoading ? <div>Loading...</div> : (
+
                     <>
                         <Sidebar portal={portal} portal_apps={portal_apps} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
                         {/* Static sidebar for desktop */}
-                        <div className="hidden   lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+            <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
                             <Navigation portal={portal} portal_apps={portal_apps} />
                         </div>
-                        <main className="py-10 lg:pl-72">
-                            <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+            <main className=" lg:pl-72">
+                {/* Mobile header */}
+                <div className=" z-50  fixed w-full lg:hidden mb-4 flex items-center justify-between bg-white border-b border-gray-200 p-3">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="p-2 rounded-md border border-gray-300"
+                    >
+                        <svg
+                            className="h-6 w-6 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 6h16M4 12h16m-7 6h7"
+                            />
+                        </svg>
+                    </button>
+                    <p className="text-lg font-semibold">{portal?.name}</p>
+                    <div className="w-8" />
+                </div>
+                {/* className="px-4 sm:px-6 lg:px-8" */}
+                <div >{children}</div>
                         </main>
-                    </>
-                )
-            }
+
 
 
         </>

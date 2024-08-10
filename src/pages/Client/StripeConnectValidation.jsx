@@ -2,6 +2,7 @@ import { Box, Button, Flex, Spinner, Text } from '@chakra-ui/react';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../api/axiosConfig';
 
 export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,16 +19,11 @@ export const StripeConnectValidation = ({ setShouldShowAddClient, portal }) => {
  */    }
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `${process.env.REACT_APP_NODE_URL}/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const data = await res.json();
+
+      // axios
+      const { data } = await axiosInstance.get(`/stripe/connect/account/${stripeConnectAccountId}`);
+      const stripeAccount = data.stripeAccount;
+      console.log({ stripeAccount })
       const account = data.account;
       setShouldShowAddClient(
         portal?.stripe_connect_account_id && account.details_submitted

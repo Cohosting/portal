@@ -29,7 +29,7 @@ export const ClientInviteSuccessModal = ({ isOpen, onClose, temporaryClient }) =
     try {
       setIsLoading(true);
       // Generate a secure password for the client.
-      let password = generateSecurePassword();
+      let password = /* generateSecurePassword() */ '12345678';
       // Hash the password before storing it.
       const hashedPassword = await bcrypt.hash(password, 10);
 

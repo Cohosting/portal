@@ -23,7 +23,7 @@ const PaymentMethodList = ({ }) => {
             setError(null);
 
             try {
-                const response = await fetch(`${process.env.REACT_APP_NODE_URL}/customers/${portal.customerId}/payment-methods`);
+                const response = await fetch(`${process.env.REACT_APP_NODE_URL}/api/customers/${portal.customerId}/payment-methods`);
                 const data = await response.json();
                 console.log({ response })
                 setPaymentMethods(data);
@@ -76,7 +76,7 @@ const PaymentMethodList = ({ }) => {
             />
 
             <Button onClick={async () => {
-                const res = await fetch(`${process.env.REACT_APP_NODE_URL}/customers/create-customer-portal-session`, {
+                const res = await fetch(`${process.env.REACT_APP_NODE_URL}/api/customers/portal-session`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

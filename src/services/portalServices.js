@@ -2,9 +2,13 @@
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
+import axiosInstance from '../api/axiosConfig';
 
 //Fetch portal data by either ID or URL.
-export const fetchPortalDataByIdOrUrl = async (identifier, identifierType = 'id') => {
+export const fetchPortalDataByIdOrUrl = async (
+  identifier,
+  identifierType = 'id'
+) => {
   console.log('getting refetched');
   if (identifierType === 'url' && identifier === 'dashboard') {
     return {
@@ -29,21 +33,11 @@ export const fetchPortalDataByIdOrUrl = async (identifier, identifierType = 'id'
 
   const { data, error } = await query;
 
-  console.log({ data, error });
-
   if (error) {
     throw new Error(error.message);
   }
 
-  if (data && data.portal_apps) {
-    console.log('portal_apps data:', data.portal_apps);
-  } else {
-    console.log('No portal_apps data found for this portal.');
-  }
-
   // filter default app from portal_apps
-
-  console.log({ data });
   return data;
 };
 export const fetchTeamMemberData = async (portalId, userEmail) => {
@@ -72,21 +66,19 @@ export const updateTeamMemberStatus = async (memberId, status) => {
 };
 
 export const createCustomer = async (uid, email) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_NODE_URL}/create-customer`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId: uid, email }),
-    }
-  );
-  return response.json();
+  const response = await axiosInstance.post('/customers', {
+    userId: uid,
+    email,
+  });
+
+  return response.data;
 };
 
 export const updateCustomerInPortal = async (portalId, customerId) => {
-  await updateDoc(doc(db, 'portals', portalId), { customerId });
+  const { error } = await supabase
+    .from('portals')
+    .update({ customer_id: customerId })
+    .eq('id', portalId);
 };
 
 export const updateSubscriptionStatus = async (
@@ -164,9 +156,6 @@ export const createStripeBillingSessionAndReturn = async customerId => {
 };
 
 export const fetchPortalClients = async portal_id => {
-  console.log({
-    portal_id,
-  });
   const { data, error } = await supabase
     .from('clients')
     .select('*')
@@ -178,3 +167,4 @@ export const fetchPortalClients = async portal_id => {
 
   return data;
 };
+

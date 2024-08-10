@@ -4,13 +4,14 @@ const AppRadio = ({
     label,
     description,
     isChecked,
+    handleClick
 
 }) => {
 
     return (
-        <div className="relative flex items-start pb-4 pt-3.5">
-            <div className="min-w-0 flex-1 text-sm leading-6">
-                <label htmlFor={`account-${label}`} className="font-medium text-gray-900">
+        <div onClick={handleClick} className={` cursor-pointer  flex items-start pb-4 pt-3.5  `}>
+            <div className="min-w-0 flex-1 text-sm leading-6  ">
+                <label htmlFor={`account-${label}`} className="font-medium  text-gray-900">
                     {label}
                 </label>
                 <p id={`account-${description}-description`} className="text-gray-500">
@@ -19,7 +20,7 @@ const AppRadio = ({
             </div>
             <div className="ml-3 flex h-6 items-center">
                 <input
-                    value={isChecked}
+                    checked={isChecked}
                     name="account"
                     type="radio"
                     aria-describedby={`account-${description}-description`}

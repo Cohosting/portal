@@ -19,7 +19,7 @@ import {
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
-import Avatar from '../../components/Avatar';
+import Avatar from '../../components/UI/Avatar';
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
@@ -64,16 +64,9 @@ export default function SidebarContent() {
         },
     ];
     return (
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-20 bg-white px-6 pb-4">
-            <div className="flex h-16 shrink-0 items-center">
-                <img
-                    alt="Your Company"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                    className="h-8 w-auto"
-                />
-            </div>
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-20 bg-white px-4 pb-4">
 
-            <div className='flex'>
+            <div className='flex pt-5'>
                 <Avatar fullName={user?.name || ''} imageUrl={user?.avatar} size="large" />
                 <div className="ml-3">
                     <div className="text-sm font-semibold text-gray-700">{user?.name}</div>
@@ -96,7 +89,7 @@ export default function SidebarContent() {
                                                     isCurrent(item.href)
                                                         ? 'bg-gray-50 text-indigo-600'
                                                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
-                                                    'group flex gap-x-3 rounded-md p-2 text-sm font-semibold w-full leading-6',
+                                                    'group flex gap-x-3 rounded-md p-2 text-xs font-semibold w-full leading-6',
                                                 )}
                                             >
                                                 <item.icon
@@ -113,7 +106,7 @@ export default function SidebarContent() {
                                                 <DisclosureButton
                                                     className={classNames(
                                                         isCurrent(item.href) ? 'bg-gray-50' : 'hover:bg-gray-50',
-                                                        'group flex w-full items-center gap-x-3 rounded-md p-2 text-left text-sm font-semibold leading-6 text-gray-700',
+                                                        'group flex w-full items-center gap-x-3 rounded-md p-2 text-left text-xs font-semibold leading-6 text-gray-700',
                                                     )}
                                                 >
                                                     <item.icon aria-hidden="true" className="h-6 w-6 shrink-0 text-gray-400" />
@@ -164,7 +157,7 @@ export default function SidebarContent() {
                                         isCurrent(item.href)
                                             ? 'bg-gray-50 text-indigo-600'
                                             : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
-                                        'group flex gap-x-3 rounded-md p-2 text-sm font-semibold w-full leading-6',
+                                        'group flex gap-x-3 rounded-md p-2 text-xs font-semibold w-full leading-6',
                                     )}
                                 >
                                     <item.icon

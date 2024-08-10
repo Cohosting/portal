@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-
-
 import { verifyToken } from '../services/clientAuthService'
 import { useDisclosure } from '@chakra-ui/react';
+import axiosInstance from '../api/axiosConfig';
 
 export const useClientAuth = (portal_id) => {
     const [clientUser, setClientUser] = useState(null);
@@ -29,27 +28,19 @@ export const useClientAuth = (portal_id) => {
         };
 
         verifyStoredToken();
-    }, [portal_id]);// Add dependencies to control effect re-execution
+    }, [portal_id]);
     const authenticate = async (email, password, portalId) => {
         onOpen()
         try {
-            const response = await fetch(`${process.env.REACT_APP_NODE_URL}/client-auth/signInWithEmailAndPassword`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Additional headers if needed
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    portalId
-                }),
-            });
-            const res = await response.json();
-            console.log(res)
-            if (res.success) {
+
+            const { data } = await axiosInstance.post('/auth/sign-in', {
+                email,
+                password,
+                portalId
+            })
+            if (data.success) {
                 // Handle success (e.g., set session token, redirect)
-                setSessionToken(res.token);
+                setSessionToken(data.token);
                 window.location.href = '/portal/messages';
 
             } else {

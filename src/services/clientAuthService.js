@@ -1,14 +1,12 @@
+import axiosInstance from '../api/axiosConfig';
+
 export const verifyToken = async (token, portalId) => {
   try {
-    const response = await fetch(
-      `${process.env.REACT_APP_NODE_URL}/client-auth/verifyToken`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, portalId }),
-      }
-    );
-    const data = await response.json();
+    const { data } = await axiosInstance.post('/auth/verify-token', {
+      token,
+      portalId,
+    });
+
     return data;
   } catch (error) {
     console.error('Error verifying token:', error);

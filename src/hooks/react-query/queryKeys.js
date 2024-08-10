@@ -1,4 +1,6 @@
 // src/hooks/react-query/queryKeys.js
+
+
 export const queryKeys = {
   userData: 'userData',
   portalData: portalId => ['portalData', portalId],
@@ -6,4 +8,11 @@ export const queryKeys = {
   clientPortalData: url => ['clientPortalData', url],
   portalClients: portal_id => ['portalClients', portal_id],
   app: appId => ['app', appId],
+  invoice: invoiceId => ['invoice', invoiceId],
+  clientPaymentMethod: customer_id => ['client-payment-method', customer_id],
+  conversations: portal_id => ['conversations', portal_id],
+  messages: conversation_id => ['messages', conversation_id],
+  invoices: filter => ['invoices', filter],
+  invoiceCounts: portal_id => ['invoiceCounts', portal_id],
 };
+

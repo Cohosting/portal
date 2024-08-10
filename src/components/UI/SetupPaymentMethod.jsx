@@ -30,7 +30,7 @@ export const SetupPaymentMethod = ({ isOpen, handleClose, forFailedPayment }) =>
     useEffect(() => {
         if (!portal) return;
         // Create a Checkout Session as soon as the page loads
-        fetch(`${process.env.REACT_APP_NODE_URL}/customers/create-setup-session`, {
+        fetch(`${process.env.REACT_APP_NODE_URL}/customers/setup-session`, {
             method: 'POST',
 
             headers: {

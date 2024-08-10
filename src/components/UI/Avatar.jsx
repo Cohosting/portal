@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const Avatar = ({ fullName, size, imageUrl }) => {
-    const getInitials = (name) => {
+const getInitials = (name) => {
         const namesArray = name.split(' ');
         const initials = namesArray.map((n) => n[0]).join('').substring(0, 2).toUpperCase();
         return initials;
-    };
+};
 
+const Avatar = ({ fullName, size, imageUrl }) => {
     const sizeClasses = {
         small: 'h-6 w-6 text-xs',
         medium: 'h-8 w-8 text-sm',

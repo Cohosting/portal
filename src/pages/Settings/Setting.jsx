@@ -23,7 +23,7 @@ const SettingItem = React.memo(({ label, isChecked, onChange }) => (
 const StripeAccountVerification = ({ stripeUser, isLoading, portal, createStripeAccount }) => {
   if (!stripeUser) return null;
 
-  if (stripeUser.details_submitted && stripeUser.charges_enabled) {
+  if (stripeUser?.details_submitted && stripeUser?.charges_enabled) {
     return (
       <Box my={3}>
         <Text color="green" fontSize="20px">
@@ -39,7 +39,7 @@ const StripeAccountVerification = ({ stripeUser, isLoading, portal, createStripe
         </Button>
       </Box>
     );
-  } else if (stripeUser.requirements.currently_due.length > 0 || stripeUser.requirements.past_due.length > 0) {
+  } else if (stripeUser?.requirements?.currently_due.length > 0 || stripeUser?.requirements?.past_due.length > 0) {
     return (
       <Box my={2}>
         <Text color="red.700">

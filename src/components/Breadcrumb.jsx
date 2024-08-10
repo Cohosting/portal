@@ -6,7 +6,7 @@ const Breadcrumb = ({ pages }) => {
 
   return (
     <nav aria-label="Breadcrumb" className="flex truncate max-w-xs">
-      <ol role="list" className="flex items-center space-x-2">
+      <ol className="flex items-center space-x-2">
         <li>
           <div>
             <a href="#" className="text-gray-400 hover:text-gray-500">

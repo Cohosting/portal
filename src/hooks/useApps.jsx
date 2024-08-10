@@ -33,13 +33,6 @@ export function useApps(portal) {
     const handleUpdate = async () => {
         try {
             setIsLoading(true); 
-/*             const portalRef = doc(db, 'portals', portal.id);
-            await updateDoc(portalRef, {
-                apps: list,
-            });
- */
-            // update the logic to supabase
-
             const { data, error } = await supabase
                 .from('portal_apps')
                 .upsert(list);
@@ -73,7 +66,6 @@ export function useApps(portal) {
                 item.index = index;
             });
 
-            // update the logic to supabase
             const { data, error } = await supabase
                 .from('portal_apps')
                 .delete()
@@ -107,13 +99,6 @@ export function useApps(portal) {
                 }
                 return item;
             });
-/*             const portalRef = doc(db, 'portals', portal.id);
-            await updateDoc(portalRef, {
-                apps: newList,
-            });
- */
-
-            // update the logic to supabase
             const { data, error } = await supabase
                 .from('portal_apps')
                 .update({ disabled: value })
@@ -124,10 +109,7 @@ export function useApps(portal) {
                 return;
             }
 
-
             setList(newList);
-
-
             toast({
                 title: 'App updated.',
                 description: 'The app has been successfully updated.',

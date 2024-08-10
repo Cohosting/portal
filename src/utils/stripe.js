@@ -1,26 +1,20 @@
+import axiosInstance from '../api/axiosConfig';
+
 export const createStripeConnectAccount = async (
   portalOwnerId,
   stripeConnectAccountId,
   portalId,
   cb
 ) => {
-  cb &&  cb(true);
+  cb && cb(true);
   try {
-    const response = await fetch(
-      `${process.env.REACT_APP_NODE_URL}/connect/create-connect-session`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: portalOwnerId,
-          stripeConnectAccountId,
-          portalId,
-        }),
-      }
-    );
-    const { accountLink } = await response.json();
+    const response = await axiosInstance.post('stripe/connect/client/session', {
+      userId: portalOwnerId,
+      stripeConnectAccountId,
+      portalId,
+    });
+    const { accountLink } = response.data;
+
     cb && cb(false);
     window.location.href = accountLink.url;
   } catch (err) {
@@ -29,17 +23,9 @@ export const createStripeConnectAccount = async (
 };
 
 export const fetchStripeUser = async stripeConnectAccountId => {
-  const response = await fetch(
-    `${process.env.REACT_APP_NODE_URL}/connect/get-connect-user?stripeConnectAccountId=${stripeConnectAccountId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
+  const { data } = await axiosInstance.get(
+    `/stripe/connect/account/${stripeConnectAccountId}`
   );
-  if (!response.ok) {
-    throw new Error('Failed to fetch stripe user');
-  }
-  return response.json();
+
+  return data.stripeAccount;
 };

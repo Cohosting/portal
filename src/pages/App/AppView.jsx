@@ -67,7 +67,7 @@ export const renderAppContent = (settings, isLoading, handleIframeLoad) => {
                   style={{
                     overflow: 'hidden'
                   }}
-                  src={isValidBrandUrl(settings.content)}
+                    src={settings.content}
                   width="100%"
                   height="100%"
                   allowFullScreen

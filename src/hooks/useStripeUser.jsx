@@ -12,7 +12,7 @@ export const useStripeUser = (stripeConnectAccountId) => {
             setIsLoading(true);
             try {
                 const data = await fetchStripeUser(stripeConnectAccountId);
-                setStripeUser(data.account);
+                setStripeUser(data);
             } catch (err) {
                 setError(err.message);
             } finally {

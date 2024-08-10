@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import { createInvoice, fetchInvoiceData, updateClientInvoice } from '../services/invoiceService';
 import { useSelector } from 'react-redux';
-import { usePortalData } from './react-query/usePortalData';
 import { v4 as uuidv4 } from 'uuid';
+import { usePortalData } from '../react-query/usePortalData';
+import { createInvoice, fetchInvoiceData, updateClientInvoice } from '../../services/invoiceService';
 
 
 const defaultInvoiceState = {
+  title: '',
+  description: '',
   isLoading: false,
   line_items: [{
     id: uuidv4(),

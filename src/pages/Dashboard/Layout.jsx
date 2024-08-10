@@ -4,19 +4,30 @@ import SidebarStatic from './SidebarStatic';
 // import Navbar from './Navbar';
 // import MainContent from './MainContent';
 
-export const Layout = ({ children, headerName = 'Dashboard', hideMobileNav = false }) => {
+export const Layout =
+  ({ children,
+    headerName = 'Dashboard',
+    showSidebar = true,
+    hideMobileNav = false,
+    containerPaddingStyle = 'lg:pl-[14rem]'
+
+
+  }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <>
       <SidebarDialog sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <SidebarStatic />
-      <div className="lg:pl-72">
+      {
+        showSidebar && <SidebarStatic />
+      }
+
+      <div className={containerPaddingStyle}>
           {/* Mobile header */}
         {
           !hideMobileNav && (
 
-            <div className="  fixed w-full lg:hidden mb-4 flex items-center justify-between bg-white border-b border-gray-200 p-3">
+            <div className=" z-50  fixed w-full lg:hidden mb-4 flex items-center justify-between bg-white border-b border-gray-200 p-3">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 rounded-md border border-gray-300"
@@ -40,8 +51,8 @@ export const Layout = ({ children, headerName = 'Dashboard', hideMobileNav = fal
           </div>
           )
         }
-
-        <main className={`flex max-lg:pt-16 overflow-y-auto  relative flex-col h-screen   ${hideMobileNav ? 'px-0' : 'px-4'}`}>
+        {/* ${hideMobileNav ? 'px-0' : 'px-2'} */}
+        <main className={`flex   overflow-y-auto  relative flex-col h-screen   `}>
 
           {children}
         </main>

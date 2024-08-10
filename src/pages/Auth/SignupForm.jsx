@@ -55,7 +55,7 @@ const SignupForm = ({ isLargerThan450 }) => {
                             <button
                                 onClick={signup}
                                 type="submit"
-                                className="btn-indigo"
+                                className="btn-indigo w-full"
                             >
                                 {
                                     isLoading ? 'Loading...' : 'Sign in'

@@ -130,7 +130,7 @@ export const Pricing = () => {
     setIsSubscriptionLoading(true);
 
     const res = await fetch(
-      `${process.env.REACT_APP_NODE_URL}/checkDefaultPaymentMethod/${portal.customerId}`,
+      `${process.env.REACT_APP_NODE_URL}/api/customers/${portal.customerId}/default-payment-method/`,
       {
         method: 'GET',
         headers: {

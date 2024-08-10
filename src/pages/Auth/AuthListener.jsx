@@ -31,7 +31,7 @@ const AuthListener = ({ children }) => {
         const fetchUserData = async () => {
             try {
                 if (session) {
-                    console.log('session found', session)
+                    // console.log('session found', session)
                     const { data, error } = await supabase
                         .from('users')
                         .select('*')
