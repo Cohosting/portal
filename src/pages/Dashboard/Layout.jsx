@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SidebarDialog from './SidebarDialog';
 import SidebarStatic from './SidebarStatic';
+import { useConversationContext } from '../../context/useConversationContext';
 // import Navbar from './Navbar';
 // import MainContent from './MainContent';
 
@@ -14,6 +15,8 @@ export const Layout =
 
   }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { listRef } = useConversationContext()
+
 
   return (
     <>
@@ -52,7 +55,7 @@ export const Layout =
           )
         }
         {/* ${hideMobileNav ? 'px-0' : 'px-2'} */}
-        <main className={`flex   overflow-y-auto  relative flex-col h-screen   `}>
+        <main ref={listRef} className={`flex unique column-reverse overflow-auto  relative flex-col h-screen   `}>
 
           {children}
         </main>

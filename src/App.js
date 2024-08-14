@@ -7,13 +7,14 @@ import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import Examples from './components/Examples';
+import { ConversationProvider } from './context/useConversationContext';
 
 function App() {
   return (
-    <>
+    <ConversationProvider>
       <RouterProvider router={router} />
       <ToastContainer />
-    </>
+    </ConversationProvider>
   );
     
 }

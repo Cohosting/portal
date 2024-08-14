@@ -2,9 +2,7 @@ import React from 'react';
 import { Dialog, DialogBackdrop, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 const MediaModal = ({ isOpen, onClose, mediaType, mediaUrl }) => {
-    console.log({
-        mediaType, mediaUrl
-    })
+
     return (
         <Transition appear show={isOpen} as={React.Fragment}>
             <Dialog

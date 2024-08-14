@@ -6,8 +6,8 @@ const store = configureStore({
   reducer: {
     auth: authReducer,
   },
-  devTools: process.env.NODE_ENV !== 'production', // Enable DevTools only in development
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logger),
+  // devTools: process.env.NODE_ENV !== 'production', // Enable DevTools only in development
+  // middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logger),
 });
 
 export default store;

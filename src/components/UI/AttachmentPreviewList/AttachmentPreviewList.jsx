@@ -7,7 +7,7 @@ const AttachmentPreviewList = ({ images, onFileUpload, onRemove, setIsFileUpload
             {images.map((image, index) => (
                 <AttachmentPreview
                     setIsFileUploading={setIsFileUploading}
-                    key={index}
+                    key={image.name}
                     file={image}
                     onRemove={() => onRemove(index)}
                     onFileUpload={onFileUpload}

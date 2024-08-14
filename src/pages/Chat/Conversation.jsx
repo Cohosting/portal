@@ -1,131 +1,200 @@
+// components/Conversation.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import ConversationHeader from '../../components/Chat/ConversationWindow/ConversationHeader';
 import MessageInput from '../../components/Chat/ConversationWindow/MessageInput';
 import MessageList from '../../components/Chat/ConversationWindow/MessageList';
-
-import { v4 as uuidv4 } from 'uuid';
-import { useSelector } from 'react-redux';
-import { sendMessage } from '../../services/chat';
-import { useRealtimeMessages } from '../../hooks/react-query/useChat';
-import { supabase } from '../../lib/supabase';
-import { toast } from 'react-toastify';
 import { Spinner } from '@phosphor-icons/react';
+import { useConversation } from '../../hooks/useConversation';
+import { useSelector } from 'react-redux';
+import { useConversationContext } from '../../context/useConversationContext';
+import { markAsSeen } from '../../services/chat';
+import { useLastElementObserver } from '../../hooks/useLastElementObserver';
+import FloatingNewMessageAlert from '../../components/UI/FloatingNewMessageAlert';
+import { useHandleNewMessage } from '../../hooks/conversations/useHandleNewMessage';
+import { useMarkConversationAsSeen } from '../../hooks/conversations/useMarkConversationAsSeen';
+import { useScrollToEndOnMessageChange } from '../../hooks/conversations/useScrollToEndOnMessageChange';
 
 const Conversation = () => {
     const { conversationId } = useParams();
-    const { isConversationsListLoading } = useOutletContext();
-    const { isLoading, messages, setMessages } = useRealtimeMessages(conversationId);
-    const [isFileUploading, setIsFileUploading] = useState(false);
-    const { user } = useSelector((state) => state.auth);
-    const messagesEndRef = useRef(null);
+    const hasMarkedAsSeenRef = useRef(false);
+    const lastElementVisible = useRef(null);
+    const containerRef = useRef(null);
+    const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
 
-    useEffect(() => {
-        // Scroll to bottom when messages are loaded or updated
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
+    const onMount = useRef(true);
 
-    const handleSendMessage = async (content, selectedMood, selectedFiles, selectedFilePublicUrls) => {
-        const id = uuidv4();
-        const newMessage = {
-            id,
-            created_at: new Date().toISOString(),
-            content,
-            status: 'pending',
-            conversation_id: conversationId,
-            sender_id: user.id,
-            sender: {
-                id: user.id,
-                name: user.name,
-                avatar_url: user.avatar_url,
-            },
-            attachments: selectedFilePublicUrls,
-        };
+    const { isConversationsListLoading, conversations } = useOutletContext();
+    const { user } = useSelector(state => state.auth);
+    const {
+        isLoading,
+        messages,
+        hasMore,
+        moreLoading,
+        isFileUploading,
+        setIsFileUploading,
+        messagesEndRef,
+        handleFetchMore,
+        handleSendMessage,
+        handleDeleteConversation,
+        fetchedWay
+    } = useConversation(conversationId, user, conversations);
+    const { listRef } = useConversationContext();
+    useScrollToEndOnMessageChange(messages, messagesEndRef, lastElementVisible);
+    useMarkConversationAsSeen(messages, conversations, conversationId, user.id);
+    useHandleNewMessage(messages, conversationId, conversations, fetchedWay, lastElementVisible, setIsFloatingAlertVisible, user.id);
+    //     if (!messages.length) return;
 
-        // Optimistically update the UI
-        setMessages((oldMessages) => [...oldMessages, newMessage]);
+    //     if (messagesEndRef.current) {
+    //         if (lastElementVisible.current) {
+    //             messagesEndRef.current.scrollIntoView({ behavior: "instant" });
+    //         } else if (onMount.current) {
+    //             messagesEndRef.current.scrollIntoView({ behavior: "instant" });
+    //             onMount.current = false;
+    //         }
+    //     }
+    // }, [messages, messagesEndRef, lastElementVisible, onMount]);
 
-        try {
-            const response = await sendMessage({
-                ...newMessage,
-                status: 'sent',
-            });
-            // Update the message status to 'sent'
-            setMessages((oldMessages) =>
-                oldMessages.map((msg) =>
-                    msg.id === id ? { ...msg, status: 'sent', id: response.id } : msg
-                )
-            );
-        } catch (error) {
-            console.error('Error sending message:', error);
-            setMessages((oldMessages) =>
-                oldMessages.map((msg) =>
-                    msg.id === id ? { ...msg, status: 'failed' } : msg
-                )
-            );
+
+    // // This hook will mark the conversation as seen when the messages are loaded
+
+    // useEffect(() => {
+    //     if (messages.length > 0 && !hasMarkedAsSeenRef.current) {
+    //         console.log(`Message length: ${messages.length} and hasMarkedAsSeenRef: ${hasMarkedAsSeenRef.current}`);
+    //         let currentConversation = conversations.find(
+    //             conv => conv.id === conversationId
+    //         );
+    //         if (currentConversation) {
+    //             console.log('Marking as seen...');
+    //             markAsSeen(currentConversation, user.id).then((res) => console.log(res));
+    //             // Set the ref to true after markAsSeen is called
+    //             hasMarkedAsSeenRef.current = true;
+    //         }
+    //     }
+    // }, [messages, conversations, conversationId, user.id,]);
+
+
+    // useEffect(() => {
+    //     // when new message came and fetchedWay is 'INSERT' check if the last message is in view and mark it as seen if it is in the view! If not in view then render the floating alert to notify the user that there is a new message and he can scroll to see it and mark it as seen
+    //     console.log(`Hook: ${fetchedWay.current}`);
+    //     if (messages.length > 0 && fetchedWay.current === 'INSERT') {
+    //         if (lastElementVisible.current) {
+    //             console.log('Marking as seen...');
+    //             const currentConversation = conversations.find(
+    //                 conv => conv.id === conversationId
+    //             );
+    //             markAsSeen(currentConversation, user.id).then((res) => console.log(res))
+    //         } else {
+    //             console.log('New message is not in view');
+    //             setIsFloatingAlertVisible(true);
+
+    //         }
+    //     }
+
+    // }, [messages, conversationId, conversations, fetchedWay])
+
+    // Callback function to handle visibility
+    const handleVisibilityChange = (isVisible) => {
+        if (isVisible) {
+            console.log('The last item is in view!');
+            lastElementVisible.current = true;
+            if (isFloatingAlertVisible) {
+                setIsFloatingAlertVisible(false);
+                if (conversations.length > 0 && user.id) {
+                    markAsSeen(conversations.find(conv => conv.id === conversationId), user.id)
+                } else {
+                    throw new Error('Conversations array is empty or user id is not available')
+                }
+            }
+        } else {
+            console.log('The last item is not in view.');
+            lastElementVisible.current = false;
         }
     };
 
-    const handleDeleteConversation = async () => {
-        console.log('Delete Conversation');
-
-        // Delete conversation from the database
-        const { error } = await supabase.from('conversations').delete().eq('id', conversationId);
-        if (error) {
-            console.error('Error deleting conversation:', error);
-        }
-
-        // Error toast using react-toastify
-        toast.success('Conversation deleted successfully', {
-            style: {
-                fontSize: '14px'
-            }
-        });
-
-
-
-    }
+    // Get the observeLastElement function from the custom hook
+    const observeLastElement = useLastElementObserver(handleVisibilityChange, {
+        root: listRef.current,
+        threshold: 1
+    });
 
     if (isConversationsListLoading) {
-        return (<div className="flex justify-center mt-5 items-center">
-            <Spinner className='animate-spin ' size={32} ></Spinner>
-        </div>)
+        return (
+            <div className="flex justify-center mt-5 items-center">
+                <Spinner className='animate-spin' size={32} />
+            </div>
+        );
     }
-
-
+    console.log({
+        messages
+    })
 
     return (
-        <div className="p-6 px-0 pt-0 pb-0 min-h-screen flex flex-col">
-            {isLoading && (
-                <div className="absolute top-0 left-0 w-full h-full bg-white bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+        <div ref={containerRef} className="p-6 px-0 pt-0 pb-0 min-h-screen flex flex-col">
+            {isLoading ? (
+                <div className="  mt-10 w-full h-full bg-white bg-opacity-50 z-50 flex items-center justify-center">
+                    <Spinner className='animate-spin' size={32} />
                 </div>
-            )}
+            ) : (
+                <div>
+                    {!messages && <div className="text-center mt-4">No messages</div>}
 
-            {!messages && <div className="text-center mt-4">No messages</div>}
+                        <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
+                            <ConversationHeader
+                                name={"Sterling Jones"}
+                                handleDeleteConversation={handleDeleteConversation}
+                            />
+                        </div>
 
-            <div className="sticky  px-6 shadow-sm top-0 bg-white z-10 py-3">
-                <ConversationHeader
-                    name={"Sterling Jones"}
-                    handleDeleteConversation={handleDeleteConversation}
-                />
-            </div>
+                        <div className="flex-grow overflow-y-auto"   >
+                            {hasMore && (
+                                <div className="text-center flex items-center justify-center py-4  ">
+                                    <button
+                                        onClick={() => handleFetchMore(listRef)}
+                                        className="bg-gray-100 flex gap-x-2 items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-500"
+                                    >
+                                        {moreLoading && (
+                                            <Spinner className='animate-spin' size={16} />
+                                        )}
+                                        Load more
+                                    </button>
+                                </div>
+                            )}
 
-            <div className="flex-grow">
-                <MessageList messages={messages} user={user} />
-                <div ref={messagesEndRef} />
-            </div>
+                            <MessageList observeLastElement={observeLastElement} messages={messages} user={user} />
+                            <div ref={messagesEndRef} />
+                        </div>
 
-            <div className="sticky px-6 bottom-0 w-full bg-white z-[100]">
-                <MessageInput
-                    isFileUploading={isFileUploading}
-                    setIsFileUploading={setIsFileUploading}
-                    onSendMessage={handleSendMessage}
+                        <div className="sticky bottom-0 w-full bg-transparent z-[100]">
+                            <FloatingNewMessageAlert
+                                onClick={() => {
+                                    setIsFloatingAlertVisible(false)
+                                    if (conversations.length > 0 && user.id) {
+                                        markAsSeen(conversations.find(conv => conv.id === conversationId), user.id)
 
-                />
-            </div>
+                                    } else {
+                                        throw new Error('Conversations array is empty or user id is not available')
+                                    }
+                                }}
+                                showButton={isFloatingAlertVisible} containerRef={containerRef} messagesEndRef={messagesEndRef} />
+
+                            <div className='h-full  px-6 bg-white'>
+                                <MessageInput
+                                    isFileUploading={isFileUploading}
+                                    setIsFileUploading={setIsFileUploading}
+                                    onSendMessage={handleSendMessage}
+                                />
+                            </div>
+
+
+                    </div>
+                </div>
+
+            )
+
+            }
+
+
         </div>
     );
 };

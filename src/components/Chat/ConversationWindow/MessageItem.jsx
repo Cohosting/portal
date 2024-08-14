@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { DotsThreeVertical, } from "@phosphor-icons/react";
+import React, { useState, memo } from "react";
+import { DotsThreeVertical } from "@phosphor-icons/react";
 import DropdownMenu from "../../UI/DropdownMenu";
 import IconButton from "../../IconButton";
 import Avatar from "../../Avatar";
@@ -7,6 +7,7 @@ import FileItem from "../../UI/FileItem";
 import MediaModal from "./MediaModal";
 import { updateMessage } from "../../../services/chat";
 import MessageContent from "./MessageContent";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 const MessageItem = ({
     isOwn,
@@ -17,7 +18,8 @@ const MessageItem = ({
     content,
     status,
     attachments,
-    id
+    id,
+    observeLastElement
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [mediaType, setMediaType] = useState('');
@@ -38,8 +40,6 @@ const MessageItem = ({
     const handleCancelEdit = () => {
         setIsEditing(false);
     };
-
-
 
     const renderMediaGrid = (media) => {
         const mediaCount = media?.length;
@@ -67,7 +67,7 @@ const MessageItem = ({
                                 }}
                             >
                                 {item.type === 'image' ? (
-                                    <img
+                                    <LazyLoadImage
                                         src={item.url}
                                         alt={item.name}
                                         className="w-full h-full object-cover cursor-pointer"
@@ -111,12 +111,13 @@ const MessageItem = ({
 
     return (
         <div
+            ref={observeLastElement}
             className={`relative flex gap-x-4 group ${isOwn ? "flex-row-reverse self-end" : "flex-row self-start"}`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+
         >
             <Avatar size="sm" src={avatarSrc} initial={avatarInitial} />
-            <div className="flex flex-col max-w-[400px] w-full gap-2 cursor-pointer">
+            <div onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)} className="flex flex-col max-w-[400px] w-full gap-2 cursor-pointer">
                 <div className={`flex justify-between items-center gap-2 ${isOwn ? "flex-row-reverse self-end" : "flex-row self-start"}`}>
                     <div className="flex items-center gap-2">
                         <div className="py-0.5 px-2 text-xs leading-5 font-medium text-gray-900">
@@ -128,7 +129,9 @@ const MessageItem = ({
                     </div>
                 </div>
                 <div className="flex items-center">
-                    <div className={`opacity-0 ${isHovered && 'opacity-100'}  m-2`}>
+                    {
+                        isOwn && (   
+                            <div className={`opacity-0 ${isHovered && 'opacity-100'}  m-2`}> 
                         <DropdownMenu
                             trigger={
                                 <IconButton
@@ -144,6 +147,9 @@ const MessageItem = ({
                             ]}
                         />
                     </div>
+                        )
+                    }
+
 
                     <div className="w-full">
                         <div className="flex items-center">
@@ -166,6 +172,26 @@ const MessageItem = ({
                             {renderOtherFiles(otherFiles)}
                         </div>
                     </div>
+                    {
+                        !isOwn && (
+                            <div className={`opacity-0 ${isHovered && 'opacity-100'}  m-2`}>
+                                <DropdownMenu
+                                    trigger={
+                                        <IconButton
+                                            variant="ghost"
+                                            icon={<DotsThreeVertical color="#525866" aria-hidden="true" size={16} weight="bold" />}
+                                            size="small"
+                                            tooltip="Settings"
+                                        />
+                                    }
+                                    options={[
+                                        { name: "Edit", onClick: handleEdit },
+                                        { name: "Delete", onClick: () => { } },
+                                    ]}
+                                />
+                            </div>
+                        )
+                    }
                 </div>
             </div>
             <MediaModal
@@ -178,10 +204,5 @@ const MessageItem = ({
     );
 };
 
-MessageItem.defaultProps = {
-    avatarSrc: null,
-    avatarInitial: null,
-    attachments: []
-};
-
-export default MessageItem;
+// Memoize the component to avoid unnecessary re-renders
+export default memo(MessageItem);

@@ -52,7 +52,7 @@ export const Button = ({
 
     return (
         <button
-            className={`${variantClass} ${className} ${disabledClass} transition-all duration-200 ease-in-out`}
+            className={`${variantClass} ${className} ${disabledClass}  `}
             style={style}
             disabled={disabled || loading}
             {...props}

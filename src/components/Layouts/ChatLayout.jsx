@@ -1,6 +1,6 @@
 
 
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import ConversionHeader from '../Chat/Sidebar/ConversationHeader';
 import ConversationList from '../Chat/Sidebar/ConversationList';
@@ -8,13 +8,12 @@ import { BaseModal } from '../Modal';
 import MassMessageForm from '../Forms/MassMessageForm';
 import NewConversationForm from '../Forms/NewConversationForm';
 
-
 import { useDisclosure, useMediaQuery } from '@chakra-ui/react';
 import { useChatConversations } from '../../hooks/react-query/useChat';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Spinner } from '@phosphor-icons/react';
-const ChatLayout = ({ setIsConversationsListLoading }) => {
+const ChatLayout = ({ setIsConversationsListLoading, setConversations }) => {
     const { user } = useSelector(state => state.auth)
     const { isOpen: isNewConversationOpen, onOpen: onNewConversationOpen, onClose: onNewConversationClose } = useDisclosure()
     const { isOpen: isMassConversationOpen, onOpen: onMassConversationOpen, onClose: onMassConversationClose } = useDisclosure()
@@ -25,7 +24,7 @@ const ChatLayout = ({ setIsConversationsListLoading }) => {
     const handleNewConversation = () => onNewConversationOpen();
     const handleMassConversation = () => onMassConversationOpen();
 
-    const { data: conversations, isLoading } = useChatConversations(user?.portals[0])
+    const { conversations, fetchedWay, isLoading, optimisticMarkLastMessageAsSeen } = useChatConversations(user?.portals[0], conversationId)
 
 
 
@@ -34,7 +33,11 @@ const ChatLayout = ({ setIsConversationsListLoading }) => {
         setIsConversationsListLoading(isLoading)
 
 
-    }, [isLoading, setIsConversationsListLoading])
+    }, [isLoading, setIsConversationsListLoading,])
+
+    useEffect(() => {
+        setConversations(conversations)
+    }, [conversations, setConversations])
     // if (isLoading) return <div className="flex items-center justify-center py-2"> Loading...  </div>
 
 
@@ -60,7 +63,7 @@ const ChatLayout = ({ setIsConversationsListLoading }) => {
                             ) : (
                                 <ul className="flex flex-1 flex-col gap-y-7">
                                     <li>
-                                        <ConversationList conversations={conversations} />
+                                            <ConversationList optimisticMarkLastMessageAsSeen={optimisticMarkLastMessageAsSeen} userId={user.id} conversations={conversations} />
                                     </li>
                                 </ul>
                             )

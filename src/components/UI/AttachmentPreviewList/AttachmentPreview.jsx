@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/solid';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { uploadFile } from '../../../services/fileUploadService';
 import { useParams } from 'react-router-dom';
 import { Dialog, DialogBackdrop } from '@headlessui/react';
@@ -8,7 +8,7 @@ import imageCompression from 'browser-image-compression';
 const compressFile = async (file) => {
     const options = {
         maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
+        maxWidthOrHeight: 600,
         useWebWorker: true,
         initialQuality: 0.75,
     };
@@ -23,13 +23,15 @@ const compressFile = async (file) => {
 
 const AttachmentPreview = ({ file, onRemove, onFileUpload, setIsFileUploading }) => {
     const [uploading, setUploading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const { conversationId } = useParams();
+    const uploadStartedRef = useRef(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        if (!file) return;
-        const uploadAttachment = async () => {
+        if (!file || uploadStartedRef.current) return;
 
+        const uploadAttachment = async () => {
+            uploadStartedRef.current = true;
             try {
                 setIsFileUploading(true);
                 let compressedFile = null;
@@ -48,11 +50,9 @@ const AttachmentPreview = ({ file, onRemove, onFileUpload, setIsFileUploading })
             }
         };
 
-
         uploadAttachment();
 
-
-    }, [file, conversationId, onFileUpload]);
+    }, [file, conversationId, onFileUpload, setIsFileUploading]);
 
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');

@@ -51,7 +51,6 @@ const MessageInput = ({ onSendMessage, onMoodChange, isFileUploading, setIsFileU
                     <div className="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
                         <div className="flex items-center space-x-5">
                             <AttachFileButton onFileSelect={handleFileSelect} />
-                            <MoodSelector selected={selected} onChange={handleMoodChange} />
                         </div>
                         <Button disabled={isFileUploading} type="submit">Send Message</Button>
                     </div>

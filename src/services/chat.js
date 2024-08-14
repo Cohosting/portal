@@ -128,6 +128,23 @@ export const fetchMessages = async conversation_id => {
   return messages;
 };
 
+export const markAsSeen = async (conversation, userId) => {
+  console.log({
+    conversation,
+    user_id: userId,
+  });
+  if (conversation?.last_message?.id) {
+    const { error } = await supabase.rpc('mark_message_seen', {
+      message_id: conversation.last_message?.id,
+      user_id: userId,
+    });
+    if (error) console.error('Error marking as seen:', error);
+    return {
+      message: 'Marked as seen',
+    };
+  }
+};
+
 /**
  * Creates and sends a mass message to multiple participants.
  *
@@ -235,6 +252,144 @@ export const updateMessage = async (messageId, content) => {
   if (error) {
     console.error('Error updating message:', error);
     throw error;
+  }
+
+  return data;
+};
+
+export const fetchInitialMessages = async (conversationId, initialLimit) => {
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*, sender:sender_id (id, name, avatar_url)')
+      .eq('conversation_id', conversationId)
+      .limit(initialLimit)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { data: data.reverse(), hasMore: data.length === initialLimit };
+  } catch (error) {
+    console.error('Error fetching initial messages:', error);
+    throw error;
+  }
+};
+
+export const fetchSender = async senderId => {
+  try {
+    const { data: sender, error } = await supabase
+      .from('users')
+      .select('id, name, avatar_url')
+      .eq('id', senderId)
+      .single();
+
+    if (error) throw error;
+
+    return sender;
+  } catch (error) {
+    console.error('Error fetching sender information:', error);
+    throw error;
+  }
+};
+
+export const handleRealtimePayload = async (
+  payload,
+  setMessages,
+  fetchSender
+) => {
+  const { new: newMessage, old: oldMessage } = payload;
+
+  console.log({ newMessage, oldMessage });
+  if (newMessage && !Object.keys(oldMessage).length) {
+    console.log('New message:', newMessage);
+    // Handle INSERT
+    const sender = await fetchSender(newMessage.sender_id);
+    if (sender) {
+      newMessage.sender = sender;
+    }
+    // because of the optimistic UI update, we need to check if the message already exists
+    // setMessages(prevMessages => [...prevMessages, newMessage]);
+    setMessages(prevMessages =>
+      prevMessages.some(msg => msg.id === newMessage.id)
+        ? prevMessages
+        : [...prevMessages, newMessage]
+    );
+  } else if (newMessage && oldMessage) {
+    // Handle UPDATE
+    const sender = await fetchSender(newMessage.sender_id);
+    if (sender) {
+      newMessage.sender = sender;
+    }
+    setMessages(prevMessages =>
+      prevMessages.map(msg =>
+        msg.id === oldMessage.id ? { ...msg, ...newMessage } : msg
+      )
+    );
+  } else if (!newMessage && oldMessage) {
+    // Handle DELETE
+    setMessages(prevMessages =>
+      prevMessages.filter(msg => msg.id !== oldMessage.id)
+    );
+  }
+};
+
+export const fetchMoreMessages = async (
+  conversationId,
+  initialLimit,
+  messages,
+  listRef,
+  setMessages,
+  setHasMore,
+  setError,
+  fetchedWay
+) => {
+  const currentScrollPosition = listRef.current.scrollTop;
+  const currentScrollHeight = listRef.current.scrollHeight;
+
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*, sender:sender_id (id, name, avatar_url)')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .range(messages.length, messages.length + initialLimit - 1);
+
+    if (error) throw error;
+
+    setMessages(prevMessages => [...data.reverse(), ...prevMessages]);
+    setHasMore(data.length === initialLimit);
+    fetchedWay.current = 'LOAD_MORE';
+
+    setTimeout(() => {
+      const newScrollHeight = listRef.current.scrollHeight;
+      const heightDifference = newScrollHeight - currentScrollHeight;
+      listRef.current.scrollTop = currentScrollPosition + heightDifference;
+    }, 0);
+  } catch (error) {
+    console.error('Error fetching more messages:', error);
+    setError(error);
+  }
+};
+
+export const fetchConversationById = async conversationId => {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      id,
+      name,
+      created_at,
+      updated_at,
+      participants:users!inner(id, name, avatar_url),
+      last_message:last_message_id(id, content, seen, created_at)
+    `
+    )
+    .eq('id', conversationId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching conversation:', error);
+    return null;
   }
 
   return data;
