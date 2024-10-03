@@ -15,3 +15,31 @@ export const fetchClientPaymentMethods = async (
   );
   return data.paymentMethods;
 };
+
+
+
+
+export const deletePaymentMethod = async paymentMethodId => {
+  console.log(`Deleting payment method with id ${paymentMethodId}`);
+  await axiosInstance.delete(`customers/payment-methods/${paymentMethodId}`);
+};
+
+export const retryPayment = async (
+  stripe_subscription_id,
+  payment_method_id,
+  shouldMakeDefault
+) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `/subscription/retry-and-set-default/`,
+      {
+        subscriptionId: stripe_subscription_id,
+        paymentMethodId: payment_method_id,
+        shouldMakeDefault,
+      }
+    );
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

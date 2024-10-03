@@ -1,28 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import {
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  query,
-  where,
-} from 'firebase/firestore';
-import {
   setUser,
   setIsAuthenticated,
   setStep,
-  setStatus,
   setError,
   setPortalURLValidation,
 } from './../slices/authSlice';
-import { getOrCreateUser } from '../../lib/auth';
-import { handleFirebaseError } from '../../utils/firebase';
-import { auth, db } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
+import { signUpUserWithPortalAndSeat } from '../../utils/signupUtils';
 
 export const signupUser = createAsyncThunk(
   'auth/signupUser',
@@ -38,22 +23,25 @@ export const signupUser = createAsyncThunk(
       const { user } = data;
 
       if (error) {
+        console.log(`error`, error);
         throw error;
       }
 
-      const cUser = await getOrCreateUser(user, {
-        ...personalInfoStep,
-        ...businessDetailsStep,
-        is_profile_completed: false,
-        uid: user.id,
-        portals: [],
-        email,
+      const {
+        user: cUser,
+        portal,
+        seat,
+      } = await signUpUserWithPortalAndSeat(user, {});
+
+      console.log({
+        user: cUser,
+        portal,
+        seat,
       });
-      console.log({ cUser });
 
       dispatch(setUser(cUser));
       dispatch(setIsAuthenticated(true));
-      dispatch(setStep(/* getState().auth.step */ 2));
+      // dispatch(setStep(/* getState().auth.step */ 2));
     } catch (err) {
       console.error(err);
       dispatch(setError(err.message));
@@ -65,11 +53,22 @@ export const validatePortalURL = createAsyncThunk(
   'auth/validatePortalURL',
   async (url, { dispatch }) => {
     dispatch(setPortalURLValidation({ isAvailable: false, isChecking: true }));
-    const ref = collection(db, 'portals');
-    const q = query(ref, where('portalURL', '==', url));
-    const querySnapshot = await getDocs(q);
+
+    const { data, error } = await supabase
+      .from('portals')
+      .select('id')
+      .eq('portal_url', url);
+
+    if (error) {
+      console.error('Error validating portal URL:', error);
+      return {
+        isAvailable: false,
+        isChecking: false,
+      };
+    }
+
     return {
-      isAvailable: querySnapshot.empty,
+      isAvailable: data.length === 0,
       isChecking: false,
     };
   }

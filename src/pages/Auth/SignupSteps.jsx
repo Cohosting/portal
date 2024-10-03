@@ -1,7 +1,4 @@
-import { Button } from '@chakra-ui/react';
-import { FaChevronLeft } from 'react-icons/fa';
 import { PersonalInfoStep, BusinessDetailsStep } from './SignupSteps/index';
-import Header from '../../components/Header';
 
 /**
  * Component to manage and display the different steps in the signup process.

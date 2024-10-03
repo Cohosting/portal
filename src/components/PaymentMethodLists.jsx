@@ -13,8 +13,8 @@ const PaymentMethodList = ({ }) => {
 
     const { isOpen, onToggle } = useDisclosure();
 
-    const { user } = useSelector(state => state.auth)
-    const { data: portal } = usePortalData(user.portals)
+    const { currentSelectedPortal } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(currentSelectedPortal)
     useEffect(() => {
         if (!portal) return;
 

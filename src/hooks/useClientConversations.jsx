@@ -39,9 +39,9 @@ export const useClientConversations = (portal_id, client_id) => {
         const updatedConversation = {
             ...conversation,
             last_message: {
-                ...conversation.last_message,
-                seen: conversation.last_message.seen
-                    ? [...conversation.last_message.seen, userId]
+                ...conversation?.last_message,
+                seen: conversation?.last_message?.seen
+                    ? [...conversation?.last_message?.seen, userId]
                     : [userId],
             },
         };

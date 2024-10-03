@@ -19,7 +19,6 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
 import { BanknotesIcon, SquaresPlusIcon } from '@heroicons/react/24/outline';
-import Example from '../../components/Example';
 import InvoiceTable from '../../components/table/InvoicesTable';
 
 
@@ -28,8 +27,8 @@ import InvoiceTable from '../../components/table/InvoicesTable';
 export const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
-  const { user } = useSelector(state => state.auth)
-  const { data: portal } = usePortalData(user?.portals)
+  const { user, currentSelectedPortal } = useSelector(state => state.auth)
+  const { data: portal } = usePortalData(currentSelectedPortal)
   const { isOpen, onOpen, onClose } = useDisclosure({
     defaultIsOpen: true
   })
@@ -47,7 +46,7 @@ export const Invoices = () => {
         .eq('portal_id', portal.id);
 
 
-      console.log({ data })
+
       if (error) {
         console.error('Error fetching invoices:', error);
       } else {
@@ -66,11 +65,24 @@ export const Invoices = () => {
 
     fetchInvoices();
 
-    // Optionally, you can use Supabase's real-time functionality to subscribe to changes in the 'invoices' table.
+
     const subscription = supabase
       .channel(`invoices:portal_id=eq.${portal.id}`)
-      .on('*', payload => {
-        fetchInvoices(); // Re-fetch invoices whenever there's a change
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'invoices',
+        filter: `portal_id=eq.${portal.id}`,
+      }, () => {
+        fetchInvoices();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'invoices',
+        filter: `portal_id=eq.${portal.id}`,
+      }, () => {
+        fetchInvoices();
       })
       .subscribe();
 
@@ -102,11 +114,7 @@ export const Invoices = () => {
         )
       }
       <Box p={4}>
-        {/* <Box>
-          {invoices.map(invoice => (
-            <InvoiceItem updateInvoiceStatusFirebase={updateInvoiceStatusFirebase} invoice={invoice} />
-          ))}
-        </Box> */}
+
 
         {
           invoices.length > 0 && <InvoiceTable invoices={invoices} stripe_connect_account_id={portal.stripe_connect_account_id} />

@@ -1,11 +1,9 @@
 import React, { useContext, useState } from 'react';
 import {
-    Box,
     Heading,
     Text,
     Button,
     Container,
-    Center,
     Flex,
     VStack,
     Divider,

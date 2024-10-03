@@ -11,8 +11,8 @@ const NewConversationForm = ({ onClose }) => {
     const [selectedPeople, setSelectedPeople] = useState([]);
     const [isCreating, setIsCreating] = useState(false);
 
-    const { user } = useSelector(state => state.auth)
-    const { data: clients, isLoading } = usePortalClients(user?.portals[0])
+    const { user, currentSelectedPortal } = useSelector(state => state.auth)
+    const { data: clients, isLoading } = usePortalClients(currentSelectedPortal)
 
     const handleChange = (selected) => {
         setSelectedPeople(selected);
@@ -24,8 +24,9 @@ const NewConversationForm = ({ onClose }) => {
         try {
             setIsCreating(true);
             const newConversationData = {
-                name: "New Group Chat",
-                portal_id: user.portals[0],
+                // add participants names or nme
+                name: selectedPeople.map(person => person.name).join(', '),
+                portal_id: currentSelectedPortal
             };
             const participantIds = selectedPeople.map((participant) => participant.id);
 

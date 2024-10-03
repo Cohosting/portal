@@ -26,6 +26,9 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
   };
 
   const handleSettingsChange = (field, value) => {
+    console.log({
+      field, value
+    })
     setAppState({
       ...appState,
       settings: {
@@ -33,6 +36,14 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
         [field]: value,
       },
     });
+  };
+  const trimExcessiveSpaces = (str) => {
+    // Trim leading and trailing whitespace
+    str = str.trim();
+
+    // Replace sequences of more than one space with a single space
+    // This preserves single spaces between words
+    return str.replace(/\s{2,}/g, ' ');
   };
 
   return (
@@ -89,13 +100,13 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
                 value="embedded"
                 label="Connected as embedded content"
                 description="Shows directly into the portal"
-                handleChange={(e) => handleSettingsChange('viewType', e.target.value)}
+                handleClick={(e) => handleSettingsChange('viewType', 'embedded')}
               />
               <AppRadio
                 value="link"
                 label="Connected as link"
                 description="App opens in a new browser tab"
-                handleChange={(e) => handleSettingsChange('viewType', e.target.value)}
+                handleClick={(e) => handleSettingsChange('viewType', 'link')}
               />
             </div>
           </Box>
@@ -111,7 +122,7 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
                 name="comment"
                 rows={4}
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                defaultValue={''}
+                value={content}
                 onChange={e => handleSettingsChange('content', e.target.value)}
 
               />

@@ -1,20 +1,31 @@
 // Import necessary hooks and libraries
 import { useEffect, useState } from 'react';
-import { useToast } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import { usePortalData } from './react-query/usePortalData';
 import { supabase } from '../lib/supabase';
+import { toast } from 'react-toastify';
+
+let defaultBrandSettings = {
+    poweredByCopilot: false,
+    sidebarBgColor: '#000000',
+    sidebarTextColor: '#FFFFFF',
+    sidebarActiveTextColor: '#FFFFFF',
+    accentColor: '#000000',
+    squareIcon: '',
+    fullLogo: '',
+    squareLoginImage: '',
+}   
 
 export const useCustomizePortalLogic = () => {
-    const { user } = useSelector(state => state.auth);
-    // WARNING: Maybe in future we switch between portals, so passing portals as an array and selecting the first one for now
-    const { data: portal } = usePortalData(user?.portals);
+    const { user, currentSelectedPortal } = useSelector(state => state.auth);
+    const { data: portal } = usePortalData(currentSelectedPortal);
     const [isLoading, setIsLoading] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const [previousSetting, setPreviousSetting] = useState({});
     const [brandSettings, setBrandSettings] = useState({});
-    const toast = useToast();
-
+    console.log({
+        brandSettings
+    })
     // Logic to handle state updates
     const handleUpdateState = (key, value) => {
         setBrandSettings({
@@ -34,15 +45,22 @@ export const useCustomizePortalLogic = () => {
             if (error) {
                 throw error;
             }
-
-
-            toast({
-                title: 'Settings updated.',
-                description: 'The Setting has been successfully updated.',
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
+            toast.success('Portal brand settings updated successfully', {
+                position: 'bottom-center',
+                style: {
+                    fontSize: '16px',
+                    width: '400px', // Increased width of the toast
+                    maxWidth: '90%', // Ensure it doesn't exceed screen width on smaller devices
+                },
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
             });
+            setPreviousSetting(brandSettings);
+            setHasChanges(false);
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
@@ -53,21 +71,35 @@ export const useCustomizePortalLogic = () => {
     useEffect(() => {
         if (portal && portal.brand_settings) {
             console.log(portal.brand_settings)
-            setBrandSettings(portal.brand_settings);
-            setPreviousSetting(portal.brand_settings)
+            setBrandSettings({
+                ...defaultBrandSettings,
+                ...portal.brand_settings,
+            });
+            setPreviousSetting({
+                ...defaultBrandSettings,
+                ...portal.brand_settings,
+            })
         }
     }, [portal]);
     useEffect(() => {
         if (previousSetting !== null) {
+            console.log({
+                previousSetting,
+            })
             const dataChanged = JSON.stringify(brandSettings) !== JSON.stringify(previousSetting);
             setHasChanges(dataChanged);
         }
     }, [brandSettings, previousSetting]);
+
+    const resetBrandSettings = () => {
+        setBrandSettings(previousSetting);
+    }
     return {
         isLoading,
         hasChanges,
         brandSettings,
         handleUpdateState,
         handleUpdatePortalBrand,
+        resetBrandSettings
     };
 };

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 
 // Create the context
 const ConversationContext = createContext();
@@ -7,11 +7,15 @@ const ConversationContext = createContext();
 
 // Create a provider component
 export const ConversationProvider = ({ children }) => {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const listRef = useRef(null);
 
     return (
         <ConversationContext.Provider value={{
-            listRef
+            listRef,
+            sidebarOpen,
+            setSidebarOpen
         }}>
             {children}
         </ConversationContext.Provider>

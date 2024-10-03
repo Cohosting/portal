@@ -90,7 +90,7 @@ export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
       elements,
       clientSecret,
       confirmParams: {
-        return_url: `${process.env.REACT_APP_NODE_URL}/success`,
+        return_url: `${window.location.origin}/success`,
       },
     });
 
@@ -109,7 +109,6 @@ export const SubscriptionForm = ({ priceId, isBrandingPaymentElementOpen }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      {isBrandingPaymentElementOpen && <Text>100$ for custom domain</Text>}
       <PaymentElement />
       <Button
         isLoading={isLoading}

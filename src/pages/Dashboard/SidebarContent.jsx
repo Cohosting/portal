@@ -8,18 +8,20 @@ import {
     HomeIcon,
     UsersIcon,
     PaintBrushIcon,
-    CreditCardIcon,
     AdjustmentsHorizontalIcon,
-    UserCircleIcon,
     CpuChipIcon,
     ArrowRightEndOnRectangleIcon
 
 
 } from '@heroicons/react/24/outline';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import Avatar from '../../components/UI/Avatar';
+import PortalSwitcher from '../../components/UI/PortalSwitcher';
+import { useConversationContext } from '../../context/useConversationContext';
+import { Bank, User, Users } from '@phosphor-icons/react';
+import { useMediaQuery } from '@chakra-ui/react';
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
@@ -29,15 +31,16 @@ function classNames(...classes) {
 const preference = [
     { name: 'App', href: '/apps', icon: ComputerDesktopIcon, current: true },
     { name: 'Customize', href: '/customize', icon: PaintBrushIcon, current: false },
-    { name: 'Team', href: '/team', icon: UsersIcon, current: false },
-    { name: 'Subscription', href: '/subscription', icon: CreditCardIcon, current: false },
-    { name: 'Portal Settings', href: '/settings', icon: AdjustmentsHorizontalIcon, current: false },
-    { name: 'Profile', href: '/settings/me', icon: UserCircleIcon, current: false },
+    { name: 'Portal Settings', href: '/settings/portal', icon: AdjustmentsHorizontalIcon, current: false },
 ];
 
 export default function SidebarContent() {
+    const { setSidebarOpen } = useConversationContext()
     const navigate = useNavigate();
     const locaiton = useLocation()
+    const { appId } = useParams()
+    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)');
+
 
     let isCurrent = (href) => {
         // just for /
@@ -47,8 +50,8 @@ export default function SidebarContent() {
         return locaiton.pathname.includes(href)
     }
 
-    const { user } = useSelector(state => state.auth);
-    const { data: portal } = usePortalData(user?.portals);
+    const { user, currentSelectedPortal } = useSelector(state => state.auth);
+    const { data: portal } = usePortalData(currentSelectedPortal);
 
 
     let portal_apps = portal?.portal_apps?.filter(app => !app.is_default) || []
@@ -60,13 +63,21 @@ export default function SidebarContent() {
         { name: 'Billing', href: '/billing', icon: BanknotesIcon, current: false },
         {
             name: 'App Configurations', href: `${portal_apps.length ?
-                `/apps/${portal_apps[0].id}/app-configurations/` : '/apps/no-apps/app-configurations'}`, icon: CpuChipIcon, current: false, children: portal_apps
+                `/apps/${portal_apps[0]?.id}/app-configurations/` : '/apps/no-apps/app-configurations'}`, icon: CpuChipIcon, current: false, children: portal_apps
         },
     ];
+
+    const mobileNavigation = [
+        { name: 'Account', href: '/settings/account', icon: User, current: false },
+        ...(portal?.created_by === user?.id ? [{ name: 'Subscriptions', href: '/settings/subscriptions', icon: Bank, current: false }] : []),
+        { name: 'Team', href: '/settings/teams', icon: Users, current: false },
+    ].filter(Boolean);
+
     return (
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-20 bg-white px-4 pb-4">
+            <PortalSwitcher />
 
-            <div className='flex pt-5'>
+            <div className='flex '>
                 <Avatar fullName={user?.name || ''} imageUrl={user?.avatar} size="large" />
                 <div className="ml-3">
                     <div className="text-sm font-semibold text-gray-700">{user?.name}</div>
@@ -84,7 +95,10 @@ export default function SidebarContent() {
                                         !item.children?.length ? (
                                             <button
                                                 href={item.href}
-                                                onClick={() => navigate(item.href)}
+                                                onClick={() => {
+                                                    navigate(item.href)
+                                                    setSidebarOpen(false)
+                                                }}
                                                 className={classNames(
                                                     isCurrent(item.href)
                                                         ? 'bg-gray-50 text-indigo-600'
@@ -119,16 +133,19 @@ export default function SidebarContent() {
                                                 <DisclosurePanel as="ul" className="mt-1 px-2">
                                                     {item.children.map((subItem) => (
                                                         <li key={subItem.name}>
-                                                            {/* 44px */}
                                                             <button
 
                                                                 onClick={() => {
-                                                                    navigate(`/apps/${subItem.id}/app-configurations`)
+                                                                    navigate(`/apps/${subItem?.id}/app-configurations`)
+                                                                    setSidebarOpen(false)
                                                                 }}
-                                                                className={classNames(
-                                                                    subItem.current ? 'bg-gray-50' : 'hover:bg-gray-50',
+                                                                className={`w-full text-left ${classNames(
+                                                                    subItem.id === appId ?
+
+                                                                        'border-l-2 border-indigo-600 rounded-l-none bg-gray-50 text-indigo-600 '
+                                                                        : 'hover:bg-gray-50',
                                                                     'block rounded-md py-2 pl-9 pr-2 text-sm leading-6 text-gray-700',
-                                                                )}
+                                                                )}`} 
                                                             >
                                                                 {subItem.name}
                                                             </button>
@@ -152,7 +169,10 @@ export default function SidebarContent() {
 
                                 <button
                                     href={item.href}
-                                    onClick={() => navigate(item.href)}
+                                    onClick={() => {
+                                        navigate(item.href)
+                                        setSidebarOpen(false)
+                                    }}
                                     className={classNames(
                                         isCurrent(item.href)
                                             ? 'bg-gray-50 text-indigo-600'
@@ -170,6 +190,30 @@ export default function SidebarContent() {
                                     {item.name}
                                 </button>
                             ))}
+                            {
+                                isLessThan1024 && mobileNavigation.map((item) => (
+                                    <button
+                                        key={item.name}
+                                        onClick={() => {
+                                            navigate(item.href)
+                                            setSidebarOpen(false)
+                                        }}
+                                        className={classNames(
+                                            isCurrent(item.href) ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                                            'group flex gap-x-3 rounded-md p-2 text-xs font-semibold w-full leading-6',
+                                        )}
+                                    >
+                                        <item.icon
+                                            aria-hidden="true"
+                                            className={classNames(
+                                                isCurrent(item.href) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                                                'h-6 w-6 shrink-0',
+                                            )}
+                                        />
+                                        {item.name}
+                                    </button>
+                                ))
+                            }
                         </ul>
                     </li>
                     <li className="mt-auto">

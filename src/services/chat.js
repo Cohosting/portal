@@ -295,7 +295,8 @@ export const fetchSender = async senderId => {
 export const handleRealtimePayload = async (
   payload,
   setMessages,
-  fetchSender
+  fetchSender,
+  messages
 ) => {
   const { new: newMessage, old: oldMessage } = payload;
 
@@ -307,14 +308,13 @@ export const handleRealtimePayload = async (
     if (sender) {
       newMessage.sender = sender;
     }
-    // because of the optimistic UI update, we need to check if the message already exists
-    // setMessages(prevMessages => [...prevMessages, newMessage]);
     setMessages(prevMessages =>
       prevMessages.some(msg => msg.id === newMessage.id)
         ? prevMessages
         : [...prevMessages, newMessage]
     );
   } else if (newMessage && oldMessage) {
+    console.log(`Updating message ${newMessage.id}`);
     // Handle UPDATE
     const sender = await fetchSender(newMessage.sender_id);
     if (sender) {
@@ -322,7 +322,7 @@ export const handleRealtimePayload = async (
     }
     setMessages(prevMessages =>
       prevMessages.map(msg =>
-        msg.id === oldMessage.id ? { ...msg, ...newMessage } : msg
+        msg.id === newMessage.id ? { ...msg, ...newMessage } : msg
       )
     );
   } else if (!newMessage && oldMessage) {
@@ -393,4 +393,12 @@ export const fetchConversationById = async conversationId => {
   }
 
   return data;
+};
+
+export const deleteMessage = async messageId => {
+  const { error } = await supabase
+    .from('messages')
+    .delete()
+    .eq('id', messageId);
+  if (error) throw error;
 };

@@ -24,6 +24,7 @@ const initialState = {
   error: null,
   email: '',
   password: '',
+  currentSelectedPortal: null,
 };
 
 const authSlice = createSlice({
@@ -31,6 +32,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setPersonalInfoStep: (state, action) => {
+      // check for portal_url change aand  portal_url subdomain structurer validaty with isValidSubdomain
+      console.log({
+        state,
+        action,
+      });
       state.personalInfoStep = action.payload;
     },
     setBusinessDetailsStep: (state, action) => {
@@ -59,6 +65,9 @@ const authSlice = createSlice({
     },
     setPassword: (state, action) => {
       state.password = action.payload;
+    },
+    setCurrentSelectedPortal: (state, action) => {
+      state.currentSelectedPortal = action.payload;
     },
   },
   extraReducers: builder => {
@@ -96,6 +105,7 @@ export const {
   setError,
   setEmail,
   setPassword,
+  setCurrentSelectedPortal,
 } = authSlice.actions;
 
 export default authSlice.reducer;

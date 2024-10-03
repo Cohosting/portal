@@ -27,9 +27,12 @@ export const SubdomainCheck = ({
 
   if (domain && !isValid) return <Box>Invalid subdomain</Box>
 
+
   if (domain && isValid && !isLoading) {
     return children;
   };
+
+
 
 
 };

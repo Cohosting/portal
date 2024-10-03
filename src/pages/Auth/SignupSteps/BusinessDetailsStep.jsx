@@ -8,21 +8,29 @@ import { initializeOrganizationSetup } from "../../../utils/signupUtils";
 import useCustomerOnDemand from "../../../hooks/useCustomerOnDemand";
 import Header from "../../../components/Header";
 import Select from "../../../components/Select";
+import { useQueryClient } from "react-query";
 
-const BusinessDetailsStep = ({ isLargerThan450 }) => {
+const BusinessDetailsStep = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { personalInfoStep, businessDetailsStep, user } = useSelector((state) => state.auth);
+  const { personalInfoStep, businessDetailsStep, user, currentSelectedPortal } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const queryClient = useQueryClient()
   const createCustomer = useCustomerOnDemand()
 
 
   const setupOrganizationAndNavigate = async () => {
+
+    console.log({
+      user,
+      personalInfoStep,
+      businessDetailsStep,
+    })
     try {
       setIsLoading(true);
       await initializeOrganizationSetup(user, personalInfoStep, businessDetailsStep, createCustomer);
-      navigate('/');
+      window.location.href = '/';
     } catch (err) {
       setError(err.message);
     } finally {

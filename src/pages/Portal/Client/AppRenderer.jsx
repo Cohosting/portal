@@ -5,22 +5,28 @@ import { ClientPortalContext } from '../../../context/clientPortalContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { AppView } from '../../App/AppView';
+import { useClientAuth } from '../../../hooks/useClientAuth';
 
 export const PortalAppRender = () => {
   const { portalName } = useParams();
   const { clientPortal } = useContext(ClientPortalContext);
-  const { clientUser } = {}
+  const { clientUser } = useClientAuth(clientPortal?.id)
   const [app, setApp] = useState(null);
 
   useEffect(() => {
     if (!clientPortal || !clientUser) return;
-    const app = clientPortal.apps.find(app => app.name === portalName);
-    if (!app) return;
-
-    (async () => {
-      const appDoc = await getDoc(doc(db, 'apps', app.id));
-      setApp(appDoc.data());
-    })();
+    console.log(clientPortal);
+    const foundApp = clientPortal.portal_apps?.find(app => app?.name.toLowerCase() === portalName.toLowerCase());
+    console.log({
+      ss: clientPortal.portal_apps.map(app => ({
+        name: app?.name.toLowerCase(),
+        portalName: portalName.toLowerCase()
+      }))
+    });
+    console.log({
+      foundApp
+    })
+    setApp(foundApp || null);
   }, [clientPortal, clientUser, portalName]);
 
   return (
@@ -29,9 +35,10 @@ export const PortalAppRender = () => {
         <Text>Loading...</Text>
       ) : (
         <AppView
-          clientId={clientUser.id}
-          settingType={app.settings.setupType}
-          settings={app.settings}
+            clientId={clientUser?.id}
+            settingType={app?.settings?.setupType}
+            settings={app?.settings}
+            app={app}
         />
       )}
     </Box>

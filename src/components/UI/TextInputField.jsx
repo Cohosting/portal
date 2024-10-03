@@ -11,11 +11,7 @@ const TextInputField = ({
 
     return (
         <Box>
-            {/*             <Input
-                value={brandName}
-                onChange={e => handleUpdateState('brandName', e.target.value)}
-                placeholder={'Brand name'}
-            /> */}
+
 
             <InputField
                 value={brandName}
@@ -23,7 +19,7 @@ const TextInputField = ({
                 handleChange={e => handleUpdateState('brandName', e.target.value)}
                 placeholder={'Brand name'}
             />
-            <Text textAlign={'right'} fontSize={'14px'}>
+            <Text textAlign={'right'} className='mt-1' fontSize={'14px'}>
                 {!brandName ? 0 : brandName.length} of 30 characters used.
             </Text>
         </Box>

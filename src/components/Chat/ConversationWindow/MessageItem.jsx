@@ -5,7 +5,7 @@ import IconButton from "../../IconButton";
 import Avatar from "../../Avatar";
 import FileItem from "../../UI/FileItem";
 import MediaModal from "./MediaModal";
-import { updateMessage } from "../../../services/chat";
+import { deleteMessage, updateMessage } from "../../../services/chat";
 import MessageContent from "./MessageContent";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
@@ -109,6 +109,11 @@ const MessageItem = ({
     const media = attachments?.filter((attachment) => attachment?.type === 'image' || attachment?.type === 'video');
     const otherFiles = attachments?.filter((attachment) => attachment?.type !== 'image' && attachment?.type !== 'video');
 
+
+    const messageDelete = async () => {
+        await deleteMessage(id);
+
+    }
     return (
         <div
             ref={observeLastElement}
@@ -143,7 +148,7 @@ const MessageItem = ({
                             }
                             options={[
                                 { name: "Edit", onClick: handleEdit },
-                                { name: "Delete", onClick: () => { } },
+                                { name: "Delete", onClick: messageDelete },
                             ]}
                         />
                     </div>
@@ -172,26 +177,7 @@ const MessageItem = ({
                             {renderOtherFiles(otherFiles)}
                         </div>
                     </div>
-                    {
-                        !isOwn && (
-                            <div className={`opacity-0 ${isHovered && 'opacity-100'}  m-2`}>
-                                <DropdownMenu
-                                    trigger={
-                                        <IconButton
-                                            variant="ghost"
-                                            icon={<DotsThreeVertical color="#525866" aria-hidden="true" size={16} weight="bold" />}
-                                            size="small"
-                                            tooltip="Settings"
-                                        />
-                                    }
-                                    options={[
-                                        { name: "Edit", onClick: handleEdit },
-                                        { name: "Delete", onClick: () => { } },
-                                    ]}
-                                />
-                            </div>
-                        )
-                    }
+
                 </div>
             </div>
             <MediaModal
@@ -205,4 +191,4 @@ const MessageItem = ({
 };
 
 // Memoize the component to avoid unnecessary re-renders
-export default memo(MessageItem);
+export default MessageItem 

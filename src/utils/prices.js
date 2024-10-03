@@ -43,3 +43,9 @@ export const prices = [
     type: 'yearly',
   },
 ];
+
+
+export const getPrice = (frequency, tier) => {
+  if (!tier) return {};
+  return frequency === 'monthly' ? tier.monthly : tier.yearly;
+};

@@ -1,7 +1,4 @@
-import React, { useContext, useState } from 'react';
-import { Box, Button, Text } from '@chakra-ui/react';
-import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
-import { storage } from '../../lib/firebase';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
@@ -10,8 +7,8 @@ export const UploadAttachmentComponent = ({ setAttachments }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedPath, setUploadedPath] = useState('');
-  const { user } = useSelector(state => state.auth)
-  const { data: portal } = usePortalData(user?.portals);
+  // const { user, currentSelectedPortal } = useSelector(state => state.auth)
+  // const { data: portal } = usePortalData(currentSelectedPortal);
 
   const handleFileChange = event => {
     const selectedFile = event.target.files[0];
@@ -64,9 +61,9 @@ export const UploadAttachmentComponent = ({ setAttachments }) => {
         Upload
       </button>
       {uploadedPath && (
-        <Text mt={2}>
+        <div className='mt-2'>
           File uploaded successfully. Path: <code>{uploadedPath}</code>
-        </Text>
+        </div>
       )}
     </div>
   );

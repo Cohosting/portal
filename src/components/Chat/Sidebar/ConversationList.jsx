@@ -21,11 +21,11 @@ const ConversationList = ({
             {conversations.map((conversation) => {
                 let chat;
                 const participants = conversation.participants;
-
+                console.log(participants)
                 if (participants?.length === 1) {
                     chat = {
                         type: "individual",
-                        avatar: participants[0].avatar_url,
+                        avatar: participants[0]?.avatar_url,
                         name: participants[0].name,
                     }
 

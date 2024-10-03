@@ -6,7 +6,6 @@ import { UpgradeOrDowngrade } from './UpgradeOrDowngrade';
 import SubscriptionPage from './SubscriptionPage';
 import { unixToDateString } from '../../utils/dateUtils';
 import PaymentMethodList from '../../components/PaymentMethodLists';
-import CurrentPlan from './CurrentPlan';
 import AddonsComponent from './AddonsComponent';
 import SubscriptionPaymentError from '../../components/SubscriptionPaymentError';
 import { useSelector } from 'react-redux';
@@ -300,7 +299,6 @@ export const Pricing = () => {
                 </Text>
                   )}   */}
 
-                  <CurrentPlan />
 
                   <PaymentMethodList />
                   {/*         <Text fontSize={'14px'} fontWeight={'bold'} color={'#6B6F76'}>

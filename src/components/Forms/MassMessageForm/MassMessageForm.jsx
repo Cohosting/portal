@@ -13,8 +13,8 @@ const MassMessageForm = ({ onClose }) => {
     const [comment, setComment] = useState("");
     const [isCreating, setIsCreating] = useState(false);
 
-    const { user } = useSelector(state => state.auth)
-    const { data: clients, isLoading } = usePortalClients(user?.portals[0])
+    const { user, currentSelectedPortal } = useSelector(state => state.auth)
+    const { data: clients, isLoading } = usePortalClients(currentSelectedPortal)
 
     let portal_id = user?.portals[0];
 
@@ -41,7 +41,7 @@ const MassMessageForm = ({ onClose }) => {
                 sender: {
                     id: user.id,
                     name: user.name,
-                    avatar_url: user.avatar_url,
+                    avatar_url: user?.avatar_url,
                 },
             };
 

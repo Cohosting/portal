@@ -14,5 +14,11 @@ export const queryKeys = {
   messages: conversation_id => ['messages', conversation_id],
   invoices: filter => ['invoices', filter],
   invoiceCounts: portal_id => ['invoiceCounts', portal_id],
+  customerPaymentMethods: customer_id => [
+    'customerPaymentMethods',
+    customer_id,
+  ],
+  billingHistory: subscriptionId => ['billingHistory', subscriptionId],
+  teamSeats: portalId => ['teamSeats', portalId],
 };
 

@@ -1,18 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { returnStyleBasedOnStatus } from './../../utils/statusStyles'
 import { calculateTotal } from '../../utils/invoices'
 import SectionHeader from '../SectionHeader'
 import { useNavigate } from 'react-router-dom'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { CheckBadgeIcon, EllipsisVerticalIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { useToast } from '@chakra-ui/react'
+import { ArrowDownOnSquareIcon, CheckBadgeIcon, EllipsisVerticalIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import axiosInstance from '../../api/axiosConfig'
+import { toast } from 'react-toastify'
+import AlertDialog from '../Modal/AlertDialog'
+import { supabase } from '../../lib/supabase'
 const InvoiceTable = ({
     invoices = [],
     stripe_connect_account_id
 }) => {
     const navigate = useNavigate();
-    const toast = useToast()
+    const [isOpen, setIsOpen] = useState(false);
+    const [invoiceToDelete, setInvoiceToDelete] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isVoidOpen, setIsVoidOpen] = useState(false);
 
     const handleInvoiceFinalized = async (invoice) => {
         const { line_items, settings, id, memo, clients } = invoice;
@@ -28,18 +33,79 @@ const InvoiceTable = ({
 
         })
 
-        // Will display the loading toast until the promise is either resolved
-        // or rejected.
-        toast.promise(invoiceFinalizedPromise, {
-            success: { title: 'Invoice finalized', description: 'Looks great' },
-            error: { title: 'Invoice finalizing failed!', description: 'Something wrong' },
-            loading: { title: 'Invoice finalizing', description: 'Please wait' },
-        });
-
-        const { data } = await invoiceFinalizedPromise
+        const { data } = await toast.promise(invoiceFinalizedPromise, {
+            pending: 'Finalizing invoice',
+            success: 'Invoice finalized',
+            error: 'Invoice finalizing failed!'
+        })
 
 
-    }
+    };
+
+    const handleDeleteInvoice = (invoice) => {
+        setInvoiceToDelete(invoice);
+        setIsOpen(true);
+    };
+
+    const onClose = () => {
+        setIsOpen(false);
+    };
+
+    const onConfirm = async () => {
+        setIsLoading(true);
+        try {
+            const invoice = invoiceToDelete;
+            const { id } = invoice;
+            const deleteInvoicePromise = supabase.from('invoices').delete().eq('id', id)
+            await toast.promise(deleteInvoicePromise, {
+                pending: 'Deleting invoice',
+                success: 'Invoice deleted',
+                error: 'Invoice deleting failed!'
+            })
+            setIsLoading(false);
+            setInvoiceToDelete(null);
+            setIsOpen(false);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const onVoidClose = () => {
+        setIsVoidOpen(false);
+    };
+
+    const onVoidConfirm = async () => {
+        setIsLoading(true);
+        try {
+
+            const invoice = invoiceToDelete;
+            const { stripe_invoice_id } = invoice;
+
+            const voidInvoicePromise = axiosInstance.post('/stripe/connect/invoice/void', {
+                stripe_invoice_id,
+                stripe_connect_account_id
+            })
+
+            await toast.promise(voidInvoicePromise, {
+                pending: 'Voiding invoice',
+                success: 'Invoice voided',
+                error: 'Invoice voiding failed!'
+            })
+        } catch (error) {
+            console.log(error);
+
+        } finally {
+            setIsLoading(false);
+            setIsVoidOpen(false);
+        }
+    };
+
+    const handleVoidInvoice = (invoice) => {
+        setIsVoidOpen(true);
+        setInvoiceToDelete(invoice);
+    };
+
     return (
         <div  >
             <SectionHeader
@@ -110,7 +176,9 @@ const InvoiceTable = ({
 
                                     </td>
                                     <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                                        <Menu as="div" className="relative flex-none">
+                                        {
+                                            invoice.status !== 'void' && (
+                                                <Menu as="div" className="relative flex-none">
                                             <MenuButton className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
                                                 <span className="sr-only">Open options</span>
                                                 <EllipsisVerticalIcon aria-hidden="true" className="h-5 w-5" />
@@ -119,33 +187,72 @@ const InvoiceTable = ({
                                                 transition
                                                 className="absolute space-y-1 right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                                             >
+                                                        {
+                                                            invoice.status === 'draft' && (
+
                                                 <MenuItem>
-                                                    <button onClick={() => navigate(`${invoice.id}/edit`)} className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+                                                                    <button onClick={() => navigate(`edit?id=${invoice.id}`)} className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
 
                                                         <PencilIcon className="h-5 w-5 text-blue-500 mr-2" />
                                                         Edit<span className="sr-only">, {/* {project.name} */}</span>
                                                     </button>
-                                                </MenuItem>
-                                                <MenuItem>
+                                                                </MenuItem>)
+                                                        }
+                                                        {
+                                                            invoice.status === 'draft' && (
+                                                                <MenuItem>
 
-                                                    <button onClick={() => navigate(`${invoice.id}/edit`)} className=" flex items-center w-full text-left  px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
-                                                        <TrashIcon className="h-5 text-red-500 w-5 mr-2" />
-                                                        Delete<span className="sr-only">, {/* {project.name} */}</span>
-                                                    </button>
-                                                </MenuItem>
+                                                                    <button onClick={() => handleDeleteInvoice(invoice)} className=" flex items-center w-full text-left  px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+                                                                        <TrashIcon className="h-5 text-red-500 w-5 mr-2" />
+                                                                        Delete<span className="sr-only">, {/* {project.name} */}</span>
+                                                                    </button>
+                                                                </MenuItem>
+                                                            )
+                                                        }
+
+                                                        {
+                                                            invoice.status === 'draft' && (
+
                                                 <MenuItem>
                                                     <button onClick={() => handleInvoiceFinalized(invoice)} className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
 
                                                         <CheckBadgeIcon className="h-5 w-5 text-green-500 mr-2" />
                                                         Finalised<span className="sr-only">, {/* {project.name} */}</span>
                                                     </button>
-                                                </MenuItem>
+                                                                </MenuItem>)
+                                                        }
+                                                        {
+                                                            invoice.status === 'open' && (
+                                                                <MenuItem>
+                                                                    {/* Void button */}
+                                                                    <button onClick={() => handleVoidInvoice(invoice)} className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+                                                                        <XMarkIcon className="h-5 w-5 text-red-500 mr-2" />
+                                                                        Void<span className="sr-only">, {/* {project.name} */}</span>
+                                                                    </button>
+                                                                </MenuItem>
+
+                                                            )
+                                                        }
+                                                        {
+                                                            invoice.status === 'paid' && (
+                                                                <MenuItem>
+                                                                    {/* download invoice button */}
+                                                                    <button className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+                                                                        <ArrowDownOnSquareIcon className="h-5 w-5 text-blue-500 mr-2" />
+                                                                        Download
+                                                                    </button>
+                                                                </MenuItem>
+                                                            )
+                                                        }
 
 
 
 
                                             </MenuItems>
                                         </Menu>
+                                            )
+                                        }
+
                                     </td>
                                 </tr>
                             )
@@ -153,7 +260,29 @@ const InvoiceTable = ({
                     </tbody>
                 </table>
             </div>
+
+            <AlertDialog
+                isOpen={isOpen}
+                onClose={onClose}
+                onConfirm={onConfirm}
+                title="Delete Invoice"
+                message="Are you sure you want to delete this invoice?"
+                confirmButtonText="Delete"
+                confirmButtonColor="bg-red-500"
+
+            />
+            <AlertDialog
+                isOpen={isVoidOpen}
+                onClose={onVoidClose}
+                onConfirm={onVoidConfirm}
+                title="Void Invoice"
+                message="Are you sure you want to void this invoice?"
+                confirmButtonText="Void"
+                confirmButtonColor="bg-red-500"
+
+            />
         </div>
+
     )
 }
 

@@ -5,6 +5,7 @@ import Sidebar from './Sidebar'
 import Navigation from './Navigation'
 import { useDomainInfo } from '../../../../hooks/useDomainInfo';
 import { useClientPortalData } from '../../../../hooks/react-query/usePortalData';
+import { useMediaQuery } from '@chakra-ui/react';
 
 const Layout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,6 +13,7 @@ const Layout = ({ children }) => {
     const { data: portal, isLoading } = useClientPortalData(domain);
 
     const portal_apps = portal?.portal_apps || [];
+    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)')
     return (
 
                     <>
@@ -45,8 +47,8 @@ const Layout = ({ children }) => {
                     <div className="w-8" />
                 </div>
                 {/* className="px-4 sm:px-6 lg:px-8" */}
-                <div >{children}</div>
-                        </main>
+                <div className={`${isLessThan1024 ? 'pt-[60px]' : ''}`}>{children}</div>
+            </main>
 
 
 

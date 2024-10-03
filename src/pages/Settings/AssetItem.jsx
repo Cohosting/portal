@@ -1,11 +1,8 @@
-import { AddIcon } from '@chakra-ui/icons';
-import { Box, Flex, Image, Progress, Text } from '@chakra-ui/react';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import React, { useEffect, useRef, useState } from 'react';
-import { storage } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
-
 import { v4 as uuidv4 } from 'uuid';
+import { XCircleIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+
 export const AssetItem = ({
   field,
   onUpload,
@@ -13,40 +10,37 @@ export const AssetItem = ({
   text,
   subText,
 }) => {
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [downloadURL, setDownloadURL] = useState(initialDownloadUrl || '');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleUpload = async (selectedImage) => {
     if (selectedImage) {
+      setIsUploading(true);
       const randomId = uuidv4()
       const fileExt = selectedImage.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `public/${fileName}-${randomId}.${fileExt}`;
 
       let { error, data } = await supabase.storage
-        .from('portal_bucket') // Replace 'your-bucket-name' with your actual bucket name
+        .from('portal_bucket')
         .upload(`${filePath}`, selectedImage, {
           cacheControl: '3600',
           upsert: false
         })
 
-
       if (error) {
         console.error('Upload error', error.message);
       } else {
-        // Assuming 'data' contains the file metadata including the path
-        const { data: {
-          publicUrl
-        } } = supabase
+        const { data: { publicUrl } } = supabase
           .storage
           .from('portal_bucket')
           .getPublicUrl(filePath)
-        console.log({ publicUrl })
         setDownloadURL(publicUrl);
         onUpload(field, publicUrl);
-        console.log('Upload complete');
       }
+      setIsUploading(false);
     }
   };
 
@@ -59,65 +53,73 @@ export const AssetItem = ({
     handleUpload(file);
   };
 
+  const handleRemove = (e) => {
+    e.stopPropagation();
+    setDownloadURL('');
+    onUpload(field, '');
+  };
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   useEffect(() => {
     setDownloadURL(initialDownloadUrl);
   }, [initialDownloadUrl]);
 
   return (
-/*     <Flex
-      p={3}
-      borderTop={'1px solid gray'}
-      alignItems={'center'}
-      justifyContent={'space-between'}
-    > */
     <li className="flex items-center justify-between gap-x-6 py-5">
-
-      <Box>
+      <div>
         <p className="text-sm font-semibold leading-6 text-gray-900">{text}</p>
         <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
-
           <p className="truncate">{subText}</p>
         </div>
-      </Box>
-      {/* Sqaure box for image */}
-      <Flex
-        alignItems={'center'}
-        justifyContent={'center'}
-        cursor={'pointer'}
-        w={[ '35px','48px']}
-        h={[ '35px','48px']}
-        borderRadius={'6px'}
-        border={'1px solid gray'}
-        onClick={handleFileOpen}
-      >
-        <input
-          type="file"
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
-        {downloadURL ? (
-          <Image src={downloadURL} w={'100%'} height={'100%'} />
-        ) : (
-          <AddIcon font fontSize={['12px', '16px']} />
-        )}
-      </Flex>
-
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <Box
-          position="fixed"
-          bottom="20px"
-          right="20px"
-          backgroundColor="rgba(0, 0, 0, 0.7)"
-          color="white"
-          padding="10px"
-          borderRadius="5px"
+      </div>
+      <div className="relative">
+        <div
+          className="flex items-center justify-center cursor-pointer w-[48px] h-[48px] border-gray-300 transition-all hover:border-indigo-500 overflow-hidden"
+          onClick={downloadURL ? toggleExpand : handleFileOpen}
         >
-          Uploading... {uploadProgress}%
-          <Progress value={uploadProgress} size="sm" mt={2} />
-        </Box>
+          <input
+            type="file"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
+          {isUploading ? (
+            <div className="flex items-center justify-center w-full h-full bg-gray-100">
+              <ArrowPathIcon className="h-6 w-6 text-gray-400 animate-spin" />
+            </div>
+          ) : downloadURL ? (
+            <img src={downloadURL} className="w-full rounded-md h-full object-cover" alt="Uploaded asset" />
+          ) : (
+            <div className="flex items-center justify-center border-2 rounded-full w-[38px] h-[38px]">
+              <PlusIcon className="h-4 w-4 text-gray-400" />
+            </div>
+          )}
+        </div>
+        {downloadURL && !isUploading && (
+          <button
+            onClick={handleRemove}
+            className="absolute -top-1 -right-1 bg-white rounded-full shadow-md p-0.5"
+          >
+            <XCircleIcon className="h-5 w-5 text-red-500" />
+          </button>
+        )}
+      </div>
+      {isExpanded && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={toggleExpand}>
+          <div className="relative bg-white p-4 rounded-lg w-full max-w-3xl max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img src={downloadURL} alt="Expanded asset" className="max-w-full max-h-[80vh] object-contain rounded-lg" />
+            <button
+              onClick={toggleExpand}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1"
+            >
+              <XCircleIcon className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
       )}
     </li>
-    // </Flex>
   );
 };

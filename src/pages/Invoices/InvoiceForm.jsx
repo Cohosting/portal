@@ -6,7 +6,7 @@ import {
 
 } from '@chakra-ui/react';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useRealtimePortalClients } from '../../hooks/useRealtimePortalClients';
@@ -20,9 +20,10 @@ import useInvoice from '../../hooks/invoice/useInvoice';
 import InputField from '../../components/InputField';
 
 export const InvoiceForm = () => {
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals);
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
   const { mode } = useParams();
+  const navigate = useNavigate();
   const clientsData = useRealtimePortalClients(user, portal);
 
   const settings = portal?.settings
@@ -43,7 +44,6 @@ export const InvoiceForm = () => {
   }
 
 
-  console.log(invoiceState)
   return (
     <Layout hideMobileNav={true}>
 
@@ -56,15 +56,18 @@ export const InvoiceForm = () => {
                 {
                   name: 'Invoices', href: '#', current: false, settings: {
                     breakPointStyle: 'lg-m:block hidden ',
-                  }
+                  },
+
                 },
                 { name: 'New Invoices', href: '#', current: true, },
 
               ]}
             />
             <div className='flex ml-auto  items-center text-sm '>
-              <button className='w-16 h-6.5'>Cancel</button>
-              <button className=' btn-indigo   px-20    ml-2 text-[12px]' onClick={saveInvoice} >
+              <button className='w-16 h-6.5' onClick={() => navigate('/billing')} >Cancel</button>
+              <button className=' btn-indigo   px-20    ml-2 text-[12px]' onClick={
+                mode === 'edit' ? () => updateInvoice() : saveInvoice
+              } >
                 {/* Mode and loading indicator */}
                 {
                   mode === 'edit' ? (invoiceState.isLoading ? 'loading...' : 'Update') : (invoiceState.isLoading ? 'loading...' : 'Create')

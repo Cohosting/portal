@@ -26,6 +26,7 @@ export const fetchPortalDataByIdOrUrl = async (
       `
       *,
       portal_apps(*)
+
     `
     )
     .eq(column, identifier)
@@ -36,8 +37,9 @@ export const fetchPortalDataByIdOrUrl = async (
   if (error) {
     throw new Error(error.message);
   }
-
-  // filter default app from portal_apps
+console.log({
+  data,
+});
   return data;
 };
 export const fetchTeamMemberData = async (portalId, userEmail) => {

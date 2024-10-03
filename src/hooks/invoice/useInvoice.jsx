@@ -34,8 +34,8 @@ const useInvoice = (defaultValue = {}) => {
   const navigate = useNavigate();
   const { mode } = useParams(); // Assuming mode is part of the URL params
   const location = useLocation();
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals);
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
   const [isClientError, setIsClientError] = useState(false);
   const prevDefaultValueRef = useRef();
   const isEditMode = mode === 'edit';
@@ -93,7 +93,7 @@ const useInvoice = (defaultValue = {}) => {
     }
   };
 
-  const updateInvoice = async (invoiceData) => {
+  const updateInvoice = async () => {
     const id = queryString.parse(location.search).id;
     if (!id) return; // Exit if no ID is found
 

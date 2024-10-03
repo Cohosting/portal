@@ -1,5 +1,5 @@
-import { Button, Flex } from '@chakra-ui/react';
 import React from 'react';
+import Button from './Button';
 
 export const ActionButtons = ({
   cancelText = 'Cancel',
@@ -8,33 +8,28 @@ export const ActionButtons = ({
   onUpdate,
   shouldShow = true,
   isLoading,
+
 }) => {
+  if (!shouldShow) return null;
+
   return (
-    <Flex
-      p={4}
-      py={6}
-      borderBottom={'1px solid #c7d1e0'}
-      alignItems={'center'}
-      justifyContent={'flex-end'}
-      height={'45px'}
-    >
-      {shouldShow && (
-        <>
-          <Button             size={['sm','md']}
- onClick={onCancel} variant={'outine'}>
-            {cancelText}
-          </Button>
-          <Button
-            bg={'black'}
-            color={'white'}
-            isLoading={isLoading}
-            size={['sm','md']}
-            onClick={onUpdate}
-          >
-            {updateText}
-          </Button>
-        </>
-      )}
-    </Flex>
+    <div className="flex justify-end items-center px-4 py-4 border-b border-gray-200">
+      <Button
+        onClick={onCancel}
+        variant="soft"
+        className="mr-3"
+      >
+        {cancelText}
+      </Button>
+      <Button
+        onClick={onUpdate}
+        variant="primary"
+        isLoading={isLoading}
+      >
+        {
+          isLoading ? 'Updating...' : updateText
+        }
+      </Button>
+    </div>
   );
 };

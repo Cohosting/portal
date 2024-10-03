@@ -15,7 +15,7 @@ const useCustomerOnDemand = () => {
                 portalTeamMemberData.uid,
                 portalTeamMemberData.email
             );
-            await updateCustomerInPortal(currentPortal, customerId);
+            return customerId
         } catch (error) {
             console.error('Error creating customer:', error);
         } finally {

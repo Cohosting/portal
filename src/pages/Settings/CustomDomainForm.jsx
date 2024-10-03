@@ -1,41 +1,18 @@
-import React, { useState } from 'react';
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  useDisclosure,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  Flex,
-  Text,
-  FormErrorMessage,
-} from '@chakra-ui/react';
+import React, { useState, Fragment } from 'react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useSelector } from 'react-redux';
 import { supabase } from '../../lib/supabase';
 import SectionHeader from '../../components/SectionHeader';
 
 export const CustomDomainForm = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [domain, setDomain] = useState('');
   const [provider, setProvider] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals)
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
   const [error, setError] = useState({ domain: '', subdomain: '' });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,22 +26,14 @@ export const CustomDomainForm = () => {
   ];
 
   const isValidDomain = domain => {
-    // a simple domain validation check
     return /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/.test(domain);
   };
 
   const isValidSubdomain = subdomain => {
-    // Check length
     if (subdomain.length > 63 || subdomain.length < 1) {
       return false;
     }
-
-    // Check valid characters
-    if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i.test(subdomain)) {
-      return false;
-    }
-
-    return true;
+    return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i.test(subdomain);
   };
 
   const handleSubmit = async event => {
@@ -72,7 +41,6 @@ export const CustomDomainForm = () => {
 
     let errorObj = {};
 
-    // Validate domain
     if (!isValidDomain(domain)) {
       errorObj = {
         ...errorObj,
@@ -80,7 +48,6 @@ export const CustomDomainForm = () => {
       };
     }
 
-    // Validate subdomain
     if (!isValidSubdomain(subdomain)) {
       errorObj = {
         ...errorObj,
@@ -95,26 +62,19 @@ export const CustomDomainForm = () => {
     }
     setIsLoading(true);
 
-    // If validation passes, process the data and save it
     let dom = domain.toLowerCase().trim();
-
-    // Remove "http://" or "https://" if present
     if (dom.startsWith('http://')) {
       dom = dom.substring(7);
     } else if (dom.startsWith('https://')) {
       dom = dom.substring(8);
     }
-
-    // Remove "www." if present, regardless of where it appears
     if (dom.includes('www.')) {
       dom = dom.replace('www.', '');
     }
 
-    // Do the same for subdomain
     let subdom = subdomain.toLowerCase().trim();
 
     try {
-      // Then, save the cleaned and formatted data
       const { error: portalError } = await supabase.from('portals').update({
         settings: { 
           ...portal.settings,
@@ -123,11 +83,9 @@ export const CustomDomainForm = () => {
           subdomain: subdom,
           customDomain: `${subdom}.${dom}`,
         },
-      }
-      ).eq('id', portal.id);
+      }).eq('id', portal.id);
 
       if (portalError) throw portalError;
-
 
       const response = await fetch(
         'https://api.vercel.com/v10/projects/portal/domains?teamId=team_X4iVsHVRDNhpdBRTph9ykl2S',
@@ -144,141 +102,211 @@ export const CustomDomainForm = () => {
       );
 
       const data = await response.json();
-
       console.log(data);
       setIsLoading(false);
     } catch (err) {
       setIsLoading(false);
-
       console.log('Error updating portal setting', err);
     }
 
-    onClose();
+    setIsOpen(false);
     setIsConfirmationOpen(true);
   };
 
   return (
     <>
-      <Flex flexDir={'column'} my={5}>
-        {/*         <Text fontSize={'15px'} fontWeight={500}>
-          {' '}
-          Portal domain
-        </Text>
-        <Text fontWeight={600} py={2}>
-          {' '}
-          Customize the domain used when clients visit your portal.{' '}
-        </Text> */}
+      <div className="flex flex-col my-5">
         <SectionHeader hideButton heading="Custom Domain" description="Customize the domain used when clients visit your portal." />
 
-        <Button
-          fontSize={'15px'}
-          bg={'black'}
-          color={'white'}
-          w={'min-content'}
-          mt={3}
-          onClick={onOpen}
+        <button
+          className="text-sm w-56 bg-black text-white mt-3 px-4 py-2 rounded"
+          onClick={() => setIsOpen(true)}
         >
           Connect Custom Domain
-        </Button>
-      </Flex>
+        </button>
+      </div>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Connect a Custom Domain</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormControl isRequired isInvalid={!!error.domain}>
-              <FormLabel>Domain name</FormLabel>
-              <Input
-                placeholder="Your domain"
-                value={domain}
-                onChange={e => {
-                  setDomain(e.target.value);
-                  if (error.domain) setError(prev => ({ ...prev, domain: '' }));
-                }}
-              />
-              <FormErrorMessage>{error.domain}</FormErrorMessage>
-            </FormControl>
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-[10000]" onClose={() => setIsOpen(false)}>
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </TransitionChild>
 
-            <FormControl isRequired mt={4}>
-              <FormLabel>Domain Provider</FormLabel>
-              <Select
-                placeholder="Select option"
-                value={provider}
-                onChange={e => setProvider(e.target.value)}
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                {providers.map(provider => (
-                  <option key={provider} value={provider}>
-                    {provider}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
+                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <DialogTitle
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Connect a Custom Domain
+                  </DialogTitle>
+                  <div className="mt-2">
+                    <form onSubmit={handleSubmit}>
+                      <div className="mb-4">
+                        <label htmlFor="domain" className="block text-sm font-medium text-gray-700">
+                          Domain name
+                        </label>
+                        <input
+                          type="text"
+                          id="domain"
+                          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${error.domain ? 'border-red-500' : ''
+                            }`}
+                          placeholder="Your domain"
+                          value={domain}
+                          onChange={(e) => {
+                            setDomain(e.target.value);
+                            if (error.domain) setError((prev) => ({ ...prev, domain: '' }));
+                          }}
+                        />
+                        {error.domain && (
+                          <p className="mt-2 text-sm text-red-600">{error.domain}</p>
+                        )}
+                      </div>
 
-            <FormControl isRequired isInvalid={!!error.subdomain} mt={4}>
-              <FormLabel>Subdomain</FormLabel>
-              <Input
-                placeholder="Subdomain"
-                value={subdomain}
-                onChange={e => {
-                  setSubdomain(e.target.value);
-                  if (error.subdomain)
-                    setError(prev => ({ ...prev, subdomain: '' }));
-                }}
-              />
-              <FormErrorMessage>{error.subdomain}</FormErrorMessage>
-            </FormControl>
-          </ModalBody>
+                      <div className="mb-4">
+                        <label htmlFor="provider" className="block text-sm font-medium text-gray-700">
+                          Domain Provider
+                        </label>
+                        <select
+                          id="provider"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          value={provider}
+                          onChange={(e) => setProvider(e.target.value)}
+                        >
+                          <option value="">Select option</option>
+                          {providers.map((provider) => (
+                            <option key={provider} value={provider}>
+                              {provider}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              colorScheme="blue"
-              onClick={handleSubmit}
-            >
-              Submit
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <AlertDialog
-        isOpen={isConfirmationOpen}
-        onClose={() => setIsConfirmationOpen(false)}
-        leastDestructiveRef={undefined}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader>Connect Your Domain</AlertDialogHeader>
-            <AlertDialogBody>
-              <p>
-                Thank you! Now, please follow these steps to set up your custom
-                domain:
-              </p>
-              <ol>
-                <li>Log in to your {provider} account.</li>
-                <li>Navigate to the DNS settings page for {domain}.</li>
-                <li>Create a new CNAME record.</li>
-                <li>
-                  Set the 'Host' or 'Name' field to {subdomain}, and the 'Points
-                  to' field to 'your-service-address.com'.
-                </li>
-                <li>
-                  Save your changes. Please note that it can take anywhere from
-                  a few minutes to 48 hours for these changes to propagate
-                  across the internet.
-                </li>
-              </ol>
-            </AlertDialogBody>
-            <AlertDialogFooter>
-              <Button onClick={() => setIsConfirmationOpen(false)}>
-                Close
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-      {/* ...remaining code for AlertDialog and closing tags */}
+                      <div className="mb-4">
+                        <label htmlFor="subdomain" className="block text-sm font-medium text-gray-700">
+                          Subdomain
+                        </label>
+                        <input
+                          type="text"
+                          id="subdomain"
+                          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${error.subdomain ? 'border-red-500' : ''
+                            }`}
+                          placeholder="Subdomain"
+                          value={subdomain}
+                          onChange={(e) => {
+                            setSubdomain(e.target.value);
+                            if (error.subdomain)
+                              setError((prev) => ({ ...prev, subdomain: '' }));
+                          }}
+                        />
+                        {error.subdomain && (
+                          <p className="mt-2 text-sm text-red-600">{error.subdomain}</p>
+                        )}
+                      </div>
+
+                      <div className="mt-4">
+                        <button
+                          type="submit"
+                          className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? 'Submitting...' : 'Submit'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={isConfirmationOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={() => setIsConfirmationOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Connect Your Domain
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      Thank you! Now, please follow these steps to set up your custom domain:
+                    </p>
+                    <ol className="list-decimal list-inside mt-2 text-sm text-gray-500">
+                      <li>Log in to your {provider} account.</li>
+                      <li>Navigate to the DNS settings page for {domain}.</li>
+                      <li>Create a new CNAME record.</li>
+                      <li>
+                        Set the 'Host' or 'Name' field to {subdomain}, and the 'Points
+                        to' field to 'your-service-address.com'.
+                      </li>
+                      <li>
+                        Save your changes. Please note that it can take anywhere from
+                        a few minutes to 48 hours for these changes to propagate
+                        across the internet.
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsConfirmationOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </>
   );
 };

@@ -6,7 +6,7 @@ import {
   markAsSeen,
 } from '../../services/chat';
 import { supabase } from '../../lib/supabase';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
 const fetchConversationById = async conversationId => {
@@ -39,13 +39,17 @@ export const useChatConversations = portal_id => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  console.log({
+    conversations,
+  });
+
   const optimisticMarkLastMessageAsSeen = (conversation, userId) => {
     const updatedConversation = {
       ...conversation,
       last_message: {
-        ...conversation.last_message,
-        seen: conversation.last_message.seen
-          ? [...conversation.last_message.seen, userId]
+        ...conversation?.last_message,
+        seen: conversation?.last_message?.seen
+          ? [...conversation?.last_message?.seen, userId]
           : [userId],
       },
     };
@@ -58,6 +62,8 @@ export const useChatConversations = portal_id => {
   };
   useEffect(() => {
     if (!portal_id) return;
+
+    console.log(portal_id);
 
     const fetchInitialConversations = async () => {
       setLoading(true);
@@ -100,8 +106,13 @@ export const useChatConversations = portal_id => {
           table: 'conversations',
           filter: `portal_id=eq.${portal_id}`,
         },
-        payload => {
-          setConversations(prev => [payload.new, ...prev]);
+        async payload => {
+          console.log('it is inserted');
+          let newConversation = await fetchConversationById(payload.new.id);
+          console.log(newConversation);
+          setConversations(prev => {
+            return [newConversation, ...prev];
+          });
           setFetchedWay('INSERT');
         }
       )
@@ -151,6 +162,28 @@ export const useChatConversations = portal_id => {
     };
   }, [portal_id]);
 
+  const refetchConversations = async () => {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(
+        `
+            id,
+            name,
+            created_at,
+            updated_at,
+            participants:users!inner(id, name, avatar_url),
+            last_message:last_message_id(id, content, seen, created_at )
+          `
+      )
+      .eq('portal_id', portal_id)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      setError(error);
+    }
+    setConversations(data);
+  };
+
   return {
     error,
     isLoading: loading,
@@ -158,6 +191,7 @@ export const useChatConversations = portal_id => {
     fetchedWay,
     optimisticMarkLastMessageAsSeen,
     updatedConversation: setConversations,
+    refetchConversations,
   };
 };
 export const useRealtimeMessages = (
@@ -173,6 +207,7 @@ export const useRealtimeMessages = (
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [moreLoading, setMoreLoading] = useState(false);
+  let [updatedMessage, setUpdatedMessage] = useState(null);
 
   const initializeMessages = async () => {
     setLoading(true);
@@ -209,23 +244,10 @@ export const useRealtimeMessages = (
           filter: `conversation_id=eq.${conversationId}`,
         },
         payload => {
-          // let currentConversation = conversations.find(
-          //   conv => conv.id === conversationId
-          // );
-          // const message = payload.new;
-          // // check if conversations last message id mathc
-          // if (
-          //   currentConversation.last_message &&
-          //   currentConversation.last_message.id === message.id
-          // ) {
-          //   console.log(
-          //     `Message ${message.id} is the last message in conversation ${conversationId}`
-          //   );
-          // }
-          // Handle UPDATE event
-          // handleRealtimePayload(payload, setMessages, fetchSender);
-          // fetchedWay.current = 'UPDATE';
-          // markAsSeen(currentConversation, user.id);
+          console.log('it is updated');
+          handleRealtimePayload(payload, setMessages, fetchSender, messages);
+
+          fetchedWay.current = 'UPDATE';
         }
       )
       .on(
@@ -249,6 +271,24 @@ export const useRealtimeMessages = (
           handleRealtimePayload(payload, setMessages, fetchSender);
           fetchedWay.current = 'INSERT';
           // markAsSeen(conversation, user.id);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        payload => {
+          console.log(
+            `Message ${payload.old.id} deleted in conversation ${conversationId}`
+          );
+          setMessages(prev => {
+            return prev.filter(msg => msg.id !== payload.old.id);
+          });
+          fetchedWay.current = 'DELETE';
         }
       )
       .subscribe(status => {

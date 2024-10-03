@@ -8,9 +8,16 @@ import { useNavigate } from 'react-router-dom'
 const ConversationHeader = ({
     name,
     handleDeleteConversation,
+    refetchConversations
 }) => {
     const [isLessThan768] = useMediaQuery('(max-width: 768px)');
     const naviagate = useNavigate();
+
+    const onDeleteConversation = async () => {
+        await handleDeleteConversation();
+        await refetchConversations();
+        naviagate('/messages')
+    }
 
     return (
         <div className="flex flex-1 items-center gap-x-4 justify-between lg:gap-x-6 ">
@@ -53,7 +60,7 @@ const ConversationHeader = ({
                     options={[
                         {
                             name: "Delete Conversation",
-                            onClick: handleDeleteConversation && handleDeleteConversation,
+                            onClick: handleDeleteConversation && onDeleteConversation,
                         },
                     ]}
                 />

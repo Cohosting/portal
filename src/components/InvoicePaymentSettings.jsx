@@ -1,31 +1,7 @@
-/* import React from 'react'
 
-const InvoicePaymentSettings = () => {
-    return (
-        <div>InvoicePaymentSettings</div>
-    )
-}
 
-export default InvoicePaymentSettings */
-
-import { Switch } from "@headlessui/react";
-import SectionHeader from "./SectionHeader";
 import SwitchComponent from "./SwitchComponent";
 
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
 export default function InvoicePaymentSettings({
     settings,
     handleSettingUpdate
@@ -49,15 +25,6 @@ export default function InvoicePaymentSettings({
                             </p>
                         </div>
                         <div className="ml-3 flex h-6 items-center">
-                            {/*  <input
-                                id="comments"
-                                name="comments"
-                                type="checkbox"
-                                aria-describedby="comments-description"
-                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                                checked={settings.ach_debit}
-                                onChange={(e) => handleSettingUpdate('ach_debit', e.target.checked)}
-                            /> */}
                             <SwitchComponent enabled={settings.ach_debit} setEnabled={(e) => handleSettingUpdate('ach_debit', e)} />
                         </div>
                     </div>
@@ -74,16 +41,7 @@ export default function InvoicePaymentSettings({
                             </p>
                         </div>
                         <div className="ml-3 flex h-6 items-center">
-                            {/*                             <input
-                                id="candidates"
-                                name="candidates"
-                                type="checkbox"
-                                aria-describedby="candidates-description"
-                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                                checked={settings.card}
-                                onChange={(e) => handleSettingUpdate('card', e.target.checked)}
 
-                            /> */}
                             <SwitchComponent enabled={settings.card} setEnabled={(e) => handleSettingUpdate('card', e)} />
 
                         </div>

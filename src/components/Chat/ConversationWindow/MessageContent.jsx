@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import TextArea from '../../UI/TextArea'
 import Button from '../../UI/Button/Button';
 import { Check, Checks, Clock } from '@phosphor-icons/react';
@@ -12,9 +12,15 @@ const MessageContent = ({
     status,
     id
 }) => {
+    console.log({ content })
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [editedContent, setEditedContent] = useState(content);
+
+    useEffect(() => {
+        setEditedContent(content);
+    }, [content]);
+
     const getStatusIcon = (status) => {
         switch (status) {
             case 'pending':
@@ -51,7 +57,6 @@ const MessageContent = ({
 
     return (
         <>
-
             {isEditing ? (
                 <div className="flex flex-col">
                     <TextArea
@@ -63,7 +68,7 @@ const MessageContent = ({
                     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                     <div className="self-end mt-2 flex gap-2">
                         <Button onClick={onCancelEdit} variant={'ghost'}>
-                            Cance
+                            Cancel
                         </Button>
                         <Button onClick={onUpdateEdit}>
                             {isLoading ? 'Updating...' : 'Update'}
@@ -79,8 +84,6 @@ const MessageContent = ({
                 </div>
             )}
         </>
-
-
     )
 }
 

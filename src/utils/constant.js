@@ -219,3 +219,52 @@ export const portalTexts = {
   },
   // Add more text constants here
 };
+
+
+
+export const tiers = [
+  {
+    id: 1,
+    name: 'Starter',
+    description: 'For small teams just getting started',
+    monthly: {
+      price: 89,
+      priceId: 'price_1Ppot2G6ekPTMWCwZM8MR58c',
+    },
+    yearly: {
+      price: 828,
+      priceId: 'price_1Ppot2G6ekPTMWCwJP5tlcod',
+    },
+    features: [
+      '10 users included',
+      '2 GB of storage',
+      'Email support',
+      'Help center access',
+    ],
+    featured: false,
+    href: '#',
+  },
+  {
+    id: 2,
+    name: 'Pro',
+    description: 'For growing teams',
+    monthly: {
+      price: 199,
+      priceId: 'price_1PpotSG6ekPTMWCw3ulBiPa9',
+    },
+    yearly: {
+      price: 1908,
+      priceId: 'price_1PpotxG6ekPTMWCwFjy8Gr8V',
+    },
+    features: [
+      '20 users included',
+      '10 GB of storage',
+      'Priority email support',
+      'Help center access',
+      'Custom branding',
+      '2FA',
+    ],
+    featured: true,
+    href: '#',
+  },
+];

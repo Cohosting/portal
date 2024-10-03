@@ -9,8 +9,8 @@ export const StripeReturn = () => {
   const [stripeUser, setStripeUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFill, setIsLoadingFill] = useState(false);
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals)
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal)
 
   const getStripeUser = async stripeConnectAccountId => {
     if (!stripeConnectAccountId) {

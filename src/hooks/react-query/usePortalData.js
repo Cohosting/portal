@@ -6,12 +6,12 @@ import {
   fetchTeamMemberData,
 } from '../../services/portalServices';
 
-export const usePortalData = portals => {
+export const usePortalData = portal_id => {
   return useQuery(
-    queryKeys.portalData(portals[0]),
-    () => fetchPortalDataByIdOrUrl(portals[0]),
+    queryKeys.portalData(portal_id),
+    () => fetchPortalDataByIdOrUrl(portal_id),
     {
-      enabled: !!portals[0],
+      enabled: !!portal_id,
       refetchInterval: 60000,
     }
   );

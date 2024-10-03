@@ -15,6 +15,7 @@ export const useStripeUser = (stripeConnectAccountId) => {
                 setStripeUser(data);
             } catch (err) {
                 setError(err.message);
+
             } finally {
                 setIsLoading(false);
             }

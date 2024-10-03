@@ -15,7 +15,8 @@ export const useSignup = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'email') {
-            dispatch(setEmail(value));
+
+            dispatch(setEmail(value.trim()));
         } else if (name === 'password') {
             dispatch(setPassword(value));
         }

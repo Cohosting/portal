@@ -7,8 +7,8 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 export const Refresh = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals)
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal)
 
   const navigate = useNavigate();
   return (

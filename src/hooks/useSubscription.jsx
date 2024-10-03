@@ -1,124 +1,148 @@
-import { useState, useEffect } from 'react';
 
-const useUpdateSubscription = () => {
-    const [isLoading, setIsLoading] = useState(false);
+
+import { useState } from "react";
+import axiosInstance from "../api/axiosConfig";
+import { getFirstDayOfCurrentMonthInUnix, getFirstDayOfNextMonthInUnix } from "../utils/dateUtils";
+import { toast } from 'react-toastify';
+
+const useSubscription = () => {
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const updateSubscription = async (data) => {
-        setIsLoading(true);
-        setError(null);
+
+    const createSubscription = async (subscriptionData) => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_NODE_URL}/update-subscription`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
+            setLoading(true);
+            setError(null);
+            const firstDayOfCurrentMonthInUnix = getFirstDayOfCurrentMonthInUnix();
+            const firstDayOfNextMonthInUnix = getFirstDayOfNextMonthInUnix();
+            const response = await axiosInstance.post("/subscription", {
+                ...subscriptionData,
+                firstDayOfNextMonthInUnix,
+                firstDayOfCurrentMonthInUnix
             });
-            console.log(res);
-        } catch (error) {
-            setError(error);
+            return response.data;
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+            throw err;
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
-    return { isLoading, error, updateSubscription };
-};
-const useCancelDowngrade = (data) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    const cancelDowngrade = async () => {
-        setIsLoading(true);
-        setError(null);
+    const updateSeatCount = async (subscriptionId, seatCount) => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_NODE_URL}/cancel-downgrade`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    currentSubscriptionId: data.subscriptions.current.subscriptionId,
-                    portalId: data.id,
-                    futureSubscriptionId: data.subscriptions.future.subscriptionId,
-                    addOnSubscriptionId: data.addOnSubscription.subscriptionId,
-                }),
-            });
-            console.log(res);
-        } catch (error) {
-            setError(error);
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.patch(`/subscription/${subscriptionId}/seats`, { seatCount });
+            return response.data;
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+            throw err;
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
-    return { isLoading, error, cancelDowngrade };
-};
 
-const useCancel = (data) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
 
-    const cancel = async () => {
-        setIsLoading(true);
-        setError(null);
+
+    const upgradeSubscription = async (subscriptionId, newPriceId) => {
+
         try {
-            const res = await fetch(`${process.env.REACT_APP_NODE_URL}/cancel-subscription`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    subscriptionId: data.subscriptions.current.subscriptionId,
-                    portalId: data.id,
-                    addOnSubscriptionId: data.addOnSubscription.subscriptionId,
-                }),
+            setLoading(true);
+            setError(null);
+            const firstDayOfNextMonthInUnix = getFirstDayOfNextMonthInUnix();
+            const response = await axiosInstance.post(`/subscription/${subscriptionId}/upgrade`, {
+                newPriceId,
+                firstDayOfNextMonthInUnix
             });
-            console.log(res);
-        } catch (error) {
-            setError(error);
+            return response.data;
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+            throw err;
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
+    }
+
+    const downgradeSubscription = async (subscriptionId, newPriceId) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.post(`/subscription/${subscriptionId}/downgrade`, { newPriceId });
+            return response.data;
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const cancelSubscriptionDowngrade = async (subscriptionId) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.post(`/subscription/${subscriptionId}/cancel-subscription-downgrade`);
+            return response.data;
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+    const cancelSubscription = async (subscriptionId) => {
+                try {
+                    setLoading(true);
+                    setError(null);
+                    const response = await axiosInstance.post(`/subscription/${subscriptionId}/cancel`);
+                    toast.success("Subscription cancelled successfully");
+                    return response.data;
+                } catch (err) {
+                    setError(err.response?.data?.message || "An error occurred");
+                    toast.error("An error occurred");
+                    throw err;
+                } finally {
+                    setLoading(false);
+                }
     };
 
-    return { isLoading, error, cancel };
-};
-const useReactivate = (data) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    const reactivate = async () => {
-        setIsLoading(true);
-        setError(null);
+    const reactiveSubscription = async (subscriptionId) => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_NODE_URL}/reactivate-subscription`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    subscriptionId: data.subscriptions.current.subscriptionId,
-                    portalId: data.id,
-                    addOnSubscriptionId: data.addOnSubscription.subscriptionId,
-                }),
-            });
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.post(`/subscription/${subscriptionId}/reactivate-subscription`);
 
-            if (!res.ok) {
-                throw new Error(`Failed to reactivate subscription: ${res.statusText}`);
+                    toast.success("Subscription reactivated successfully");
+                    return response.data;
+                } catch (err) {
+                    setError(err.response?.data?.message || "An error occurred");
+                    toast.error("An error occurred");
+                    throw err;
+        } finally {
+                    setLoading(false);
+        }
             }
 
-            console.log(res);
-            // Handle successful reactivation (e.g., update UI, show success message)
-        } catch (error) {
-            setError(`Failed to reactivate subscription: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
-    return { isLoading, error, reactivate };
+    return {
+        createSubscription,
+        updateSeatCount,
+        cancelSubscription,
+        upgradeSubscription,
+        cancelSubscriptionDowngrade,
+        downgradeSubscription,
+        reactiveSubscription,
+        loading,
+        setLoading,
+        error,
+        setError,
+
+    };
 };
 
-
-export {
-    useUpdateSubscription,
-    useReactivate,
-    useCancelDowngrade,
-    useCancel,
-
-
-}
+export default useSubscription;

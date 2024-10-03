@@ -1,23 +1,6 @@
-import { defaultAppList } from './constant';
 import { supabase } from '../lib/supabase';
-import { getCurrentTimestamp } from './dateUtils';
-
+import { getOrCreateUser } from '../lib/auth';
 // Standardizing date handling
-
-// Extracting seat creation into its own function
-const createSeats = async (portalId, user) => {
-  const seats = [];
-  for (let i = 0; i < 5; i++) {
-    seats.push({
-      portal_id: portalId,
-      status: i === 0 ? 'occupied' : 'available',
-      user_id: i === 0 ? user.id : null,
-      seat_type: 'free',
-    });
-  }
-  const { error } = await supabase.from('seats').insert(seats);
-  if (error) throw error;
-};
 
 const validateInput = (user, personalInfoStep, businessDetailsStep) => {
   if (!user || !user.id) throw new Error('Invalid user data');
@@ -45,27 +28,16 @@ export const preparePortalData = (
       card: false,
       auto_import: false,
     },
-    trial_start_date: trialStartDate,
-    trial_end_date: trialEndDate,
-    is_subscribed: false,
-    is_expiry_count: true,
   };
 };
 
-export const prepareTeamMemberData = (portalId, personalInfoStep, user) => {
-  let [first_name, last_name] = personalInfoStep.name.split(' ');
-  first_name = first_name !== undefined ? first_name : '';
-  last_name = last_name !== undefined ? last_name : '';
-
+export const prepareTeamMemberData = (portalId, user) => {
   return {
     portal_id: portalId,
-    first_name: first_name,
-    last_name: last_name,
     email: user.email,
     uid: user.id,
     status: 'active',
     role: 'owner',
-    created_at: getCurrentTimestamp(),
   };
 };
 
@@ -75,72 +47,74 @@ export const initializeOrganizationSetup = async (
   businessDetailsStep,
   createCustomer
 ) => {
-  console.log('Initializing organization setup', {
-    user,
-    personalInfoStep,
-    businessDetailsStep,
-  });
   try {
     validateInput(user, personalInfoStep, businessDetailsStep);
-    console.log('Input validated successfully');
 
-    const portalData = preparePortalData(
-      user,
-      personalInfoStep,
-      businessDetailsStep
-    );
-
-    console.log('Inserting portal data', portalData);
-    const { data: portal, error: portalError } = await supabase
+    const { data: portalData, error: portalError } = await supabase
       .from('portals')
-      .insert([portalData])
-      .select()
+      .select('*')
+      .eq('created_by', user.id)
       .single();
-    if (portalError) throw portalError;
-    console.log('Portal data inserted successfully', portal);
 
-    const memberData = prepareTeamMemberData(portal.id, personalInfoStep, user);
-    console.log('Inserting team member data', memberData);
-    const { error: memberError } = await supabase
-      .from('team_members')
-      .insert([memberData]);
-    if (memberError) throw memberError;
-    console.log('Team member data inserted successfully');
-
-    console.log('Inserting default app list', defaultAppList);
-    const { error: portalAppError } = await supabase.from('portal_apps').insert(
-      defaultAppList.map(app => ({
-        ...app,
-        portal_id: portal.id,
-      }))
+    const customer_id = await createCustomer(
+      portalData,
+      { uid: user.id, email: user.email },
+      portalData.id
     );
-    if (portalAppError) throw portalAppError;
-    console.log('Default app list inserted successfully');
 
-    console.log('Updating user portals', {
-      user_id: user.id,
-      portal_id: portal.id,
-      first_name: memberData.first_name,
-      last_name: memberData.last_name,
-    });
-    const { error: userError } = await supabase.rpc('update_user_portals', {
-      user_id: user.id,
-      portal_id: portal.id,
-      first_name: memberData.first_name,
-      last_name: memberData.last_name,
-    });
-    if (userError) throw userError;
-    console.log('User portals updated successfully');
+    // update portal existing data
+    const { data: updatedPortal } = await supabase
+      .from('portals')
+      .update({
+        portal_url: personalInfoStep.portal_url,
+        brand_settings: {
+          brandName: personalInfoStep.company_name,
+        },
+        customer_id,
+      })
+      .eq('id', portalData.id)
+      .select('*');
 
-    console.log('Creating seats for portal', portal.id);
-    await createSeats(portal.id, user);
-    console.log('Seats created successfully');
-
-    console.log('Creating customer', portalData, memberData, portal.id);
-    await createCustomer(portalData, memberData, portal.id);
-    console.log('Organization setup successful');
+    await supabase
+      .from('users')
+      .update({
+        name: personalInfoStep.name,
+        is_profile_completed: true,
+        additional_data: {
+          ...businessDetailsStep,
+          ...personalInfoStep,
+        },
+      })
+      .eq('id', user.id);
   } catch (error) {
-    console.error('Error persisting data:', error);
+    console.error('Error during organization setup:', error);
+
     throw error;
   }
+};
+export const initializeUser = async user => {
+  return await getOrCreateUser(user, {
+    is_profile_completed: false,
+    portals: [],
+    email: user.email,
+    id: user.id,
+  });
+};
+
+export const signUpUserWithPortalAndSeat = async supabaseUser => {
+  let dataObject = {
+    user_id: supabaseUser.id,
+    user_email: supabaseUser.email,
+  };
+
+  const { data, error } = await supabase.rpc(
+    'sign_up_user_with_portal_and_seat',
+    dataObject
+  );
+
+  if (error) {
+    console.error('Error signing up user with portal and seat:', error);
+    throw error;
+  }
+  return data;
 };

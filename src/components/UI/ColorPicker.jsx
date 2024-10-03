@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Flex, Input, Square, useOutsideClick } from '@chakra-ui/react';
 import { SketchPicker } from 'react-color';
 
 export const BrandColorPicker = ({
@@ -9,10 +8,18 @@ export const BrandColorPicker = ({
   const [showPicker, setShowPicker] = useState(false);
   const ref = useRef();
 
-  useOutsideClick({
-    ref: ref,
-    handler: () => setShowPicker(false),
-  });
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setShowPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
 
   const handleChangeComplete = (color) => {
     setColor(color.hex);
@@ -26,7 +33,6 @@ export const BrandColorPicker = ({
   const handleInputChange = (event) => {
     const newColor = event.target.value;
     setColor(newColor);
-    // Optionally, you can add validation for the input value to be a valid hex color
     if (/^#([0-9A-F]{3}){1,2}$/i.test(newColor)) {
       onCompletePick(field, newColor);
     }
@@ -38,43 +44,30 @@ export const BrandColorPicker = ({
   }, [defaultColor]);
 
   return (
-    <Flex
-      justifyContent={'space-between'}
-      p={3}
-      py={5}
-      pl={0}
-      flexDir={['column', 'row']}
-      alignItems={['flex-start', 'center']}
-    >
-      <p className='text-sm font-semibold leading-6 text-gray-900'>{title}</p>
-      <Box display="flex" alignItems="center" position={'relative'}>
-        <Square
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-5 pl-0">
+      <p className="text-sm font-semibold leading-6 text-gray-900 mb-2 sm:mb-0">{title}</p>
+      <div className="flex items-center relative">
+        <div
           onClick={() => setShowPicker(!showPicker)}
-          size="35px"
-          bg={color}
-          border="1px solid #cacaca"
-          borderRadius={'6px'}
-          cursor="pointer"
-        />
-        <Input
+          className="w-9 h-9 border border-gray-300 rounded cursor-pointer"
+          style={{ backgroundColor: color }}
+        ></div>
+        <input
           type="text"
           value={color}
           onChange={handleInputChange}
-          ml="10px"
-          h={'35px'}
-          bg={'white'}
-          w="105px"
+          className="ml-2.5 h-9 bg-white w-[105px] border border-gray-300 rounded px-2"
         />
         {showPicker && (
-          <Box ref={ref}>
+          <div ref={ref} className="absolute top-full left-0 mt-2 z-10">
             <SketchPicker
               color={color}
               onChange={handleChange}
               onChangeComplete={handleChangeComplete}
             />
-          </Box>
+          </div>
         )}
-      </Box>
-    </Flex>
+      </div>
+    </div>
   );
 };

@@ -19,6 +19,7 @@ const registerClientWithStripe = async (
     });
 
     console.log('Client registered with Stripe successfully:', data);
+    return data.stripeCustomer;
   } catch (error) {
     console.error('Error registering client with Stripe:', error);
   }

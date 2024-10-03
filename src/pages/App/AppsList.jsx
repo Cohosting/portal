@@ -19,8 +19,8 @@ import SectionHeader from '../../components/SectionHeader';
 export const AppsList = () => {
   const navigate = useNavigate();
 
-  const { user } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(user?.portals);
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
 
   const {
     list,

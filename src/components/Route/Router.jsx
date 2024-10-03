@@ -19,13 +19,17 @@ import { AppForm } from '../../pages/App/AppForm';
 import { AppsList } from '../../pages/App/AppsList';
 import { CustomizePortal } from '../../pages/Settings/CustomizePortal';
 import { Team } from '../../pages/Team/Team';
-import { AccountSettingsPage } from '../../pages/Settings/Profile/Profile';
-import { AcceptInvitationPage } from '../../pages/Team/AcceptInvitationPage';
+import { AccountSettings } from '../../pages/Settings/Profile/AccountSettings.jsx';
 import SubdomainWrapper from '../UI/SubdomainWrapper';
 import { AppConfigurations } from '../../pages/App/AppConfigurations';
 import InvoiceDetails from '../../pages/Portal/Client/Invoices/InvoiceDetails';
 import Chat from '../../pages/Chat/Chat';
 import Conversation from '../../pages/Chat/Conversation.jsx';
+import SubscriptionPage from '../../pages/Subscriptions/SubscriptionPage.jsx';
+import InvitationAccept from '../../pages/Team/InvitationAccept.jsx';
+import SettingsLayout from '../../pages/Settings/SettingsLayout.jsx';
+import QuickSetup from '../../pages/Auth/QuickSetup.jsx';
+import SubscriptionSuccess from '../UI/SubscriptionSuccess.jsx';
 
 
 
@@ -70,22 +74,23 @@ const router = createBrowserRouter([
       },
       {
         path: 'subscription',
-        element: <SubdomainLayout />,
+        element: <ProtectedLayout />,
         children: [
           {
             index: true,
-            element: <Pricing />,
+            element: <SubscriptionPage />,
           },
         ],
+
       },
       {
-        path: 'settings',
-        element: <SubdomainLayout />,
+        path: '/settings',
+        element: <SettingsLayout />,
         children: [
-          {
-            index: true,
-            element: <Settings />,
-          },
+          { path: 'portal', element: <Settings /> },
+          { path: 'account', element: <AccountSettings /> },
+          { path: 'subscriptions', element: <SubscriptionPage /> },
+          { path: 'teams', element: <Team /> },
         ],
       },
       {
@@ -172,8 +177,8 @@ const router = createBrowserRouter([
         element: <SubdomainLayout />,
         children: [
           {
-            index: true,
-            element: <AccountSettingsPage />,
+            index: true, 
+            element: <AccountSettings />,
           },
         ],
       },
@@ -201,20 +206,30 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: '/quick-setup',
+    element: (
+      <SubdomainWrapper>
+        <QuickSetup />
+      </SubdomainWrapper>
+    ),
+  },
+  {
     path: '/login',
     element: <Login />,
   },
-  {
-    path: '/success',
-    element: <Success />,
-  },
+
   {
     path: '/cancel',
     element: <Failed />,
   },
+
   {
-    path: '/accept-team',
-    element: <AcceptInvitationPage />,
+    path: '/success',
+    element: <SubscriptionSuccess />,
+  },
+  {
+    path: '/invitations/:inviteId/accept/:token',
+    element: <InvitationAccept />,
   },
 ]);
 

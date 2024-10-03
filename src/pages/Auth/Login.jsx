@@ -3,7 +3,7 @@ import { Box, Spinner } from '@chakra-ui/react';
 import { useDomainInfo } from '../../hooks/useDomainInfo';
 import { LoginForm } from './LoginForm';
 import { ClientLogin } from '../Portal/Client/Login';
-import { useClientPortalData } from '../../hooks/react-query/usePortalData';
+import PortalAccessUnavailable from '../../components/UI/PortalAccessUnavailable';
 
 export const Login = () => {
   const { domain, isLoading } = useDomainInfo(true);
@@ -20,7 +20,13 @@ export const Login = () => {
       if (!domain.existsInDb) {
         return <Box>Invalid subdomain</Box>;
       }
-      return <ClientLogin portal={domain.portalData} />;
+
+      if (domain.portalData.subscription_id) {
+        return <ClientLogin portal={domain.portalData} />;
+      } else {
+        // give a message that the portal is not active
+        return <PortalAccessUnavailable />;
+      }
     }
 
     return null;

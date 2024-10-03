@@ -48,7 +48,7 @@ export const useConversation = (conversationId, user, conversations) => {
         sender: {
           id: user.id,
           name: user.name,
-          avatar_url: user.avatar_url,
+          avatar_url: user?.avatar_url,
         },
         attachments: selectedFilePublicUrls,
         seen: [user.id],

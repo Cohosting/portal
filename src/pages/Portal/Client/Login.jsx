@@ -60,7 +60,7 @@ export const ClientLogin = ({
                   type="email"
                   label="Email address"
                   value={email}
-                  handleChange={(e) => setClientLoginCredentials({ ...clientLoginCredentials, email: e.target.value })}
+                  handleChange={(e) => setClientLoginCredentials({ ...clientLoginCredentials, email: e.target.value.trim() })}
                   errorMessage="Not a valid email address."
                   ariaInvalid={false}
                   required

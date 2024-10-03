@@ -7,7 +7,7 @@ const ConversationListItem = (props) => {
     const isGroup = chat.type === "group";
 
     console.log({
-        isUnread
+        chat
     })
     const renderAvatar = () => {
         if (isGroup) {

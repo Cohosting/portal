@@ -1,5 +1,5 @@
 // components/Conversation.js
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import ConversationHeader from '../../components/Chat/ConversationWindow/ConversationHeader';
 import MessageInput from '../../components/Chat/ConversationWindow/MessageInput';
@@ -17,14 +17,11 @@ import { useScrollToEndOnMessageChange } from '../../hooks/conversations/useScro
 
 const Conversation = () => {
     const { conversationId } = useParams();
-    const hasMarkedAsSeenRef = useRef(false);
     const lastElementVisible = useRef(null);
     const containerRef = useRef(null);
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
 
-    const onMount = useRef(true);
-
-    const { isConversationsListLoading, conversations } = useOutletContext();
+    const { isConversationsListLoading, conversations, refetchConversations } = useOutletContext();
     const { user } = useSelector(state => state.auth);
     const {
         isLoading,
@@ -43,55 +40,7 @@ const Conversation = () => {
     useScrollToEndOnMessageChange(messages, messagesEndRef, lastElementVisible);
     useMarkConversationAsSeen(messages, conversations, conversationId, user.id);
     useHandleNewMessage(messages, conversationId, conversations, fetchedWay, lastElementVisible, setIsFloatingAlertVisible, user.id);
-    //     if (!messages.length) return;
 
-    //     if (messagesEndRef.current) {
-    //         if (lastElementVisible.current) {
-    //             messagesEndRef.current.scrollIntoView({ behavior: "instant" });
-    //         } else if (onMount.current) {
-    //             messagesEndRef.current.scrollIntoView({ behavior: "instant" });
-    //             onMount.current = false;
-    //         }
-    //     }
-    // }, [messages, messagesEndRef, lastElementVisible, onMount]);
-
-
-    // // This hook will mark the conversation as seen when the messages are loaded
-
-    // useEffect(() => {
-    //     if (messages.length > 0 && !hasMarkedAsSeenRef.current) {
-    //         console.log(`Message length: ${messages.length} and hasMarkedAsSeenRef: ${hasMarkedAsSeenRef.current}`);
-    //         let currentConversation = conversations.find(
-    //             conv => conv.id === conversationId
-    //         );
-    //         if (currentConversation) {
-    //             console.log('Marking as seen...');
-    //             markAsSeen(currentConversation, user.id).then((res) => console.log(res));
-    //             // Set the ref to true after markAsSeen is called
-    //             hasMarkedAsSeenRef.current = true;
-    //         }
-    //     }
-    // }, [messages, conversations, conversationId, user.id,]);
-
-
-    // useEffect(() => {
-    //     // when new message came and fetchedWay is 'INSERT' check if the last message is in view and mark it as seen if it is in the view! If not in view then render the floating alert to notify the user that there is a new message and he can scroll to see it and mark it as seen
-    //     console.log(`Hook: ${fetchedWay.current}`);
-    //     if (messages.length > 0 && fetchedWay.current === 'INSERT') {
-    //         if (lastElementVisible.current) {
-    //             console.log('Marking as seen...');
-    //             const currentConversation = conversations.find(
-    //                 conv => conv.id === conversationId
-    //             );
-    //             markAsSeen(currentConversation, user.id).then((res) => console.log(res))
-    //         } else {
-    //             console.log('New message is not in view');
-    //             setIsFloatingAlertVisible(true);
-
-    //         }
-    //     }
-
-    // }, [messages, conversationId, conversations, fetchedWay])
 
     // Callback function to handle visibility
     const handleVisibilityChange = (isVisible) => {
@@ -112,6 +61,8 @@ const Conversation = () => {
         }
     };
 
+
+
     // Get the observeLastElement function from the custom hook
     const observeLastElement = useLastElementObserver(handleVisibilityChange, {
         root: listRef.current,
@@ -125,10 +76,8 @@ const Conversation = () => {
             </div>
         );
     }
-    console.log({
-        messages
-    })
 
+    const conversation = conversations.find(conv => conv.id === conversationId)
     return (
         <div ref={containerRef} className="p-6 px-0 pt-0 pb-0 min-h-screen flex flex-col">
             {isLoading ? (
@@ -136,13 +85,14 @@ const Conversation = () => {
                     <Spinner className='animate-spin' size={32} />
                 </div>
             ) : (
-                <div>
+                    <>
                     {!messages && <div className="text-center mt-4">No messages</div>}
 
                         <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
                             <ConversationHeader
-                                name={"Sterling Jones"}
+                                name={conversation?.name}
                                 handleDeleteConversation={handleDeleteConversation}
+                                refetchConversations={refetchConversations}
                             />
                         </div>
 
@@ -188,7 +138,7 @@ const Conversation = () => {
 
 
                     </div>
-                </div>
+                    </>
 
             )
 

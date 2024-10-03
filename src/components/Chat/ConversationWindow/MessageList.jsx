@@ -5,7 +5,7 @@ const MessageList = ({ messages, user, hasMore, observeLastElement }) => {
 
     if (messages.length === 0) return <div className="text-center mt-4 text-gray-500">No messages yet</div>;
 
-    console.log({ user })
+    console.log({ messages })
     return (
         <div className='space-y-4 py-10'>
 

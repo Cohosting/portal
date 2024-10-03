@@ -1,3 +1,5 @@
+const moment = require('moment-timezone');
+
 export const formattedMonthTime = timestamp => {
   const date = new Date(
     timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
@@ -27,9 +29,38 @@ export const unixToDateString = unixTimestamp => {
 
 // Function to format dates
 export function formatDate(dateString) {
+  console.log({
+    dateString,
+  });
   const date = new Date(dateString);
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
- 
+// Get the user's timezone
+
+export function getFirstDayOfNextMonthInUnix() {
+  // Get the current date
+  const now = moment();
+
+  // Move to the first day of the next month
+  const firstDayOfNextMonth = now.add(1, 'month').startOf('month');
+
+  // Convert to Unix timestamp (in seconds)
+  const unixTimestamp = firstDayOfNextMonth.unix();
+
+  return unixTimestamp;
+}
+
+export const getFirstDayOfCurrentMonthInUnix = () => {
+  // Get the current date
+  const now = moment();
+
+  // Move to the first day of the current month
+  const firstDayOfCurrentMonth = now.startOf('month');
+
+  // Convert to Unix timestamp (in seconds)
+  const unixTimestamp = firstDayOfCurrentMonth.unix();
+
+  return unixTimestamp;
+};

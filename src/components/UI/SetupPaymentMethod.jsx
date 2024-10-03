@@ -25,8 +25,8 @@ const stripePromise = loadStripe('pk_test_51N43KcG6ekPTMWCwR2197fOHN32C1E5jNzPRm
 
 export const SetupPaymentMethod = ({ isOpen, handleClose, forFailedPayment }) => {
     const [clientSecret, setClientSecret] = useState('');
-    const { user } = useSelector(state => state.auth)
-    const { data: portal } = usePortalData(user.portals)
+    const { user, currentSelectedPortal } = useSelector(state => state.auth)
+    const { data: portal } = usePortalData(currentSelectedPortal)
     useEffect(() => {
         if (!portal) return;
         // Create a Checkout Session as soon as the page loads

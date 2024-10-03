@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import SidebarDialog from './SidebarDialog';
 import SidebarStatic from './SidebarStatic';
 import { useConversationContext } from '../../context/useConversationContext';
+import { useMediaQuery } from '@chakra-ui/react';
 // import Navbar from './Navbar';
 // import MainContent from './MainContent';
 
@@ -14,10 +15,17 @@ export const Layout =
 
 
   }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { listRef } = useConversationContext()
+    const { listRef, sidebarOpen, setSidebarOpen } = useConversationContext()
+    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)')
 
+    let shouldAddPadding = isLessThan1024 && !window.location.pathname.includes('messages')
 
+    console.log({
+      isLessThan1024,
+      shouldAddPadding,
+      window: window.location.pathname,
+      path: window.location.pathname.includes('messsages')
+    })
   return (
     <>
       <SidebarDialog sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -55,7 +63,7 @@ export const Layout =
           )
         }
         {/* ${hideMobileNav ? 'px-0' : 'px-2'} */}
-        <main ref={listRef} className={`flex unique column-reverse overflow-auto  relative flex-col h-screen   `}>
+        <main ref={listRef} className={`flex unique column-reverse overflow-auto  relative flex-col h-screen ${shouldAddPadding ? 'pt-[4rem]' : ''}   `}>
 
           {children}
         </main>
