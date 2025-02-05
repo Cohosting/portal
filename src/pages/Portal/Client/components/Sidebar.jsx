@@ -1,35 +1,22 @@
-import { Box, Text } from "@chakra-ui/react";
+import React from 'react';
 
 const NavItem = ({ children, isActive, ...rest }) => (
-    <Box
-        cursor="pointer"
-        my={1}
-        py={2}
-        px={4}
-        bg={isActive ? 'blue.500' : 'transparent'}
-        color={isActive ? 'white' : 'gray.500'}
-        borderRadius="md"
-        _hover={{
-            bg: isActive ? 'blue.600' : 'gray.200',
-            color: isActive ? 'white' : 'black',
-        }}
+    <div
+        className={`cursor-pointer my-1 py-2 px-4 rounded-md ${isActive ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-500'
+            } hover:${isActive ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'}`}
         {...rest}
     >
-        <Text fontSize="md">{children}</Text>
-    </Box>
+        <span className="text-md">{children}</span>
+    </div>
 );
 
 const Sidebar = ({ apps, portalName, settings, onClose, navigate, ref }) => (
-    <Box
+    <div
         ref={ref}
-        zIndex={99999}
-        w="240px"
-        h="100%"
-        bg={settings?.sidebarBgColor || 'gray.100'}
-        color={settings?.sidebarTextColor || 'gray.800'}
-        p={4}
+        style={{ zIndex: 99999 }}
+        className={`w-60 h-full ${settings?.sidebarBgColor || 'bg-gray-100'} ${settings?.sidebarTextColor || 'text-gray-800'} p-4`}
     >
-        <Text>{settings?.brandName}</Text>
+        <span>{settings?.brandName}</span>
         {apps.map((app) => (
             <NavItem
                 key={app.id}
@@ -42,6 +29,6 @@ const Sidebar = ({ apps, portalName, settings, onClose, navigate, ref }) => (
                 {app.name}
             </NavItem>
         ))}
-    </Box>
+    </div>
 );
 export default Sidebar;

@@ -1,16 +1,16 @@
-import { Box, Button, Spinner, Text } from '@chakra-ui/react'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { createStripeConnectAccount } from '../../utils/stripe';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { useSelector } from 'react-redux';
 import axiosInstance from '../../api/axiosConfig';
+import { Button } from '@headlessui/react';
 
 export const StripeReturn = () => {
   const [stripeUser, setStripeUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFill, setIsLoadingFill] = useState(false);
-  const { user, currentSelectedPortal } = useSelector(state => state.auth);
-  const { data: portal } = usePortalData(currentSelectedPortal)
+  const { currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
 
   const getStripeUser = async stripeConnectAccountId => {
     if (!stripeConnectAccountId) {
@@ -18,7 +18,6 @@ export const StripeReturn = () => {
     }
     setIsLoading(true);
     try {
-      // axios
       const { data } = await axiosInstance.get(`/stripe/connect/account/${stripeConnectAccountId}`);
       const stripeAccount = data.stripeAccount;
 
@@ -37,46 +36,41 @@ export const StripeReturn = () => {
   console.log({
     stripeUser,
   });
-  return (
-    <Box p={4}>
-      <Text fontSize={'40px'}>Let me check your account</Text>
 
-      {isLoading && <Spinner m={'20px'} />}
+  return (
+    <div className="p-4">
+      <p className="text-4xl">Let me check your account</p>
+
+      {isLoading && <div className="m-5 animate-spin">🔄</div>}
       {stripeUser && stripeUser.details_submitted && (
-        <Text fontSize={'20px'}>
+        <p className="text-2xl">
           Your account information submitted successfully
-        </Text>
+        </p>
       )}
       {stripeUser && !stripeUser.details_submitted && (
-        <Text fontSize={'20px'}>
+        <p className="text-2xl">
           Your account information is not submitted successfully
-        </Text>
+        </p>
       )}
       {stripeUser && !stripeUser.charges_enabled && (
-        <Box fontSize={'20px'} display={'flex'} flexDir={'column'} gap={2}>
-          <Text>Your onboarding is not completed</Text>
-          {
-            stripeUser?.requirements?.pending_verification.length > 0 && (
-              <>
-                <Text color={'red.500'}>Your information is beeing verified! It's  pending! please wait for confirmation</Text>
-                <Text></Text>
+        <div className="text-2xl flex flex-col gap-2">
+          <p>Your onboarding is not completed</p>
+          {stripeUser?.requirements?.pending_verification.length > 0 && (
+            <>
+              <p className="text-red-500">Your information is being verified! It's pending! please wait for confirmation</p>
+              <p></p>
+            </>
+          )}
+          {stripeUser?.requirements?.currently_due.length > 0 && stripeUser?.requirements?.past_due.length > 0 && (
+            <p className="text-red-700">
+              Thanks for submitting your information. It seems you still need to submit some information or documents. Please submit those.
+            </p>
+          )}
 
-              </>
-            )
-          }
-          {
-            stripeUser?.requirements?.currently_due.length > 0 && stripeUser?.requirements?.past_due.length > 0 && (
-              <Text color={'red.700'}>
-                Thanks for submitting your information.
-                It's seems you still need to submit some information or documents.
-                please submit those</Text>
-            )
-          }
-
-
-          <Text>Do you want to fill it!? </Text>
+          <p>Do you want to fill it!? </p>
           <Button
-            isLoading={isLoadingFill}
+            className="bg-green-500 text-white px-4 py-2 rounded"
+            disabled={isLoadingFill}
             onClick={() =>
               createStripeConnectAccount(
                 portal.uid,
@@ -85,12 +79,11 @@ export const StripeReturn = () => {
                 setIsLoadingFill
               )
             }
-            color={'green'}
           >
-            Fill it
+            {isLoadingFill ? 'Loading...' : 'Fill it'}
           </Button>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

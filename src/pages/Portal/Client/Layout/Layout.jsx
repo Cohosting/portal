@@ -1,19 +1,18 @@
 
-
 import React, { useState } from 'react'
 import Sidebar from './Sidebar'
 import Navigation from './Navigation'
 import { useDomainInfo } from '../../../../hooks/useDomainInfo';
 import { useClientPortalData } from '../../../../hooks/react-query/usePortalData';
-import { useMediaQuery } from '@chakra-ui/react';
+import { useMediaQuery } from 'react-responsive';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, showHeader = true }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { domain } = useDomainInfo();
     const { data: portal, isLoading } = useClientPortalData(domain);
 
     const portal_apps = portal?.portal_apps || [];
-    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)')
+    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
     return (
 
                     <>
@@ -24,7 +23,9 @@ const Layout = ({ children }) => {
                         </div>
             <main className=" lg:pl-72">
                 {/* Mobile header */}
-                <div className=" z-50  fixed w-full lg:hidden mb-4 flex items-center justify-between bg-white border-b border-gray-200 p-3">
+                {
+                    showHeader && (
+                        <div className=" z-50  fixed w-full lg:hidden mb-4 flex items-center justify-between bg-white border-b border-gray-200 p-3">
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="p-2 rounded-md border border-gray-300"
@@ -46,8 +47,11 @@ const Layout = ({ children }) => {
                     <p className="text-lg font-semibold">{portal?.name}</p>
                     <div className="w-8" />
                 </div>
+                    )
+                }
+
                 {/* className="px-4 sm:px-6 lg:px-8" */}
-                <div className={`${isLessThan1024 ? 'pt-[60px]' : ''}`}>{children}</div>
+                <div className={`${isLessThan1024 && showHeader ? 'pt-[60px]' : ''}`}>{children}</div>
             </main>
 
 

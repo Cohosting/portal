@@ -8,11 +8,13 @@ export const uploadFile = async (file, conversationId) => {
   // Determine the folder based on MIME type
   const folder = getUploadFolder(mimeType);
 
-  // Generate a unique file name (e.g., using timestamp)
-  const fileName = `${folder}_${new Date().toISOString()}_${file.name}`;
+  // Generate a unique file name
+  const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+  const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
+  const uniqueFileName = `${timestamp}_${safeFileName}`;
 
   // Construct the file path
-  const filePath = `conversations_${conversationId}/${folder}/${fileName}`;
+  const filePath = `conversations_${conversationId}/${folder}/${uniqueFileName}`;
 
   // Upload the file to Supabase storage
   const { data, error } = await supabase.storage
@@ -29,12 +31,12 @@ export const uploadFile = async (file, conversationId) => {
     .from('chat-uploads')
     .getPublicUrl(filePath);
 
-  const publicURL = url.publicUrl;
-
   if (urlError) {
     console.error('Error getting public URL:', urlError);
     return null;
   }
+
+  const publicURL = url.publicUrl;
 
   // Return the public URL for storing in the database or using directly
   return {

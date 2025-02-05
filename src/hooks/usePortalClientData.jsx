@@ -1,26 +1,21 @@
 import { useEffect, useState } from "react";
-import { useDisclosure } from "@chakra-ui/react";
+import { useToggle } from "react-use";
 import { supabase } from "../lib/supabase";
 
 const getClientData = async (portal) => {
-
-
     const { data: clients } = await supabase.from('clients').select('*').eq('portal_id', portal.id);
-
-
-
     return clients;
 }
+
 const usePortalClientData = (portal) => {
     const [clientData, setClientData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { isOpen: isNotificationOpen, onToggle: toggleNotification } = useDisclosure();
+    const [isNotificationOpen, toggleNotification] = useToggle(false);
 
     useEffect(() => {
         if (!portal) return;
 
         (async () => {
-
             try {
                 setLoading(true);
                 const clients = await getClientData(portal);
@@ -31,12 +26,7 @@ const usePortalClientData = (portal) => {
             } finally {
                 setLoading(false);
             }
-
-
         })()
-
-
-
     }, [portal]);
 
     const refetch = async () => {
@@ -49,7 +39,6 @@ const usePortalClientData = (portal) => {
         }
     }
 
-
     return {
         clientData,
         isNotificationOpen,
@@ -58,9 +47,5 @@ const usePortalClientData = (portal) => {
         refetch
     };
 }
-
-
-
-
 
 export default usePortalClientData;

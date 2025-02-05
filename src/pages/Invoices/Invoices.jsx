@@ -1,51 +1,35 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
-import { Box, Button, Flex, Spinner, Text, useDisclosure } from '@chakra-ui/react';
+import { useToggle } from 'react-use';
 import { useNavigate } from 'react-router-dom';
-import {
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { ClientInvoiceItem } from '../Portal/Client/InvoiceItem';
-import { MdEdit, } from 'react-icons/md';
-import { AddIcon } from '@chakra-ui/icons';
+
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
-import { BanknotesIcon, SquaresPlusIcon } from '@heroicons/react/24/outline';
+import { BanknotesIcon, } from '@heroicons/react/24/outline';
 import InvoiceTable from '../../components/table/InvoicesTable';
-
-
-
+import { Spinner } from '@phosphor-icons/react';
 
 export const Invoices = () => {
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
-  const { user, currentSelectedPortal } = useSelector(state => state.auth)
+  const { currentSelectedPortal } = useSelector(state => state.auth)
   const { data: portal } = usePortalData(currentSelectedPortal)
-  const { isOpen, onOpen, onClose } = useDisclosure({
-    defaultIsOpen: true
-  })
+  const [isOpen, toggleOpen] = useToggle(true);
 
   // fetch invoices from firebase invoices collection
   useEffect(() => {
     if (!portal) return;
 
     const fetchInvoices = async () => {
-      onOpen()
+
+      toggleOpen(true);
 
       const { data, error } = await supabase
         .from('invoices')
         .select('*, clients(*)')
         .eq('portal_id', portal.id);
-
-
 
       if (error) {
         console.error('Error fetching invoices:', error);
@@ -60,11 +44,10 @@ export const Invoices = () => {
 
         setInvoices(invoices);
       }
-      onClose()
+      toggleOpen(false);
     };
 
     fetchInvoices();
-
 
     const subscription = supabase
       .channel(`invoices:portal_id=eq.${portal.id}`)
@@ -91,12 +74,16 @@ export const Invoices = () => {
     };
   }, [portal]);
 
-
-
-  console.log(invoices)
-
   return (
     <Layout headerName='Invoices'>
+      {
+        isOpen && (
+          <div className="flex justify-center items-center h-96">
+            <Spinner size={46} />
+          </div>
+        )
+
+      }
       {
         !invoices.length && !isOpen && (
           <div className="mt-[100px]">
@@ -107,21 +94,16 @@ export const Invoices = () => {
                 `It looks like you haven't created any invoices yet. Click the button below to create your first invoice.`
               }
               buttonText={'Create invoice'}
-
               onButtonClick={() => navigate('/billing/add')}
             />
           </div>
         )
       }
-      <Box p={4}>
-
-
+      <div className='p-4'>
         {
-          invoices.length > 0 && <InvoiceTable invoices={invoices} stripe_connect_account_id={portal.stripe_connect_account_id} />
+          invoices.length > 0 && <InvoiceTable portal={portal} invoices={invoices} stripe_connect_account_id={portal.stripe_connect_account_id} />
         }
-
-
-      </Box>
+      </div>
     </Layout>
   );
 };

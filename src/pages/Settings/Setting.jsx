@@ -12,6 +12,7 @@ import { Spinner } from '@phosphor-icons/react';
 import StripeConnectStatus from '../Pricing/components/StripeConnectStatus.jsx';
 import DefaultPortalSettings from '../../components/UI/DefaultPortalSettings.jsx';
 import { toast } from 'react-toastify';
+import SettingsBillingAddress from '../../components/UI/SettingsBillingAddress.jsx';
 
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
@@ -126,6 +127,7 @@ export const Settings = () => {
               updateSetting={togglePortalSetting}
             />
           </div>
+          <SettingsBillingAddress portalId={portal?.id} billingAddress={portal.billing_address} />  
           <DefaultPortalSettings />
 
           {!portal.settings?.customDomain ? <CustomDomainForm /> : <CheckDomainConfiguration defaultDomain={portal?.settings?.customDomain} />}

@@ -6,6 +6,9 @@ import TeamSeating from "./components/TeamSeating";
 import { Spinner } from "@phosphor-icons/react";
 import { usePortalData } from "../../hooks/react-query/usePortalData";
 import PortalAccessUnavailable from "../../components/UI/PortalAccessUnavailable";
+import { useState } from "react";
+import TeamMembers from "./components/TeamMembers";
+import { useTeamMembers } from "../../hooks/react-query/useTeamMembers";
 
 
 let headingText = "Subscription Required - Access Restricted"
@@ -15,10 +18,9 @@ export const Team = () => {
   const { user, currentSelectedPortal } = useSelector(state => state.auth);
   const { data: portal, isLoading: portalLoading } = usePortalData(currentSelectedPortal);
   const { data: teamSeats, isLoading } = useTeamSeats(currentSelectedPortal);
+  const { data: teamMembers, isLoading: teamMemberLoading } = useTeamMembers(currentSelectedPortal);
 
-
-
-  if (portalLoading || isLoading) {
+  if (portalLoading || isLoading || teamMemberLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner className="w-12 h-12" />
@@ -30,27 +32,38 @@ export const Team = () => {
     return <PortalAccessUnavailable heading={headingText} message={message} />
 
   }
-  console.log({
-    seats: teamSeats
-  })
+
 
   return (
-    <div>
+    <div >
 
 
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="w-[500px]">
-          <TeamOverview
+      <div className="  px-4 sm:px-6 lg:px-8 py-4">
+        <div className="py-4">
+          <header>
+            <div className="max-w-7xl   px-4 sm:px-6 lg:px-8">
+              <h1 className="text-xl font-bold leading-tight text-gray-900">Team Management</h1>
+            </div>
+          </header>
+          <main>
+            <div className="max-w-7xl    ">
+              <TeamOverview
             companyName={portal?.brand_settings?.brandName}
             totalSeats={teamSeats?.length}
-            filledSeats={teamSeats?.filter(seat => seat.status === 'occupied').length}
+            filledSeats={teamSeats?.filter(seat => seat.status === 'reserved').length}
             freeSeatsLimit={5}
             additionalSeatCost={20}
-          />
+                teamMembers={teamMembers}
+              />
+              <TeamMembers portal={portal} teamMembers={teamMembers} />
+
+            </div>
+          </main>
         </div>
 
-        <TeamSeating portal={portal} seats={teamSeats} />
+
+        {/* <TeamSeating portal={portal} seats={teamSeats} /> */}
       </div>
 
     </div>

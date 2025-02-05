@@ -1,15 +1,14 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Layout } from "../Dashboard/Layout";
-import { useMediaQuery } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { usePortalData } from "../../hooks/react-query/usePortalData";
-
+import { useMediaQuery } from 'react-responsive';
 
 const SettingsLayout = () => {
     const location = useLocation();
-    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)')
-    const { user, currentSelectedPortal } = useSelector((state) => state.auth)
-    const { data: portal } = usePortalData(currentSelectedPortal)
+    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
+    const { user, currentSelectedPortal } = useSelector((state) => state.auth);
+    const { data: portal } = usePortalData(currentSelectedPortal);
     const secondaryNavigation = [
         { name: 'Settings', href: '/settings/portal' },
         { name: 'Account', href: '/settings/account' },
@@ -19,7 +18,7 @@ const SettingsLayout = () => {
 
     return (
         <Layout>
-            <div className="bg-white shadow-sm rounded-lg">
+            <div className="bg-white  ">
                 <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
 
                     {
@@ -45,7 +44,7 @@ const SettingsLayout = () => {
                     }
 
                 </header>
-                <div className="overflow-y-auto" style={{ height: 'calc(100vh - 60px)' }}>
+                <div style={{ height: 'calc(100vh - 60px)' }}>
                     <Outlet />
                 </div>
             </div>

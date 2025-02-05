@@ -1,10 +1,10 @@
 // components/Conversation.js
-import React, { useRef, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import ConversationHeader from '../../components/Chat/ConversationWindow/ConversationHeader';
 import MessageInput from '../../components/Chat/ConversationWindow/MessageInput';
 import MessageList from '../../components/Chat/ConversationWindow/MessageList';
-import { Spinner } from '@phosphor-icons/react';
+import { Spinner, XCircle } from '@phosphor-icons/react';
 import { useConversation } from '../../hooks/useConversation';
 import { useSelector } from 'react-redux';
 import { useConversationContext } from '../../context/useConversationContext';
@@ -14,12 +14,56 @@ import FloatingNewMessageAlert from '../../components/UI/FloatingNewMessageAlert
 import { useHandleNewMessage } from '../../hooks/conversations/useHandleNewMessage';
 import { useMarkConversationAsSeen } from '../../hooks/conversations/useMarkConversationAsSeen';
 import { useScrollToEndOnMessageChange } from '../../hooks/conversations/useScrollToEndOnMessageChange';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+import { supabase } from '../../lib/supabase';
 
+
+const NoConversation = () => {
+    const navigation = useNavigate();
+
+    const handleGoBack = () => {
+
+        if (window.location.pathname.includes('portal')) {
+            navigation('/portal/messages');
+
+        } else {
+            navigation('/messages');
+        }
+    }
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+            <div className="max-w-md w-full bg-white rounded-lg shadow-md">
+                <div className="p-8 text-center">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-red-50 rounded-full">
+                        <XCircleIcon className="w-8 h-8 text-red-500" aria-hidden="true" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+                        Conversation Not Found
+                    </h2>
+                    <p className="text-gray-600">
+                        The conversation you are looking for might have been deleted or does not exist.
+                    </p>
+                </div>
+                <div className="px-8 py-4 bg-gray-50 rounded-b-lg">
+                    <Link href="/conversations">
+                        <button
+                            onClick={handleGoBack}
+                            className="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                        >
+                            Go Back to Conversations
+                        </button>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    )
+}
 const Conversation = () => {
     const { conversationId } = useParams();
     const lastElementVisible = useRef(null);
     const containerRef = useRef(null);
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
+    const [isConversationsDeleted, setIsConversationsDeleted] = useState(false);
 
     const { isConversationsListLoading, conversations, refetchConversations } = useOutletContext();
     const { user } = useSelector(state => state.auth);
@@ -34,7 +78,8 @@ const Conversation = () => {
         handleFetchMore,
         handleSendMessage,
         handleDeleteConversation,
-        fetchedWay
+        fetchedWay,
+        error,
     } = useConversation(conversationId, user, conversations);
     const { listRef } = useConversationContext();
     useScrollToEndOnMessageChange(messages, messagesEndRef, lastElementVisible);
@@ -45,7 +90,6 @@ const Conversation = () => {
     // Callback function to handle visibility
     const handleVisibilityChange = (isVisible) => {
         if (isVisible) {
-            console.log('The last item is in view!');
             lastElementVisible.current = true;
             if (isFloatingAlertVisible) {
                 setIsFloatingAlertVisible(false);
@@ -78,21 +122,36 @@ const Conversation = () => {
     }
 
     const conversation = conversations.find(conv => conv.id === conversationId)
+
+
+    if (isLoading) {
+        return (
+            <div className="  mt-10 w-full h-full bg-white bg-opacity-50 z-50 flex items-center justify-center">
+                <Spinner className='animate-spin' size={32} />
+            </div>
+        )
+    }
+
+    // if no conversattion found then prompt to that it was deleted
+    if (!conversation) {
+        return <NoConversation />
+    }
+
+
     return (
-        <div ref={containerRef} className="p-6 px-0 pt-0 pb-0 min-h-screen flex flex-col">
-            {isLoading ? (
-                <div className="  mt-10 w-full h-full bg-white bg-opacity-50 z-50 flex items-center justify-center">
-                    <Spinner className='animate-spin' size={32} />
-                </div>
-            ) : (
-                    <>
+        <div ref={containerRef} className="p-6 px-4 pt-0 pb-0 min-h-screen flex flex-col">
+
+
                     {!messages && <div className="text-center mt-4">No messages</div>}
 
                         <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
                             <ConversationHeader
-                                name={conversation?.name}
+
+                    name={conversation?.participants === 1
+                        ? conversation?.participants.map(participant => participant.name).join(', ') : conversation?.name}
                                 handleDeleteConversation={handleDeleteConversation}
                                 refetchConversations={refetchConversations}
+                    participants={conversation.participants}
                             />
                         </div>
 
@@ -128,7 +187,7 @@ const Conversation = () => {
                                 }}
                                 showButton={isFloatingAlertVisible} containerRef={containerRef} messagesEndRef={messagesEndRef} />
 
-                            <div className='h-full  px-6 bg-white'>
+                <div className='h-full  px-3 bg-white'>
                                 <MessageInput
                                     isFileUploading={isFileUploading}
                                     setIsFileUploading={setIsFileUploading}
@@ -137,12 +196,8 @@ const Conversation = () => {
                             </div>
 
 
-                    </div>
-                    </>
+            </div>
 
-            )
-
-            }
 
 
         </div>

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { verifyToken } from '../services/clientAuthService'
-import { useDisclosure } from '@chakra-ui/react';
+import { useToggle } from 'react-use';
 import axiosInstance from '../api/axiosConfig';
 
 export const useClientAuth = (portal_id) => {
     const [clientUser, setClientUser] = useState(null);
     const [error, setError] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [isOpen, toggleIsOpen] = useToggle(false);
     const [authenticationError, setAuthenticationError] = useState(null)
 
     useEffect(() => {
@@ -30,7 +30,7 @@ export const useClientAuth = (portal_id) => {
         verifyStoredToken();
     }, [portal_id]);
     const authenticate = async (email, password, portalId) => {
-        onOpen()
+        toggleIsOpen(true);
         try {
 
             const { data } = await axiosInstance.post('/auth/sign-in', {
@@ -49,7 +49,7 @@ export const useClientAuth = (portal_id) => {
         } catch (error) {
             setAuthenticationError('Email or password incorrect');
         }
-        onClose()
+        toggleIsOpen(false);
     };
 
     const setSessionToken = (token) => {

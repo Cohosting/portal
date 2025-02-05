@@ -3,11 +3,12 @@ import DropdownMenu from '../../UI/DropdownMenu/DropdownMenu';
 import IconButton from './../../IconButton'
 import { MagnifyingGlass, Plus } from '@phosphor-icons/react';
 import { useConversationContext } from '../../../context/useConversationContext';
-import { useMediaQuery } from '@chakra-ui/react';
+import { useMediaQuery } from 'react-responsive';
+
 const ConversionHeader = ({ handleNewConversation, handleMassConversation }) => {
     const { setSidebarOpen } = useConversationContext();
 
-    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)');
+    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
     return (
         <div className="flex items-center shadow-sm justify-between gap-4 p-4 border-b border-gray-200">

@@ -1,4 +1,3 @@
-import { Flex, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clients, industries, sizes, types } from "../../../utils/constant";
@@ -19,9 +18,7 @@ const BusinessDetailsStep = () => {
   const queryClient = useQueryClient()
   const createCustomer = useCustomerOnDemand()
 
-
   const setupOrganizationAndNavigate = async () => {
-
     console.log({
       user,
       personalInfoStep,
@@ -39,19 +36,12 @@ const BusinessDetailsStep = () => {
   };
 
   return (
-    <Flex
-      minW={'100%'}
-      alignItems={'center'}
-      flexDirection={'column'}
-      justify={'center'}
-    >
-
+    <div className="flex min-w-full items-center flex-col justify-center">
       <Header title="Finish creating your account"
         subTitle="First things first, tell us a bit about your business"
       />
 
-      <div className=" w-100 flex flex-col gap-y-5 mt-5 ">
-
+      <div className="w-full flex flex-col gap-y-5 mt-5">
         <Select
           label={'Which industry are you in?'}
           list={industries}
@@ -62,7 +52,6 @@ const BusinessDetailsStep = () => {
           }))
           }
         />
-
 
         <Select
           label={'How large is your company?'}
@@ -96,15 +85,13 @@ const BusinessDetailsStep = () => {
           }))
           }
         />
-        {error && <Text color={'red'}>{error}</Text>}
+        {error && <p className="text-red-500">{error}</p>}
 
-        <button onClick={setupOrganizationAndNavigate} className={` mt-3  btn-indigo ${Object.values(businessDetailsStep).includes('') ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' : ''} `}>{
+        <button onClick={setupOrganizationAndNavigate} className={`mt-3 btn-indigo ${Object.values(businessDetailsStep).includes('') ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' : ''} `}>{
           isLoading ? 'Loading...' : 'Continue'
         }</button>
-
-
       </div>
-    </Flex>
+    </div>
   );
 };
 

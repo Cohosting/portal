@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
 import IconPicker from '../../components/IconPicker';
 import InputField from '../../components/InputField';
-import Example from '../../components/Example';
 import AppRadio from '../../components/Radio/AppRadio';
 import { Switch } from '@headlessui/react';
 import Select from '../../components/Select';
@@ -48,29 +40,28 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
 
   return (
     <>
-      <h1 className=' font-semibold text-xl mb-7 '>
+      <h1 className='font-semibold text-xl mb-7'>
         {mode === 'edit' ? 'Edit' : 'Create New Application'}
       </h1>
 
-      <Box my={4}>
-        <Text className='block text-sm font-medium leading-6 text-gray-900'>Name - How it should appear in the sidebar</Text>
+      <div className="my-4">
+        <p className='block text-sm font-medium leading-6 text-gray-900'>Name - How it should appear in the sidebar</p>
         <InputField
           name="name"
           value={name}
           handleChange={handleInputChange}
           required
         />
+      </div>
 
-      </Box>
-
-      <Box my={4}>
-        <Text mb={1} className='block text-sm font-medium leading-6 text-gray-900' >Select sidebar icon</Text>
+      <div className="my-4">
+        <p className='block text-sm font-medium leading-6 text-gray-900 mb-1'>Select sidebar icon</p>
         <IconPicker icon={icon} onIconSelect={handleIconSelect} />
-      </Box>
+      </div>
 
       {mode !== 'edit' && (
-        <Box my={4}>
-          <Box mt={2} pos={'relative'}>
+        <div className="my-4">
+          <div className="mt-2 relative">
             <Select
               list={['Automatic — All clients see the same content', 'Manual — Manually connect content for each client',]}
               selected={
@@ -88,13 +79,13 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
               }}
               label="Select setup type"
             />
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
 
       {setupType !== 'manual' && (
         <>
-          <Box my={4}>
+          <div className="my-4">
             <div className='mt-2.5 divide-y divide-gray-20'>
               <AppRadio
                 value="embedded"
@@ -109,8 +100,7 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
                 handleClick={(e) => handleSettingsChange('viewType', 'link')}
               />
             </div>
-          </Box>
-
+          </div>
 
           <div>
             <label htmlFor="comment" className="block text-sm font-medium leading-6 text-gray-900">
@@ -124,13 +114,12 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 value={content}
                 onChange={e => handleSettingsChange('content', e.target.value)}
-
               />
             </div>
           </div>
 
           {viewType === 'embedded' && (
-            <Flex alignItems={'center'} my={4}>
+            <div className="flex items-center my-4">
               <Switch
                 checked={autoSize}
                 onChange={value =>
@@ -144,8 +133,8 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
                   className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5"
                 />
               </Switch>
-              <p className='ml-4' >Auto size</p>
-            </Flex>
+              <p className='ml-4'>Auto size</p>
+            </div>
           )}
         </>
       )}

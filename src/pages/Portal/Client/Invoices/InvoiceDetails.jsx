@@ -6,7 +6,21 @@ import { useParams } from 'react-router-dom';
 import InvoiceStatusRenderer from '../../../../components/Invoice/InvoiceStatusRenderer';
 import { getCustomerId, getStripeConnectAccountId } from '../../../../utils/invoice/invoiceUtils';
 import { useInvoiceDetails } from '../../../../hooks/invoice/useInvoiceDetails';
+import InvoiceAttachments from '../../../../components/Invoice/InvoiceAttachments';
 
+
+const formatAddress = (address = {}) => {
+    const { addressLine1, addressLine2, city, stateProvince, zipPostalCode } = address || {}
+    const formattedAddress = [
+        addressLine1,
+        addressLine2,
+        `${city}, ${stateProvince} ${zipPostalCode}`
+    ]
+        .filter(Boolean)
+        .join(', ');
+
+    return formattedAddress;
+};
 
 const ContactInfo = ({
     label, companyName, address
@@ -52,8 +66,8 @@ const InvoiceDetails = () => {
 
                             <ContactInfo
                                 label="From"
-                                companyName="Acme, Inc."
-                                address="7363 Cynthia Pass Toronto, ON N3Y 4H8"
+                                companyName={invoice?.portal?.brand_settings?.brandName}
+                                address={formatAddress(invoice?.portal?.billing_address)}
                             />
                         </div>
                         <div className="mt-8 sm:mt-6 sm:border-t sm:border-gray-900/5 sm:pl-4 sm:pt-6">
@@ -72,6 +86,10 @@ const InvoiceDetails = () => {
                         stripeConnectAccountId={stripeConnectAccountId}
                         customerId={customerId}
                     />
+                    {
+
+                        invoice?.attachments && <InvoiceAttachments attachments={invoice.attachments} />
+                    }
 
 
                 </div>

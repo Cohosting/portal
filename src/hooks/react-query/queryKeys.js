@@ -20,5 +20,8 @@ export const queryKeys = {
   ],
   billingHistory: subscriptionId => ['billingHistory', subscriptionId],
   teamSeats: portalId => ['teamSeats', portalId],
+  openInvoices: portalId => ['openInvoices', portalId],
+  recentActivities: portalId => ['recentActivities', portalId],
+  teamMembers: portalId => ['teamMembers', portalId],
 };
 

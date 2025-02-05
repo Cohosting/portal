@@ -102,9 +102,11 @@ const MessageItem = ({
 
     const renderOtherFiles = (files) => (
         <div className="flex flex-col gap-2 mb-2">
-            {files?.map((file, index) => <FileItem key={file.name} fileName={file.name} fileType={file.type} fileSize={'1.4MB'} />)}
+            {files?.map((file, index) => <FileItem key={file?.name} fileName={file?.name} fileType={file?.type} fileSize={'1.4MB'} />)}
         </div>
     );
+
+
 
     const media = attachments?.filter((attachment) => attachment?.type === 'image' || attachment?.type === 'video');
     const otherFiles = attachments?.filter((attachment) => attachment?.type !== 'image' && attachment?.type !== 'video');

@@ -1,4 +1,3 @@
-import { Button, Flex, Heading, Spinner, Text } from '@chakra-ui/react';
 import React, { useState, useEffect } from 'react';
 
 export const CheckDomainConfiguration = ({ defaultDomain }) => {
@@ -34,34 +33,34 @@ export const CheckDomainConfiguration = ({ defaultDomain }) => {
 
   if (isMisconfigured && isDomainChecked) {
     return (
-      <Flex flexDir={'column'} my={5}>
-        <Text fontSize={'26px'} fontWeight={700}>
+      <div className="flex flex-col my-5">
+        <p className="text-2xl font-bold">
           Your domain: {domain}
-          {isLoading && <Spinner ml={3} />}
-        </Text>
-        <Text>Your domain dns is not configured properly</Text>
-        <Text>please check your dns settings</Text>
-        <Text>
+          {isLoading && <span className="ml-3 animate-spin">🔄</span>}
+        </p>
+        <p>Your domain dns is not configured properly</p>
+        <p>please check your dns settings</p>
+        <p>
           Create a cName: Name would be <strong>{domain.split('.')[0]}</strong>{' '}
           and point it to <strong>cname.vercel-dns.com.</strong>{' '}
-        </Text>
-      </Flex>
+        </p>
+      </div>
     );
   } else if (isMisconfigured === false && isDomainChecked) {
     return (
       <div>
-        <Text fontSize={'24px'} fontWeight={'700'} my={3}>
+        <p className="text-xl font-bold my-3">
           Your domain is properly configured!
-          {isLoading && <Spinner ml={3} />}
-        </Text>
-        <Text>
+          {isLoading && <span className="ml-3 animate-spin">🔄</span>}
+        </p>
+        <p>
           Your current domain: <strong>{domain}</strong>
-        </Text>
-        <Button my={3} bg={'black'} color={'white'} fontSize={'15px'}>
+        </p>
+        <button className="my-3 bg-black text-white text-sm py-2 px-4">
           Delete
-        </Button>
+        </button>
       </div>
     );
   }
-  if (!isDomainChecked) return <Spinner my={3} />;
+  if (!isDomainChecked) return <span className="my-3 animate-spin">🔄</span>;
 };

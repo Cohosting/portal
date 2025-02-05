@@ -11,6 +11,7 @@ import useRealtimeSubscription from "../../hooks/react-query/useRealtimeSubscrip
 import { formatDate } from "../../utils/dateUtils";
 import SubscriptionError from "../../components/UI/SubscriptionError";
 import RestrictedAccess from "../../components/UI/RestrictedAccess";
+import { useState } from "react";
 
 let subscriptionStatusStyle = {
   active: "bg-green-500",
@@ -42,6 +43,7 @@ const SubscriptionPage = () => {
   console.log({
     user
   })
+  const [shouldShowSubscription, setShouldShowSubscription] = useState(true)
   const { subscription, loading } = useRealtimeSubscription(currentSelectedPortal);
 
 
@@ -68,7 +70,7 @@ const SubscriptionPage = () => {
 
 
       {
-        subscription ? (
+        subscription && shouldShowSubscription ? (
           <>
             <div className="border-b  border-gray-200 pb-4">
               <div className="flex items-center gap-2 mb-4">
@@ -94,7 +96,10 @@ const SubscriptionPage = () => {
             <BillingHistory subscription={subscription} />
           </>
         ) : (
-          <PricingPage />
+            <>
+              <PricingPage shouldShowSubscription={shouldShowSubscription} setShouldShowSubscription={setShouldShowSubscription} />
+
+            </>
         )
 
       }

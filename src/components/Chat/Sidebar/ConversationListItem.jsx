@@ -15,7 +15,7 @@ const ConversationListItem = (props) => {
                 <div className="relative w-10 h-10">
                     <div className="absolute bottom-0 left-0">
                         <Avatar
-                            src={chat.avatars[0]}
+                            src={chat?.avatars[0]}
                             variant="circle"
                             alt={chat.name}
                             size="xs"

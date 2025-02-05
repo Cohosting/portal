@@ -11,7 +11,7 @@ import { usePortalData } from '../../../hooks/react-query/usePortalData';
 
 
 
-const CheckoutForm = ({ selectedTier, priceId, isYearly }) => {
+const CheckoutForm = ({ selectedTier, priceId, isYearly, setShouldShowSubscription }) => {
 
     const { user, currentSelectedPortal } = useSelector(state => state.auth);
     const { data: portal, isLoading } = usePortalData(currentSelectedPortal)
@@ -34,8 +34,9 @@ const CheckoutForm = ({ selectedTier, priceId, isYearly }) => {
     };
 
     const handleSubmit = async event => {
-        setLoading(true);
         event.preventDefault();
+        setLoading(true);
+        setShouldShowSubscription(false);
 
         if (!stripe) {
             return;

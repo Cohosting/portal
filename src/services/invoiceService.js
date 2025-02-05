@@ -2,29 +2,45 @@ import { generateInvoiceNumber } from '../utils';
 import { supabase } from '../lib/supabase';
 import axiosInstance from '../api/axiosConfig';
 
-import { formatISO, toDate } from 'date-fns';
 import moment from 'moment-timezone';
+import { calculateTotal } from '../utils/invoices';
 
 export const createInvoice = async (invoiceState, portal) => {
+  let { client, isLoading, ...rest } = invoiceState;
   const invoice_number = generateInvoiceNumber();
 
+  console.log(`Invoice State: ${invoiceState}`);
   try {
     const now = moment().tz('UTC');
 
-    const created = now.toISOString();
-    console.log({ created });
+    const created_at = now.toISOString();
     const { data, error } = await supabase.from('invoices').insert([
       {
-        ...invoiceState,
+        ...rest,
         status: 'draft',
         invoice_number,
         portal_id: portal.id,
-        created,
+        created_at,
+        amount: calculateTotal(invoiceState.line_items),
       },
     ]);
 
     if (error) throw error;
-
+    let title = `Draft created for Invoice ${invoice_number.slice(-4)} for ${
+      client.name
+    }`;
+    const { error: recentError } = await supabase
+      .from('recent_activities')
+      .insert([
+        {
+          title,
+          portal_id: portal.id,
+          additional_data: {
+            invoice_number: invoice_number,
+          },
+        },
+      ]);
+    if (recentError) throw recentError;
     // Optionally, handle the response data, e.g., to get the ID of the inserted row
     console.log(data);
     // console.log('Invoice created with ID:', data[0].id);
@@ -53,7 +69,9 @@ export const fetchInvoiceData = async invoiceId => {
   try {
     const { data, error } = await supabase
       .from('invoices')
-      .select('*, clients(*)') // Adjust 'clients(*)' based on your actual relationship and table names
+      .select(
+        '*, clients(*), portal: portal_id(billing_address, brand_settings )'
+      ) // Adjust 'clients(*)' based on your actual relationship and table names
       .eq('id', invoiceId)
       .single();
 
@@ -168,4 +186,81 @@ export const fetchInvoiceCounts = async (portal_id, client_id) => {
     { name: 'Paid', count: paid_count },
     { name: 'Processing', count: processing_count },
   ];
+};
+
+export const getOpenInvoices = async portalId => {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('*, client: client_id(*)')
+    .eq('portal_id', portalId)
+    .eq('status', 'open');
+  if (error) {
+    console.error('Error fetching open invoices:', error);
+    return [];
+  }
+  return data;
+};
+
+export const sendInvoiceReminder = async (invoiceData, email) => {
+  try {
+    const { data } = await axiosInstance.post(`/email/send`, {
+      to: email,
+      subject: 'Invoice Reminder!',
+      htmlContent: `<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border: 1px solid #ddd;">
+        <h2 style="color: #333;">Invoice Reminder</h2>
+        <p>Dear ${invoiceData.client.name},</p>
+        <p>This is a friendly reminder that your invoice <strong>#${invoiceData.invoice_number}</strong>.</p>
+        <p>Please make your payment at your earliest convenience.</p>
+        <p><strong>Amount Due:</strong> $${invoiceData.amount}</p>
+        <p>If you have already made the payment, please disregard this email.</p>
+        <p>Thank you for your prompt attention to this matter!</p>
+        <p>Best regards,</p>
+        <p>${invoiceData.brand_settings.brandName}</p>
+    </div>
+</body>`,
+    });
+    const { error } = await supabase
+      .from('invoices')
+      .update({
+        reminded_at: new Date().toISOString(),
+      })
+      .eq('id', invoiceData.id);
+
+    if (error) {
+      console.error('Error updating invoice:', error);
+      // return { success: false, invoice: invoiceData, error };
+    }
+    return { success: true, invoice: invoiceData }; // Return success and invoice data
+  } catch (error) {
+    console.error(
+      'Error sending email for invoice:',
+      invoiceData.invoice_number,
+      error
+    );
+    return { success: false, invoice: invoiceData, error }; // Return failure with error
+  }
+};
+
+export const sendInvoiceReminderInBatch = async invoiceDataArray => {
+  const promises = invoiceDataArray.map(invoice =>
+    sendInvoiceReminder(invoice, invoice.client.email)
+  );
+
+  // Use Promise.allSettled to track which ones failed and which succeeded
+  const results = await Promise.allSettled(promises);
+
+  const failed = results.filter(
+    result => result.status === 'rejected' || !result.value.success
+  );
+  const succeeded = results.filter(
+    result => result.status === 'fulfilled' && result.value.success
+  );
+
+  // Log success and failure
+  console.log(`${succeeded.length} emails sent successfully.`);
+  console.error(`${failed.length} emails failed to send.`);
+
+  // Optionally, return the details of successes and failures
+  return { succeeded, failed };
 };

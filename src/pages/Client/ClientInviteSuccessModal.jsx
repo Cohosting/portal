@@ -15,6 +15,9 @@ export const ClientInviteSuccessModal = ({ isOpen, onClose, client, sendEmail, r
     try {
       setIsLoading(true)
       let password = client.status === 'restricted' ? generateSecurePassword() : null;
+      console.log({
+        password
+      })
       let newStatus = 'pending';
 
       if (password) {
@@ -102,7 +105,7 @@ export const ClientInviteSuccessModal = ({ isOpen, onClose, client, sendEmail, r
           </TransitionChild>
         </div>
       </Dialog>
-    </Transition >
+    </Transition>
 
   )
 }

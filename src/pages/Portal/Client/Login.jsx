@@ -81,7 +81,7 @@ export const ClientLogin = ({
 
                 {authenticationError && (
                   <p id="email-error" className="mt-2 text-sm" style={{ color: 'red' }}>
-                    Not a valid email address.
+                    {authenticationError}
                   </p>
                 )}
 

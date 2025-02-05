@@ -1,10 +1,7 @@
 import React from 'react';
 import { Layout } from '../Dashboard/Layout';
 
-import {
-  Box,
 
-} from '@chakra-ui/react';
 import { UploadAttachmentComponent } from '../../components/UI/uploadAttachment';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -47,7 +44,7 @@ export const InvoiceForm = () => {
   return (
     <Layout hideMobileNav={true}>
 
-      <Box py={5}    >
+      <div className='py-4' >
 
         <div className="lg:w-[calc(100%-288px)] z-10 w-full px-5 items-center justify-between fixed top-0 py-4 border-b border-gray-200 bg-white  ">
           <div className='flex  items-center  '>
@@ -117,7 +114,7 @@ export const InvoiceForm = () => {
 
               <>
                 <p className='block truncate font-normal group-data-[selected]:font-semibold'>{client?.name}</p>
-                <p className='block truncate text-sm text-gray-500 group-data-[selected]:text-gray-900'>{client?.email}</p>
+                <p className='block truncate text-sm '>{client?.email}</p>
               </>
             )}
           />
@@ -174,7 +171,7 @@ export const InvoiceForm = () => {
         </div>
 
 
-      </Box>
+      </div>
     </Layout>
 
   );

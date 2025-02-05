@@ -1,9 +1,6 @@
-import { Box, Text } from '@chakra-ui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClientPortalContext } from '../../../context/clientPortalContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
 import { AppView } from '../../App/AppView';
 import { useClientAuth } from '../../../hooks/useClientAuth';
 
@@ -30,9 +27,9 @@ export const PortalAppRender = () => {
   }, [clientPortal, clientUser, portalName]);
 
   return (
-    <Box height={'100%'}>
+    <div className="h-full">
       {!app ? (
-        <Text>Loading...</Text>
+        <p>Loading...</p>
       ) : (
         <AppView
             clientId={clientUser?.id}
@@ -41,6 +38,6 @@ export const PortalAppRender = () => {
             app={app}
         />
       )}
-    </Box>
+    </div>
   );
 };

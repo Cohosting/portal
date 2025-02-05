@@ -73,6 +73,8 @@ const useInvoice = (defaultValue = {}) => {
   }, [isEditMode, location.search]);
 
   const saveInvoice = async (invoiceData) => {
+
+
     // Input validation
     if (!invoiceState.client) {
       return setIsClientError(true);
@@ -82,9 +84,8 @@ const useInvoice = (defaultValue = {}) => {
 
     try {
       // remove client object before persisting
-      const { client, isLoading, ...rest } = invoiceState;
 
-      await createInvoice(rest, portal);
+      await createInvoice(invoiceState, portal);
       navigate('/billing'); // Adjust the path as necessary
     } catch (error) {
       console.error('Error saving invoice:', error);

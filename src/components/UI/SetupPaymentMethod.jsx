@@ -1,15 +1,6 @@
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    Button,
-} from '@chakra-ui/react';
-import React, { useState, useEffect, useContext } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import { Fragment } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
     EmbeddedCheckoutProvider,
@@ -17,7 +8,6 @@ import {
 } from '@stripe/react-stripe-js';
 import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
-
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
@@ -32,7 +22,6 @@ export const SetupPaymentMethod = ({ isOpen, handleClose, forFailedPayment }) =>
         // Create a Checkout Session as soon as the page loads
         fetch(`${process.env.REACT_APP_NODE_URL}/customers/setup-session`, {
             method: 'POST',
-
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -50,25 +39,62 @@ export const SetupPaymentMethod = ({ isOpen, handleClose, forFailedPayment }) =>
         clientSecret,
         onComplete: (e) => console.log('After complete', e)
     };
+
     return (
-        <Modal isOpen={isOpen} onClose={handleClose}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader> {forFailedPayment ? "Update your payment method" : "Save Card"}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                    {clientSecret && (
-                        <EmbeddedCheckoutProvider
-                            stripe={stripePromise}
-                            options={options}
+        <Transition appear show={isOpen} as={Fragment}>
+            <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={handleClose}>
+                <div className="min-h-screen px-4 text-center">
+                    <TransitionChild
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+                    </TransitionChild>
 
-                        >
-                            <EmbeddedCheckout />
-                        </EmbeddedCheckoutProvider>
-                    )}
-                </ModalBody>
-
-            </ModalContent>
-        </Modal>
+                    <span className="inline-block h-screen align-middle" aria-hidden="true">
+                        &#8203;
+                    </span>
+                    <TransitionChild
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                    >
+                        <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+                            <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                                {forFailedPayment ? "Update your payment method" : "Save Card"}
+                            </DialogTitle>
+                            <div className="mt-2">
+                                {clientSecret && (
+                                    <EmbeddedCheckoutProvider
+                                        stripe={stripePromise}
+                                        options={options}
+                                    >
+                                        <EmbeddedCheckout />
+                                    </EmbeddedCheckoutProvider>
+                                )}
+                            </div>
+                            <div className="mt-4">
+                                <button
+                                    type="button"
+                                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+                                    onClick={handleClose}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </TransitionChild>
+                </div>
+            </Dialog>
+        </Transition>
     )
 }

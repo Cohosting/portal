@@ -11,7 +11,8 @@ import AlertDialog from '../Modal/AlertDialog'
 import { supabase } from '../../lib/supabase'
 const InvoiceTable = ({
     invoices = [],
-    stripe_connect_account_id
+    stripe_connect_account_id,
+    portal
 }) => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
@@ -86,12 +87,30 @@ const InvoiceTable = ({
                 stripe_invoice_id,
                 stripe_connect_account_id
             })
-
+            console.log({
+                invoiceToDelete
+            })
+            let invoiceNumberLast4Digit = invoiceToDelete.invoice_number.slice(-4);
+            let clientName = invoiceToDelete.client.name;
             await toast.promise(voidInvoicePromise, {
                 pending: 'Voiding invoice',
                 success: 'Invoice voided',
                 error: 'Invoice voiding failed!'
-            })
+            }).then(async () => {
+
+                const { data, error } = await supabase.from("recent_activities").insert([
+                    {
+                        title: `Invoice #${invoiceNumberLast4Digit} from "${clientName}" Voided`,
+                        additional_data: { stripe_invoice_id },
+                        portal_id: portal.id,
+                    },
+                ]);
+                if (error) {
+                    console.error('Error inserting recent activity:', error);
+                }
+            }
+            )
+
         } catch (error) {
             console.log(error);
 
@@ -162,13 +181,13 @@ const InvoiceTable = ({
                                             <dt className="sr-only sm:hidden">Invoice ID</dt>
                                             <div className=' sm:hidden'>
                                                 <p className='mt-2 text-sm text-gray-500 font-semibold'>Invoice id:</p>
-                                                <dd className=" truncate text-gray-500">{invoice.invoice_number}</dd>
+                                                <dd className=" truncate text-gray-500">#{invoice.invoice_number}</dd>
                                             </div>
 
                                         </dl>
                                     </td>
                                     <td className="hidden px-3 py-4 text-sm text-green-500 lg:table-cell font-normal ">{calculateTotal(invoice.line_items)}$</td>
-                                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{invoice.invoice_number}</td>
+                                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">#{invoice.invoice_number}</td>
                                     <td className="px-3 py-4 text-sm text-gray-500">
                                         <span className={`inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium  ${returnStyleBasedOnStatus(invoice.status)}`}>
                                             {invoice.status}
@@ -237,7 +256,7 @@ const InvoiceTable = ({
                                                             invoice.status === 'paid' && (
                                                                 <MenuItem>
                                                                     {/* download invoice button */}
-                                                                    <button className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+                                                                    <button onClick={() => window.open(invoice.invoice_pdf, "_blank", "noopener,noreferrer")} className="w-full text-left flex items-center px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
                                                                         <ArrowDownOnSquareIcon className="h-5 w-5 text-blue-500 mr-2" />
                                                                         Download
                                                                     </button>

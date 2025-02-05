@@ -1,6 +1,5 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { VStack } from '@chakra-ui/react';
 import AppListItem from './AppListItem';
 
 const DragDropList = ({ list, onDragEnd, markAsDisabled, handleDeleteApp }) => {
@@ -8,11 +7,10 @@ const DragDropList = ({ list, onDragEnd, markAsDisabled, handleDeleteApp }) => {
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="list">
                 {(provided) => (
-                    <VStack
+                    <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        align="stretch"
-                        spacing={4}
+                        className="flex flex-col space-y-4"
                     >
                         <div className='divide-y divide-gray-100'>
 
@@ -32,7 +30,7 @@ const DragDropList = ({ list, onDragEnd, markAsDisabled, handleDeleteApp }) => {
                         ))}
                         </div>
                         {provided.placeholder}
-                    </VStack>
+                    </div>
                 )}
             </Droppable>
         </DragDropContext>

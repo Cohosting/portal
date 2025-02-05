@@ -38,7 +38,7 @@ const PaidInvoiceStatus = ({ invoice }) => (
             </span>
 
         </div>
-        <p className="mt-2 text-sm text-gray-600">Transection ID: {invoice.payment_intent_id}</p>
+        <p className="mt-2 text-sm text-gray-600">Transection ID: {invoice.payment_intent}</p>
 
         <div className="mt-4">
             <p className="text-sm text-gray-500">

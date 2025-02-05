@@ -3,8 +3,9 @@
 
 import React from 'react'
 import ConversationListItem from './ConversationListItem'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { markAsSeen } from '../../../services/chat';
+import _ from 'lodash';
 
 
 const ConversationList = ({
@@ -12,24 +13,40 @@ const ConversationList = ({
     userId,
     isClientExperience = false,
     convId,
-    optimisticMarkLastMessageAsSeen
+    optimisticMarkLastMessageAsSeen,
+    portal
 }) => {
+    const location = useLocation()
     const navigate = useNavigate();
-    const { conversationId } = useParams()
+    const { conversationId } = useParams();
+
+    console.log({
+        location
+    })
     return (
         <ul >
             {conversations.map((conversation) => {
                 let chat;
                 const participants = conversation.participants;
-                console.log(participants)
                 if (participants?.length === 1) {
-                    chat = {
-                        type: "individual",
-                        avatar: participants[0]?.avatar_url,
-                        name: participants[0].name,
+
+                    if (location.pathname === '/portal/messages') {
+                        chat = {
+                            type: "individual",
+                            avatar: participants[0]?.avatar_url,
+                            // lodash make capitalize
+                            name: _.capitalize(portal?.brand_settings?.brandName),
+                        }
+                    } else {
+                        chat = {
+                            type: "individual",
+                            avatar: participants[0]?.avatar_url,
+                            name: participants[0].name,
+                        }
                     }
 
-                } else {
+
+                } else if (participants?.length > 1) {
                     chat = {
                         type: "group",
                         avatars: participants?.map(participant => participant?.avatar_url),
@@ -37,7 +54,6 @@ const ConversationList = ({
                     }
                 }
                 let seen = conversation?.last_message?.seen;
-                console.log(conversation?.last_message)
                 const isUnread = (!seen || !seen.includes(userId)) && conversation.id !== (conversationId || convId);
 
 

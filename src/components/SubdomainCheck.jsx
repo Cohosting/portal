@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box, Spinner } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
 export const SubdomainCheck = ({
@@ -15,24 +14,21 @@ export const SubdomainCheck = ({
     if (!token) return navigate('/login');
   }
 
-
   if (!domain && !mainDomainComponent) return null;
 
   if (!domain && mainDomainComponent) return mainDomainComponent;
 
   if (domain && isLoading) {
-
-    return <Spinner />
+    return (
+      <div className="flex justify-center items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
-  if (domain && !isValid) return <Box>Invalid subdomain</Box>
-
+  if (domain && !isValid) return <div className="text-red-500">Invalid subdomain</div>;
 
   if (domain && isValid && !isLoading) {
     return children;
   };
-
-
-
-
 };

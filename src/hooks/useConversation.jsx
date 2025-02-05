@@ -14,6 +14,7 @@ export const useConversation = (conversationId, user, conversations) => {
     hasMore,
     moreLoading,
     fetchedWay,
+    error,
   } = useRealtimeMessages(conversationId, 15, conversations, user);
 
   const [isFileUploading, setIsFileUploading] = useState(false);
@@ -90,7 +91,9 @@ export const useConversation = (conversationId, user, conversations) => {
 
   const handleDeleteConversation = useCallback(async () => {
     console.log('Delete Conversation');
-    const { error } = await supabase.from('conversations').delete().eq('id', conversationId);
+    const { error } = await supabase.from('conversations').update({
+      status: 'deleted',
+    }).eq('id', conversationId);
     if (error) {
       console.error('Error deleting conversation:', error);
     }
@@ -115,5 +118,6 @@ export const useConversation = (conversationId, user, conversations) => {
     handleSendMessage,
     handleDeleteConversation,
     fetchedWay,
+    error
   };
 };

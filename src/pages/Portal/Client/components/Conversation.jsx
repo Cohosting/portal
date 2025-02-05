@@ -13,7 +13,7 @@ import { useHandleNewMessage } from '../../../../hooks/conversations/useHandleNe
 import FloatingNewMessageAlert from '../../../../components/UI/FloatingNewMessageAlert'
 import { markAsSeen } from '../../../../services/chat'
 
-const Conversation = ({ conversationId, user, conversations }) => {
+const Conversation = ({ conversationId, user, conversations, isClientExperience }) => {
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
     const lastElementVisible = useRef(null);
     const onMount = useRef(true);
@@ -70,6 +70,7 @@ const Conversation = ({ conversationId, user, conversations }) => {
 
         </div>
     }
+    const conversation = conversations.find(conv => conv.id === conversationId)
 
 
 
@@ -78,7 +79,7 @@ const Conversation = ({ conversationId, user, conversations }) => {
             <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
 
                 <ConversationHeader
-                    name={"Sterling Jones"}
+                    name={conversation?.name}
                     handleDeleteConversation={handleDeleteConversation}
                 />
             </div>

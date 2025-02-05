@@ -1,68 +1,66 @@
+import { Menu, Transition } from "@headlessui/react";
+import { ChartBarIcon, ChevronDownIcon, UserPlusIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { CurrencyDollar, Desk, UserPlus, Users } from "@phosphor-icons/react";
+import { Fragment, useState } from "react";
 
-const TeamOverview = ({ companyName, totalSeats, filledSeats, freeSeatsLimit, additionalSeatCost }) => {
-    const freeSeats = Math.max(freeSeatsLimit - filledSeats, 0);
-    const paidSeats = Math.max(filledSeats - freeSeatsLimit, 0);
-    const availablePaidSeats = totalSeats - Math.max(filledSeats, freeSeatsLimit);
+const TeamOverview = ({ companyName, teamMembers, totalSeats, filledSeats, freeSeatsLimit, additionalSeatCost }) => {
 
+    const freeMembersLimit = 5
+    const memberCount = teamMembers.length
+    const paidMembersCount = Math.max(0, memberCount - freeMembersLimit)
+    const freeSlots = Math.max(0, freeMembersLimit - memberCount)
     return (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-            <div className="px-4 py-5 sm:px-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">{companyName}</h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500">Team Seating Overview</p>
+        <div className="px-2 py-4 sm:px-4 sm:py-6">
+            <div className="grid gap-4 mb-6 sm:gap-6 sm:mb-8 md:grid-cols-2 xl:grid-cols-4">
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-xs sm:p-4">
+                    <div className="p-2 mr-3 text-blue-500 bg-blue-100 rounded-full sm:p-3 sm:mr-4">
+                        <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-                <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4">
-                        <div className="flex items-center justify-between sm:justify-start sm:w-1/2">
-                            <div className="flex items-center">
-                                <Desk className="mr-2 h-5 w-5 text-gray-400" />
-                                <span className="text-sm font-medium text-gray-500">Total Seats</span>
-                            </div>
-                            <span className="text-sm text-gray-900 sm:ml-4">{totalSeats}</span>
-                        </div>
-                        <div className="flex items-center justify-between sm:justify-start sm:w-1/2 mt-4 sm:mt-0">
-                            <div className="flex items-center">
-                                <Users className="mr-2 h-5 w-5 text-gray-400" />
-                                <span className="text-sm font-medium text-gray-500">Filled Seats</span>
-                            </div>
-                            <span className="text-sm text-gray-900 sm:ml-4">{filledSeats}</span>
-                        </div>
+                    <div>
+                        <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Total Members</p>
+                        <p className="text-base font-semibold text-gray-700 sm:text-lg">{memberCount}</p>
+                        <p className="text-xs text-gray-500 sm:text-sm">
+                            {freeSlots > 0 ? `${freeSlots} free slots remaining` : `${paidMembersCount} paid members`}
+                        </p>
                     </div>
-
-                    <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <UserPlus className="mr-2 h-5 w-5 text-green-500" />
-                                <span className="text-sm font-medium text-gray-500">Free Seats</span>
-                            </div>
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                {freeSeats} Available (of {freeSeatsLimit} free seats)
-                            </span>
-                        </div>
+                </div>
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-xs sm:p-4">
+                    <div className="p-2 mr-3 text-green-500 bg-green-100 rounded-full sm:p-3 sm:mr-4">
+                        <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-
-                    <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <CurrencyDollar className="mr-2 h-5 w-5 text-blue-500" />
-                                <span className="text-sm font-medium text-gray-500">Paid Seats</span>
-                            </div>
-                            <div>
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {paidSeats} In Use
-                                </span>
-                                <span className="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    {availablePaidSeats} Available
-                                </span>
-                            </div>
-                        </div>
+                    <div>
+                        <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Admins</p>
+                        <p className="text-base font-semibold text-gray-700 sm:text-lg">{teamMembers.filter(member => member.role === "admin").length}</p>
                     </div>
-
-
+                </div>
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-xs col-span-2 sm:p-4">
+                    <div className="p-2 mr-3 text-purple-500 bg-purple-100 rounded-full sm:p-3 sm:mr-4">
+                        <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
+                    <div className="w-full">
+                        <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Team Member Usage</p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                className="bg-purple-600 h-2 rounded-full transition-all duration-500 ease-in-out"
+                                style={{
+                                    width: `${(freeMembersLimit / freeSlots) * 100}%`
+                                }}
+                            ></div>
+                        </div>
+                        <div className="flex justify-between mt-1 text-xs text-gray-500 sm:mt-2">
+                            <span>0</span>
+                            <span>{freeMembersLimit} (Free Limit)</span>
+                        </div>
+                        <p className="mt-1 text-xs text-gray-600 sm:mt-2 sm:text-sm">
+                            {paidMembersCount > 0
+                                ? `Current additional cost: $${paidMembersCount * 20} /month`
+                                : "You're within the free member limit"}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
+
     );
 }
 export default TeamOverview;

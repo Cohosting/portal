@@ -16,7 +16,6 @@ const MassMessageForm = ({ onClose }) => {
     const { user, currentSelectedPortal } = useSelector(state => state.auth)
     const { data: clients, isLoading } = usePortalClients(currentSelectedPortal)
 
-    let portal_id = user?.portals[0];
 
     const handleChange = (selected) => {
         setSelectedPeople(selected);
@@ -29,6 +28,7 @@ const MassMessageForm = ({ onClose }) => {
 
     const handleMassMessageSubmit = async (e) => {
         e.preventDefault();
+        console.log(`this is the selected people: `, selectedPeople)
 
         try {
             setIsCreating(true);
@@ -45,7 +45,7 @@ const MassMessageForm = ({ onClose }) => {
                 },
             };
 
-            await createMassMessage(newMessage, participants, portal_id);
+            await createMassMessage(newMessage, participants, currentSelectedPortal);
             setIsCreating(false);
             onClose()
         } catch (error) {
@@ -62,7 +62,7 @@ const MassMessageForm = ({ onClose }) => {
 
 
     return (
-        <form onSubmit={handleMassMessageSubmit}>
+        <div >
             <div>
                 <div className="mb-6">
                     <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900 mb-2">
@@ -94,13 +94,15 @@ const MassMessageForm = ({ onClose }) => {
                 <Button size="lg" onClick={onClose} variant="secondary">
                     Cancel
                 </Button>
-                <Button size="lg" type="submit" data-autofocus  >
+                <Button onClick={
+                    handleMassMessageSubmit
+                } size="lg" type="submit" data-autofocus  >
                     {
                         isCreating ? 'Sending...' : 'Send'
                     }
                 </Button>
             </div>
-        </form>
+        </div>
     );
 };
 

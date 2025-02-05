@@ -10,6 +10,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { queryKeys } from "../../../hooks/react-query/queryKeys";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { Spinner } from "@phosphor-icons/react";
 
 const PaymentSettings = ({
     subscription
@@ -39,9 +40,7 @@ const PaymentSettings = ({
     };
 
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+
 
     const retryPaymentMethod = async (paymentMethodId, shouldMakeDefault = false) => {
         console.log('Retry payment method', paymentMethodId);
@@ -60,9 +59,17 @@ const PaymentSettings = ({
     return (
         <>
 
-            <div className="max-w-md  bg-white py-6 rounded-lg ">
+            <div className="max-w-md  bg-white pb-6 pt-3 rounded-lg ">
                 <h2 className="text-base font-medium mb-1">Payment settings</h2>
-                <p className="text-sm text-gray-600 mb-6">Update your plan settings</p>
+                <p className="text-sm text-gray-600 mb-6">Update your plan settings</p> 
+
+                {
+                    isLoading && (
+                        <div className="flex items-center ">
+                            <Spinner size={36} className="animate-spin m-5 " />
+                        </div>
+                    )
+                }
 
                 {subscription.subscription_error && (
                     <div className="rounded-md bg-red-50 p-4 my-2">

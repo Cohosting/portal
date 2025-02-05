@@ -169,7 +169,8 @@ export const createMassMessage = async (
   participantIds,
   portal_id
 ) => {
-  for (const participantId of participantIds) {
+  // Create a function to handle message sending per participant
+  const handleParticipant = async participantId => {
     // Fetch all conversations for this participant in the specified portal
     const { data, error } = await supabase
       .from('conversation_participants')
@@ -178,7 +179,8 @@ export const createMassMessage = async (
         conversation_id,
         conversations (
           id,
-          portal_id
+          portal_id,
+          status
         )
       `
       )
@@ -187,12 +189,15 @@ export const createMassMessage = async (
 
     if (error) {
       console.error('Error fetching conversation participants:', error);
-      continue; // Continue with the next participant
+      return; // Skip to the next participant
     }
+    console.log({
+      data,
+    });
 
     if (data && data.length > 0) {
       // User is part of existing conversations in this portal
-      for (const item of data) {
+      const messagePromises = data.map(async item => {
         if (item.conversations) {
           // Check if this is a one-on-one conversation
           const { count, error: countError } = await supabase
@@ -205,7 +210,7 @@ export const createMassMessage = async (
               'Error counting conversation participants:',
               countError
             );
-            continue;
+            return;
           }
 
           if (count === 1) {
@@ -216,9 +221,14 @@ export const createMassMessage = async (
             });
           }
         }
-      }
+      });
+
+      await Promise.all(messagePromises); // Send messages concurrently
     } else {
-      // User is not part of any conversation in this portal, create a new one
+      // User is not part of any active conversation in this portal, create a new one
+      console.log(
+        `Creating new conversation for participant: ${participantId}`
+      );
       const new_conversation_id = await createConversation(
         {
           name: `Mass Message - ${new Date().toISOString()}`,
@@ -239,9 +249,12 @@ export const createMassMessage = async (
         );
       }
     }
-  }
-};
+  };
 
+  // Use Promise.all to handle all participants in parallel
+  const participantPromises = participantIds.map(handleParticipant);
+  await Promise.all(participantPromises); // Wait for all participants to be processed
+};
 export const updateMessage = async (messageId, content) => {
   const { data, error } = await supabase
     .from('messages')
@@ -371,17 +384,16 @@ export const fetchMoreMessages = async (
   }
 };
 
-export const fetchConversationById = async conversationId => {
+export const fetchConversationById = async (conversationId, clientId) => {
   const { data, error } = await supabase
     .from('conversations')
     .select(
       `
-      id,
-      name,
-      created_at,
-      updated_at,
+      * ,
       participants:users!inner(id, name, avatar_url),
       last_message:last_message_id(id, content, seen, created_at)
+          conversation_participants!inner(user_id)
+
     `
     )
     .eq('id', conversationId)

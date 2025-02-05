@@ -1,4 +1,3 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignup } from '../../hooks/useSignup';
@@ -11,12 +10,8 @@ const SignupForm = ({ isLargerThan450 }) => {
     const navigate = useNavigate();
     const { handleChange, signup, email, password, error, isLoading } = useSignup();
 
-
-
     return (
-
-
-        <Box>
+        <div className="w-full">
             <Layout>
                 <button onClick={async () => await supabase.auth.signOut()}>
                     signout
@@ -25,7 +20,6 @@ const SignupForm = ({ isLargerThan450 }) => {
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
                     <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-
                         <InputField
                             value={email}
                             id="email"
@@ -45,7 +39,6 @@ const SignupForm = ({ isLargerThan450 }) => {
                                 type="password"
                                 label="Password"
                                 handleChange={handleChange}
-
                                 ariaInvalid={false}
                                 required
                             />
@@ -55,8 +48,6 @@ const SignupForm = ({ isLargerThan450 }) => {
                                 {error}
                             </p>
                         }
-
-
                         <div>
                             <button
                                 onClick={signup}
@@ -66,11 +57,10 @@ const SignupForm = ({ isLargerThan450 }) => {
                                 {
                                     isLoading ? 'Loading...' : 'Sign up'
                                 }
-
                             </button>
-                            <button className='flex m-auto	' onClick={() => navigate('/login')}>
+                            <button className='flex m-auto' onClick={() => navigate('/login')}>
                                 <div className="flex justify-center mt-6">
-                                    <span className="text-sm text-gray-500">Already have a account?</span>
+                                    <span className="text-sm text-gray-500">Already have an account?</span>
                                     <span className="text-sm text-indigo-600 ml-1">Log in</span>
                                 </div>
                             </button>
@@ -78,10 +68,7 @@ const SignupForm = ({ isLargerThan450 }) => {
                     </div>
                 </div>
             </Layout>
-
-        </Box>
-
-
+        </div>
     );
 };
 

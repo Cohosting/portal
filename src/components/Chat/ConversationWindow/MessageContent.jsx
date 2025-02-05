@@ -12,7 +12,6 @@ const MessageContent = ({
     status,
     id
 }) => {
-    console.log({ content })
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [editedContent, setEditedContent] = useState(content);

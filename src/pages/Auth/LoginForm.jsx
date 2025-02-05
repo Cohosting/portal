@@ -1,11 +1,9 @@
-import { Box, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 
 import { Layout } from './Layout';
 import { useNavigate } from 'react-router-dom';
 import { handleSupabaseError } from '../../utils/firebase';
-import { getOrCreateUser } from '../../lib/auth';
-import { useSelector } from 'react-redux';
+
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import { supabase } from '../../lib/supabase';
@@ -102,9 +100,9 @@ export const LoginForm = () => {
             />
             </div>
             {error && (
-              <Text color={'red'} fontSize={'13px'} mb={'1.2rem'}>
+              <p className="text-red-500 text-xs mb-4">
                 {error}
-              </Text>
+              </p>
             )}
             <button
               onClick={handleEmailPasswordLogin}
@@ -117,13 +115,8 @@ export const LoginForm = () => {
 
             </button>
 
-          <Box
-            maxW={'340px'}
-              m="auto"
-              mt={'1rem'}
-
-              textAlign={'center'}
-            fontSize={'14px'}
+            <div
+              className="max-w-xs mx-auto mt-4 text-center text-sm"
           >
               <p
                 className='text-sm text-gray-500 cursor-pointer'
@@ -132,7 +125,7 @@ export const LoginForm = () => {
             >
               New to copilot?
               </p>
-          </Box>
+            </div>
           </div>
         </div>
 

@@ -6,11 +6,22 @@ import usePlanSelector from "../../../hooks/subscriptions/usePlanSelector";
 import SubscriptionScheduleInfo from "./SubscriptionScheduleInfo";
 import CurrentPlan from "./CurrentPlan";
 import useSubscription from "../../../hooks/useSubscription";
+import PlanSelectionModal from "./PlanSelectionModal";
 
+
+const getCurrentPlan = (priceId) => {
+    for (const tier of tiers) {
+        if (tier.monthly.priceId === priceId) {
+            return { name: tier.name, interval: 'monthly' };
+        }
+        if (tier.yearly.priceId === priceId) {
+            return { name: tier.name, interval: 'yearly' };
+        }
+    }
+    return null; // Return null if no matching plan is found
+};
 const PlanSelector = ({ subscription }) => {
-    console.log({
-        subscription
-    })
+
     const {
         isYearly,
         selectedPlan,
@@ -62,7 +73,9 @@ const PlanSelector = ({ subscription }) => {
                     />
                 )
             }
-            <div className="mb-6">
+
+            <PlanSelectionModal currentPlan={getCurrentPlan(subscription.price_id)} subscription={subscription} />
+            {/* <div className="mb-6">
                 <ToggleSwitch isYearly={isYearly} onToggle={handleToggle} />
             </div>
 
@@ -81,9 +94,9 @@ const PlanSelector = ({ subscription }) => {
                         onClick={() => handlePlanSelect(tier)}
                     />
                 ))}
-            </div>
+            </div> */}
 
-            {isPlanChanged() && (
+            {/* {isPlanChanged() && (
                 <div>
                     <p className="mt-4 text-sm text-yellow-600 bg-yellow-100 p-2 rounded">
                         Note: Switching billing cycle will take effect on your next billing date. Your current plan remains active until then.
@@ -98,7 +111,7 @@ const PlanSelector = ({ subscription }) => {
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
 
         </div>
     );

@@ -1,4 +1,3 @@
-import { Box } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Fa500Px, FaAirbnb, FaAlgolia, FaAws } from 'react-icons/fa';
 
@@ -25,17 +24,9 @@ const IconPicker = ({ onIconSelect, icon }) => {
 
   return (
     <div>
-      <Box
-        w={'30px'}
-        height={'30px'}
-        border={'1px solid'}
-        borderRadius={'4px'}
+      <div
+        className="w-8 h-8 border border-solid border-gray-300 rounded flex items-center justify-center p-1 cursor-pointer"
         onClick={handleBoxClick}
-        display={'flex'}
-        alignItems={'center'}
-        justifyContent={'center'}
-        p={1}
-        cursor={'pointer'}
       >
         {selectedIcon ? (
           <div className="selected-icon">
@@ -49,30 +40,23 @@ const IconPicker = ({ onIconSelect, icon }) => {
             }}
           />
         )}
-      </Box>
+      </div>
 
       {showIcons && (
-        <Box
-          bg={'white'}
-          p={'5px'}
-          borderRadius={'6px'}
-          boxShadow={' rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'}
-          className="icon-list"
-          w={'max-content'}
+        <div
+          className="bg-white p-1.5 rounded-lg shadow-md max-w-max"
         >
           {icons.map((icon, index) => (
-            <Box
-              my={1}
-              cursor={'pointer'}
+            <div
+              className={`my-1 cursor-pointer icon ${selectedIcon === icon.icon ? 'selected' : ''}`}
               key={index}
-              className={`icon ${selectedIcon === icon.icon ? 'selected' : ''}`}
               onClick={() => handleIconClick(icon)}
             >
               {icon.icon}
               <span>{icon.name}</span>
-            </Box>
+            </div>
           ))}
-        </Box>
+        </div>
       )}
     </div>
   );

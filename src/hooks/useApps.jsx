@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useToast } from '@chakra-ui/react';
+import { toast } from 'react-toastify';
 import { supabase } from '../lib/supabase';
 import { sortAndIndexData } from '../utils';
 
@@ -8,8 +8,6 @@ export function useApps(portal) {
     const [previousList, setPreviousList] = useState(null);
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    const toast = useToast();
 
     // Effect to track previous list and detect changes
     useEffect(() => {
@@ -29,7 +27,6 @@ export function useApps(portal) {
         setPreviousList(apps);
     }, [portal]);
 
-
     const handleUpdate = async () => {
         try {
             setIsLoading(true); 
@@ -43,15 +40,16 @@ export function useApps(portal) {
                 return;
             }
 
-
             setHasChanges(false);
             setIsLoading(false);
-            toast({
-                title: 'App order updated.',
-                description: 'The order of your apps has been successfully updated.',
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
+            toast.success('The order of your apps has been successfully updated.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
             });
         } catch (error) {
             setIsLoading(false);
@@ -78,13 +76,14 @@ export function useApps(portal) {
 
             setList(newList);
 
-
-            toast({
-                title: 'App deleted.',
-                description: 'The app has been successfully deleted.',
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
+            toast.success('The app has been successfully deleted.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
             });
         } catch (error) {
             console.log(`Error deleting app: ${error}`);
@@ -110,12 +109,14 @@ export function useApps(portal) {
             }
 
             setList(newList);
-            toast({
-                title: 'App updated.',
-                description: 'The app has been successfully updated.',
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
+            toast.success('The app has been successfully updated.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
             });
         } catch (error) {
             console.log(`Error updating app: ${error}`);

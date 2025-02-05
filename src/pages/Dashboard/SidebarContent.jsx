@@ -1,4 +1,3 @@
-import { ChevronRightIcon } from '@chakra-ui/icons';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import {
     CalendarIcon,
@@ -11,8 +10,6 @@ import {
     AdjustmentsHorizontalIcon,
     CpuChipIcon,
     ArrowRightEndOnRectangleIcon
-
-
 } from '@heroicons/react/24/outline';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -20,13 +17,12 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import Avatar from '../../components/UI/Avatar';
 import PortalSwitcher from '../../components/UI/PortalSwitcher';
 import { useConversationContext } from '../../context/useConversationContext';
-import { Bank, User, Users } from '@phosphor-icons/react';
-import { useMediaQuery } from '@chakra-ui/react';
+import { ArrowRight, Bank, User, Users } from '@phosphor-icons/react';
+import { useMediaQuery } from 'react-responsive';
+
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
-
-
 
 const preference = [
     { name: 'App', href: '/apps', icon: ComputerDesktopIcon, current: true },
@@ -39,8 +35,7 @@ export default function SidebarContent() {
     const navigate = useNavigate();
     const locaiton = useLocation()
     const { appId } = useParams()
-    const [isLessThan1024] = useMediaQuery('(max-width: 1024px)');
-
+    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
     let isCurrent = (href) => {
         // just for /
@@ -52,7 +47,6 @@ export default function SidebarContent() {
 
     const { user, currentSelectedPortal } = useSelector(state => state.auth);
     const { data: portal } = usePortalData(currentSelectedPortal);
-
 
     let portal_apps = portal?.portal_apps?.filter(app => !app.is_default) || []
     const navigation = [
@@ -125,7 +119,7 @@ export default function SidebarContent() {
                                                 >
                                                     <item.icon aria-hidden="true" className="h-6 w-6 shrink-0 text-gray-400" />
                                                     {item.name}
-                                                    <ChevronRightIcon
+                                                        <ArrowRight
                                                         aria-hidden="true"
                                                         className="ml-auto h-5 w-5 shrink-0 text-gray-400 group-data-[open]:rotate-90 group-data-[open]:text-gray-500"
                                                     />

@@ -14,10 +14,7 @@ const fetchConversationById = async conversationId => {
     .from('conversations')
     .select(
       `
-      id,
-      name,
-      created_at,
-      updated_at,
+    *,
       participants:users!inner(id, name, avatar_url),
       last_message:last_message_id(id, content, seen, created_at)
     `
@@ -38,10 +35,6 @@ export const useChatConversations = portal_id => {
   const [fetchedWay, setFetchedWay] = useState('initial');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  console.log({
-    conversations,
-  });
 
   const optimisticMarkLastMessageAsSeen = (conversation, userId) => {
     const updatedConversation = {
@@ -72,12 +65,10 @@ export const useChatConversations = portal_id => {
           .from('conversations')
           .select(
             `
-            id,
-            name,
-            created_at,
-            updated_at,
+            * ,
             participants:users!inner(id, name, avatar_url),
             last_message:last_message_id(id, content, seen, created_at )
+             
           `
           )
           .eq('portal_id', portal_id)
@@ -149,6 +140,7 @@ export const useChatConversations = portal_id => {
           filter: `portal_id=eq.${portal_id}`,
         },
         payload => {
+          console.log(payload);
           setConversations(prev => {
             return prev.filter(conv => conv.id !== payload.old.id);
           });
@@ -167,10 +159,7 @@ export const useChatConversations = portal_id => {
       .from('conversations')
       .select(
         `
-            id,
-            name,
-            created_at,
-            updated_at,
+          * ,
             participants:users!inner(id, name, avatar_url),
             last_message:last_message_id(id, content, seen, created_at )
           `
@@ -187,7 +176,7 @@ export const useChatConversations = portal_id => {
   return {
     error,
     isLoading: loading,
-    conversations,
+    conversations: conversations.filter(conv => conv.status !== 'deleted'),
     fetchedWay,
     optimisticMarkLastMessageAsSeen,
     updatedConversation: setConversations,

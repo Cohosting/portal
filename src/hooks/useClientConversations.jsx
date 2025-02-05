@@ -8,10 +8,7 @@ const fetchConversations = async (portal_id, client_id) => {
         const { data } = await supabase
             .from('conversations')
             .select(`
-    id,
-    name,
-    created_at,
-    updated_at,
+    *,
     participants:users!inner(id, name, avatar_url),
     last_message:last_message_id(id, content, seen, created_at),
     conversation_participants!inner(user_id)
@@ -20,7 +17,7 @@ const fetchConversations = async (portal_id, client_id) => {
             .eq('portal_id', portal_id)
             .order('updated_at', { ascending: false });
 
-        return data;
+        return data 
     } catch (error) {
         throw error;
     }
@@ -79,17 +76,22 @@ export const useClientConversations = (portal_id, client_id) => {
                     table: 'conversations',
                     filter: `portal_id=eq.${portal_id}`,
                 },
-                payload => {
+                async payload => {
                     // setData(prev => ({
                     //     conversations: [payload.new, ...prev.conversations],
                     //     fetchedWay: 'INSERT',
                     // }));
                     // need to fetch data cause payload dont have embed data
+                    console.log(`Conversation ${payload.new.id} inserted`);
+                    let newConversation = payload.new;
+                    const conv = await fetchConversationById(newConversation.id, client_id)
+                    console.log({
+                        conv
+                    })
+                    setConversations(prev => [conv, ...prev]);
 
 
 
-                    setConversations(prev => [payload.new, ...prev]);
-                    setFetchedWay('INSERT');
                 }
             )
             .on(
@@ -101,8 +103,9 @@ export const useClientConversations = (portal_id, client_id) => {
                     filter: `portal_id=eq.${portal_id}`,
                 },
                 async payload => {
+                    console.log(`Conversation ${payload.new.id} updated`);
                     let updatedConversation = payload.new;
-                    fetchConversationById(updatedConversation.id).then(data => {
+                    fetchConversationById(updatedConversation.id, client_id).then(data => {
                         setConversations(prev => prev.map(conversation => conversation.id === payload.new.id ? data : conversation));
                     }
                     );
@@ -127,6 +130,18 @@ export const useClientConversations = (portal_id, client_id) => {
         return () => { conversationSubscription.unsubscribe() }
     }, [portal_id, client_id])
 
-    return { conversations, optimisticMarkLastMessageAsSeen, fetchedWay, isLoading, error }
+    console.log({
+        beforeDelete: conversations
+    })
+
+    return {
+        conversations: conversations.filter((conv) =>
+            conv !== null &&
+            conv.status !== 'deleted' &&
+            conv.participants &&
+            Array.isArray(conv.participants) &&
+            conv.participants.some(participant => participant && participant.id === client_id)
+        ), optimisticMarkLastMessageAsSeen, fetchedWay, isLoading, error
+    }
 
 }

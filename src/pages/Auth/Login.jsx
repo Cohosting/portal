@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Spinner } from '@chakra-ui/react';
+import { CircleNotch } from '@phosphor-icons/react';
 import { useDomainInfo } from '../../hooks/useDomainInfo';
 import { LoginForm } from './LoginForm';
 import { ClientLogin } from '../Portal/Client/Login';
@@ -15,10 +15,10 @@ export const Login = () => {
 
     if (domain.name) {
       if (isLoading) {
-        return <Spinner />;
+        return <CircleNotch className="animate-spin" />;
       }
       if (!domain.existsInDb) {
-        return <Box>Invalid subdomain</Box>;
+        return <div className="p-4">Invalid subdomain</div>;
       }
 
       if (domain.portalData.subscription_id) {
@@ -33,8 +33,8 @@ export const Login = () => {
   };
 
   return (
-    <Box>
+    <div  >
         {renderContent()}
-    </Box>
+    </div>
   );
 };

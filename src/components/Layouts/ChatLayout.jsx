@@ -6,29 +6,29 @@ import { BaseModal } from '../Modal';
 import MassMessageForm from '../Forms/MassMessageForm';
 import NewConversationForm from '../Forms/NewConversationForm';
 
-import { useDisclosure, useMediaQuery } from '@chakra-ui/react';
+import { useMediaQuery } from 'react-responsive';
 import { useChatConversations } from '../../hooks/react-query/useChat';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Spinner } from '@phosphor-icons/react';
+import { useToggle } from 'react-use';
+import { usePortalData } from '../../hooks/react-query/usePortalData';
 
 const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, optimisticMarkLastMessageAsSeen }) => {
     const { user, currentSelectedPortal } = useSelector(state => state.auth)
-    const { isOpen: isNewConversationOpen, onOpen: onNewConversationOpen, onClose: onNewConversationClose } = useDisclosure()
-    const { isOpen: isMassConversationOpen, onOpen: onMassConversationOpen, onClose: onMassConversationClose } = useDisclosure()
+    const [isNewConversationOpen, toggleNewConversationOpen] = useToggle(false);
+    const [isMassConversationOpen, toggleMassConversationOpen] = useToggle(false);
+    const { data: portal } = usePortalData(currentSelectedPortal)
     const { conversationId } = useParams();
 
-    const [isLessThan768] = useMediaQuery('(max-width: 768px)');
+    const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const handleNewConversation = () => onNewConversationOpen();
-    const handleMassConversation = () => onMassConversationOpen();
-
-
+    const handleNewConversation = () => toggleNewConversationOpen();
+    const handleMassConversation = () => toggleMassConversationOpen();
 
     useEffect(() => {
         setIsConversationsListLoading(isLoading)
     }, [isLoading, setIsConversationsListLoading,])
-
 
     return (
         <div className={` chat-layout fixed lg:inset-y-0 lg:z-50 h-screen ${isLessThan768 ? 'w-full' : 'w-72'}  flex lg:flex-col`}>
@@ -46,7 +46,7 @@ const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, o
                         ) : conversations.length > 0 ? (
                             <ul className="flex flex-1 flex-col gap-y-7">
                                 <li>
-                                    <ConversationList optimisticMarkLastMessageAsSeen={optimisticMarkLastMessageAsSeen} userId={user.id} conversations={conversations} />
+                                        <ConversationList portal={portal} optimisticMarkLastMessageAsSeen={optimisticMarkLastMessageAsSeen} userId={user.id} conversations={conversations} />
                                 </li>
                             </ul>
                         ) : (
@@ -59,11 +59,11 @@ const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, o
             )}
 
             {/* Modal for creating new conversations */}
-            <BaseModal isOpen={isNewConversationOpen} onClose={onNewConversationClose}>
-                <NewConversationForm onClose={onNewConversationClose} />
+            <BaseModal isOpen={isNewConversationOpen} onClose={toggleNewConversationOpen}>
+                <NewConversationForm onClose={toggleNewConversationOpen} />
             </BaseModal>
-            <BaseModal isOpen={isMassConversationOpen} onClose={onMassConversationClose}>
-                <MassMessageForm onClose={onMassConversationClose} />
+            <BaseModal isOpen={isMassConversationOpen} onClose={toggleMassConversationOpen}>
+                <MassMessageForm onClose={toggleMassConversationOpen} />
             </BaseModal>
         </div>
     )

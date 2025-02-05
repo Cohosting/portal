@@ -7,7 +7,7 @@ import { usePortalClients, usePortalData } from '../../hooks/react-query/usePort
 import { AppView } from './AppView';
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
 import { SquaresPlusIcon, PencilIcon, EllipsisVerticalIcon, UserCircleIcon, Cog6ToothIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { useDisclosure } from '@chakra-ui/react';
+import { useToggle } from 'react-use';
 import { Spinner } from '@phosphor-icons/react';
 
 // Custom hook for handling window resize
@@ -134,7 +134,7 @@ export const AppConfigurations = () => {
   const { data: portal, isLoading: isPortalLoading } = usePortalData(currentSelectedPortal);
   const { data: clients, isLoading: isClientsLoading } = usePortalClients(portal?.id);
   const app = portal?.portal_apps.find(app => app.id === appId);
-  const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+  const [isOpen, toggleIsOpen] = useToggle(false);
   const navigate = useNavigate();
 
   const { width } = useWindowSize();
@@ -192,7 +192,7 @@ export const AppConfigurations = () => {
                   currentSelectedMember={currentSelectedMember}
                   app={app}
                   navigate={navigate}
-                  onToggle={onToggle}
+                  onToggle={toggleIsOpen}
                   isMobile={isMobile}
                   setShowClientList={setShowClientList}
                 />
@@ -208,7 +208,7 @@ export const AppConfigurations = () => {
                       isConnected={app.settings?.clientsSettings?.some(setting => setting.clientId === currentSelectedMember)}
                       clientId={currentSelectedMember}
                       app={app}
-                        onToggle={onToggle}
+                        onToggle={toggleIsOpen}
                         isOpen={isOpen}
                       />
                 ) : (

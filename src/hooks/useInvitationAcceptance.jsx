@@ -36,7 +36,7 @@ export const useInvitationAcceptance = (token) => {
             setIsValidatingToken(true);
             const response = await axiosInstance.get(`/team/invitations/invite/verify/${token}`);
             setInvitationData(response.data);
-            await checkUserExistence(response.data.email);
+            // await checkUserExistence(response.data.email);
         } catch (error) {
             setError('Invalid or expired invitation.');
         } finally {

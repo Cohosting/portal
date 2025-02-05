@@ -146,7 +146,6 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
           >
             <option value="member">Member</option>
             <option value="admin">Admin</option>
-            <option value="owner">Owner</option>
           </select>
         </div>
       </>

@@ -1,4 +1,3 @@
-import { Box, FormControl, FormErrorMessage, FormLabel, Input } from '@chakra-ui/react'
 import React from 'react'
 import { handleError } from '../utils/validationUtils';
 
@@ -11,56 +10,32 @@ export const CustomInput = ({
   formLabel,
   ...otherProps
 }) => {
-  const inputStyle = {
-    border: '1px solid #eee',
-    _invalid: { borderColor: '#FC8181', boxShadow: 'none' },
-  };
-
   const isInvalid = handleError(name, value)
   return (
-    <FormControl
-      isInvalid={isInvalid}
-    display={'flex'}
-    flexDirection="column"
-    height="105px"
-  >
-    {
-      formLabel ? formLabel  :  (
-        <FormLabel  m="0" fontSize={'13px'}>
-      {label}
-    </FormLabel>
-      )
-    }
-    
-    <Input
+    <div className={`flex flex-col h-[105px] ${isInvalid ? 'border-red-400' : ''}`}>
+      {
+        formLabel ? formLabel : (
+          <label className="m-0 text-[13px]">
+            {label}
+          </label>
+        )
+      }
+
+      <input
         name={name}
-      type="email"
-      value={value}
-      height={'3rem'}
-      sx={{
-         ...inputStyle,
-        _hover: !isInvalid && {
-          border: '1px solid #eee',
-        },
-        _focus: !isInvalid ? {
-              border: '1px solid rgb(33, 43, 54)',
-              boxShadow: 'none',
-            } : {
-              border: '1px solid #FC8181',
-              boxShadow: 'none',
-            },
-          
-      }}
-      onChange={e => {
-        handleChange(e, name)
-      }}
-      {...otherProps}
-    />
+        type="email"
+        value={value}
+        className={`h-[3rem] border ${isInvalid ? 'border-red-400' : 'border-gray-200'} focus:outline-none focus:${isInvalid ? 'border-red-400' : 'border-gray-800'} hover:${!isInvalid ? 'border-gray-200' : ''}`}
+        onChange={e => {
+          handleChange(e, name)
+        }}
+        {...otherProps}
+      />
       {isInvalid && (
-      <FormErrorMessage alignSelf={'end'} fontSize={'13px'}>
-        Email is required.
-      </FormErrorMessage>
-    )}
-  </FormControl>
+        <p className="self-end text-[13px] text-red-400">
+          Email is required.
+        </p>
+      )}
+    </div>
   )
 }

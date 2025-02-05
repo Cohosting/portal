@@ -11,7 +11,7 @@ const stripePromise = loadStripe(
     process.env.REACT_APP_STRIPE_PUBLIC_KEY
 );
 
-const PricingPage = () => {
+const PricingPage = ({ shouldShowSubscription, setShouldShowSubscription }) => {
     const [frequency, setFrequency] = useState('monthly');
     const [selectedTier, setSelectedTier] = useState(null);
     const {
@@ -41,9 +41,12 @@ const PricingPage = () => {
                             payment_method_types: ['card'],
                         }} >
 
-                            <CheckoutForm isYearly={
+                                <CheckoutForm setShouldShowSubscription={setShouldShowSubscription} isYearly={
                                 frequency === 'yearly'
                             } priceId={priceId} tier={selectedTier} frequency={frequency} />
+                                {!shouldShowSubscription && (
+                                    <p className="my-2 text-green-500">Please wait everthing is getting proccessed...</p>
+                                )}
                         </Elements>
                     </>
                 )}

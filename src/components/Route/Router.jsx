@@ -4,9 +4,6 @@ import { Login } from '../../pages/Auth/Login';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { Dashboard } from '../../pages/Dashboard/Dashboard';
 import { ProtectedRoutes } from './ProtectedRoutes';
-import { Pricing } from '../../pages/Subscriptions/Pricing';
-import { Success } from '../../pages/Subscriptions/Success';
-import { Failed } from '../../pages/Subscriptions/Failed';
 import { Settings } from '../../pages/Settings/Setting';
 import { Refresh } from '../../pages/Settings/Refresh';
 import { StripeReturn } from '../../pages/Settings/StripeReturn';
@@ -30,6 +27,7 @@ import InvitationAccept from '../../pages/Team/InvitationAccept.jsx';
 import SettingsLayout from '../../pages/Settings/SettingsLayout.jsx';
 import QuickSetup from '../../pages/Auth/QuickSetup.jsx';
 import SubscriptionSuccess from '../UI/SubscriptionSuccess.jsx';
+import Files from '../../pages/Files/Files.jsx';
 
 
 
@@ -61,6 +59,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Dashboard />,
+      },
+      {
+        path: '/files',
+        element: <Files />,
       },
       {
         path: 'messages',
@@ -218,10 +220,6 @@ const router = createBrowserRouter([
     element: <Login />,
   },
 
-  {
-    path: '/cancel',
-    element: <Failed />,
-  },
 
   {
     path: '/success',
@@ -231,6 +229,9 @@ const router = createBrowserRouter([
     path: '/invitations/:inviteId/accept/:token',
     element: <InvitationAccept />,
   },
+  {
+
+  }
 ]);
 
     export { router };

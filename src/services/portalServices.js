@@ -1,6 +1,4 @@
 // portalService.js
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import axiosInstance from '../api/axiosConfig';
 
@@ -37,9 +35,9 @@ export const fetchPortalDataByIdOrUrl = async (
   if (error) {
     throw new Error(error.message);
   }
-console.log({
-  data,
-});
+  console.log({
+    data,
+  });
   return data;
 };
 export const fetchTeamMemberData = async (portalId, userEmail) => {
@@ -81,15 +79,6 @@ export const updateCustomerInPortal = async (portalId, customerId) => {
     .from('portals')
     .update({ customer_id: customerId })
     .eq('id', portalId);
-};
-
-export const updateSubscriptionStatus = async (
-  portalId,
-  subscriptionDetails
-) => {
-  await updateDoc(doc(db, 'portals', portalId), {
-    'addOnSubscription.items.removeBranding': subscriptionDetails,
-  });
 };
 
 export const redirectToStripeCheckoutSession = async invoice => {
@@ -169,4 +158,3 @@ export const fetchPortalClients = async portal_id => {
 
   return data;
 };
-

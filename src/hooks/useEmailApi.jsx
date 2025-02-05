@@ -7,6 +7,11 @@ export const useSendEmail = () => {
   const [error, setError] = useState(null);
 
   const sendEmail = async (to, subject, htmlContent) => {
+    console.log({
+      to,
+      subject,
+      htmlContent
+    })
     setLoading(true);
     setError(null);
     try {

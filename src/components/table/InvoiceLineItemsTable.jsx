@@ -26,9 +26,15 @@ const InvoiceLineItemsTable = ({
         setLineItems(
             lineItems.map((item) => {
                 if (item.id === id) {
+                    let newValue = value;
+                    if (name === 'quantity') {
+                        newValue = Math.max(0, Math.round(value)); // Ensure integer and non-negative
+                    } else if (name === 'unit_amount') {
+                        newValue = Math.max(0, parseFloat(value)); // Ensure non-negative
+                    }
                     return {
                         ...item,
-                        [name]: value
+                        [name]: newValue
                     };
                 }
                 return item;
@@ -46,7 +52,6 @@ const InvoiceLineItemsTable = ({
             })
         );
     };
-
 
     let total = calculateTotal(lineItems);
 
@@ -96,46 +101,54 @@ const InvoiceLineItemsTable = ({
                                                 <Label>Unit amount</Label>
 
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     name="unit_amount"
                                                     value={item.unit_amount}
                                                     onChange={(e) => handleInputChange(item.id, e)}
                                                     className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 leading-6 text-xs"
                                                     placeholder="Unit amount"
+                                                    min="0"
+                                                    step="0.01"
                                                 />
                                             </div>
 
                                             <Label>Quantity</Label>
 
                                             <input
-                                                type="text"
+                                                type="number"
                                                 name="quantity"
                                                 value={item.quantity}
                                                 onChange={(e) => handleInputChange(item.id, e)}
                                                 className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 leading-6 text-xs"
                                                 placeholder="Quantity"
+                                                min="0"
+                                                step="1"
                                             />
 
                                         </div>
                                     </td>
                                     <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">
                                         <input
-                                            type="text"
+                                            type="number"
                                             name="unit_amount"
                                             value={item.unit_amount}
                                             onChange={(e) => handleInputChange(item.id, e)}
                                             className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6 text-xs"
                                             placeholder="Unit amount"
+                                            min="0"
+                                            step="0.01"
                                         />
                                     </td>
                                     <td className="hidden px-3 py-5 text-right text-xs text-gray-500 sm:table-cell">
                                         <input
-                                            type="text"
+                                            type="number"
                                             name="quantity"
                                             value={item.quantity}
                                             onChange={(e) => handleInputChange(item.id, e)}
                                             className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6 text-xs"
                                             placeholder="Quantity"
+                                            min="0"
+                                            step="1"
                                         />
                                     </td>
                                     <td className="py-5 pl-3 pr-4 text-right text-xs text-gray-500 sm:pr-0">

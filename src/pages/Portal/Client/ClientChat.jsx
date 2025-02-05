@@ -10,9 +10,12 @@ const Chat = ({ portalData }) => {
     if (isLoading) {
         return <div>Loading...</div>
     }
+    console.log({
+        cossss: conversations
+    })
     return (
 
-        <ClientChatLayout optimisticMarkLastMessageAsSeen={optimisticMarkLastMessageAsSeen} user={clientUser} conversations={conversations}>
+        <ClientChatLayout portal={portalData} optimisticMarkLastMessageAsSeen={optimisticMarkLastMessageAsSeen} user={clientUser} conversations={conversations}>
             s
         </ClientChatLayout>
 

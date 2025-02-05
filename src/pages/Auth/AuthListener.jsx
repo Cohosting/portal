@@ -14,9 +14,9 @@ const AuthListener = ({ children }) => {
 
     useEffect(() => {
         const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+            // await supabase.auth.signOut()
 
             if (session) {
-                // await supabase.auth.signOut()
                 console.log('Session found:', session);
                 setSession(session)
             } else {

@@ -1,4 +1,3 @@
-import { Box, useDisclosure } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { InviteForm } from './InviteForm';
@@ -17,7 +16,6 @@ import { useSendEmail } from '../../hooks/useEmailApi';
 const WarningBanner = ({ message }) => {
   const navigate = useNavigate()
 
-
   const onAction = () => navigate('/settings/portal');
   return (
     <div className="bg-yellow-50 border-r-4 border-yellow-400 p-4">
@@ -35,7 +33,6 @@ const WarningBanner = ({ message }) => {
             >
               Complete setup
             </button>
-
           </p>
         </div>
       </div>
@@ -44,7 +41,7 @@ const WarningBanner = ({ message }) => {
 };
 
 export const Client = () => {
-  const { user, currentSelectedPortal } = useSelector((state) => state.auth);
+  const { currentSelectedPortal } = useSelector((state) => state.auth);
   const { data: portal, isLoading: portalLoading } = usePortalData(currentSelectedPortal);
   const { stripeUser, isLoading: stripeUserLoading, refetch: refetchStripeUser } = useStripeUser(portal?.stripe_connect_account_id);
   const {
@@ -58,7 +55,9 @@ export const Client = () => {
   const { sendEmail, loading: sendEmailLoading, error: sendEmailError } = useSendEmail();
   const [temporaryClient, setTemporaryClient] = useState(null);
   const [showStripeConnect, setShowStripeConnect] = useState(false);
-  const { isOpen, onToggle } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const onToggle = () => setIsOpen(!isOpen);
 
   const isLoading = portalLoading || stripeUserLoading;
 
@@ -105,35 +104,32 @@ export const Client = () => {
               onAction={() => setShowStripeConnect(true)}
             />
           )}
-          <Box>
-            <div className="px-4 sm:px-6 lg:px-8 pt-7">
-              <div className="sm:flex sm:items-center border-b pb-4">
-                <div className="sm:flex-auto ">
-                  <h1 className="text-base font-semibold leading-6 text-gray-900">Clients</h1>
-                  <p className="mt-2 text-sm text-gray-700">
-                    A list of all the clients in your portal including their name, email and status.
-                  </p>
-                </div>
-                <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                  <button
-                    onClick={onToggle}
-                    type="button"
-                    className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Add client
-                  </button>
-                </div>
+          <div className="px-4 sm:px-6 lg:px-8 pt-7">
+            <div className="sm:flex sm:items-center border-b pb-4">
+              <div className="sm:flex-auto ">
+                <h1 className="text-base font-semibold leading-6 text-gray-900">Clients</h1>
+                <p className="mt-2 text-sm text-gray-700">
+                  A list of all the clients in your portal including their name, email and status.
+                </p>
               </div>
-              {
-                !loading && clients.length === 0 ? (
-                  <div className="mt-8 flex items-center justify-center">
-                    <p className="text-sm font-semibold text-gray-700">Your client list is empty. Add a new client to get started!</p>
-                  </div>
-                ) : <ClientTable refetch={refetch} clients={clients} />
-              }
-
+              <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                <button
+                  onClick={onToggle}
+                  type="button"
+                  className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Add client
+                </button>
+              </div>
             </div>
-          </Box>
+            {
+              !loading && clients.length === 0 ? (
+                <div className="mt-8 flex items-center justify-center">
+                  <p className="text-sm font-semibold text-gray-700">Your client list is empty. Add a new client to get started!</p>
+                </div>
+              ) : <ClientTable refetch={refetch} clients={clients} />
+            }
+          </div>
           <InviteForm
             isOpen={isOpen}
             onClose={onToggle}

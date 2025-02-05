@@ -1,7 +1,4 @@
-import { Box, Button, Divider, Flex, Text } from "@chakra-ui/react";
-import CustomSelect from "../../../components/CustomSelect";
 import { foundOn } from "../../../utils/constant";
-import { CustomInput } from "../../../components/CustomInput";
 import PortalURLInput from "../../../components/PortalURLInput";
 import { useSelector, useDispatch } from "react-redux";
 import { setPersonalInfoStep, setStep } from "../../../store/slices/authSlice";
@@ -9,8 +6,6 @@ import InputField from "../../../components/InputField";
 import Header from "../../../components/Header";
 import Select from "../../../components/Select";
 import { useEffect, useState } from "react";
-
-
 
 const PersonalInfoStep = ({ isLargerThan450 }) => {
   const dispatch = useDispatch();
@@ -23,7 +18,6 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
       ...personalInfoStep,
       [name]: value,
     }));
-
   };
 
   const isFormValid = () => {
@@ -43,12 +37,7 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
   }, [personalInfoStep]);
 
   return (
-    <Flex
-      minW={'100%'}
-      alignItems={'center'}
-      flexDirection={'column'}
-      justify={'center'}
-    >
+    <div className="flex min-w-full items-center flex-col justify-center">
       <Header title="Finish creating your account"
         subTitle="First things first, tell us a bit about yourself"
       />
@@ -85,17 +74,16 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
           value={personalInfoStep.portal_url}
           setStopGoForward={setStopGoForward}
           handleChange={(url,) => {
-
             dispatch(
               setPersonalInfoStep({
-            ...personalInfoStep,
-              portal_url: url,
-              portalURLValidation: {
-                ...portalURLValidation,
-                isChecking: true,
-                isAvailable: false,
-              }
-            }))
+                ...personalInfoStep,
+                portal_url: url,
+                portalURLValidation: {
+                  ...portalURLValidation,
+                  isChecking: true,
+                  isAvailable: false,
+                }
+              }))
           }}
         />
 
@@ -111,7 +99,7 @@ const PersonalInfoStep = ({ isLargerThan450 }) => {
           Continue
         </button>
       </div>
-    </Flex>
+    </div>
   );
 };
 

@@ -5,14 +5,14 @@ import MoodSelector from "../../UI/MoodSelector";
 import { useMoodSelection } from "../../../hooks/useMoodSelection";
 import TextArea from "../../UI/TextArea";
 import ImagePreviewList from "../../UI/AttachmentPreviewList";
-import { useMediaQuery } from "@chakra-ui/react";
+import { useMediaQuery } from "react-responsive";
 
 const MessageInput = ({ onSendMessage, onMoodChange, isFileUploading, setIsFileUploading }) => {
     const { selected, handleMoodChange } = useMoodSelection(onMoodChange);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedFilePublicUrls, setSelectedFilePublicUrls] = useState([]);
     const [message, setMessage] = useState("");
-    const [isLessThan768] = useMediaQuery('(max-width: 768px)');
+    const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
 
     const handleSubmit = (event) => {
         event.preventDefault();

@@ -1,5 +1,5 @@
 
-import { useMediaQuery } from "@chakra-ui/react";
+import { useMediaQuery } from "react-responsive";
 import { RangePicker } from "react-ease-picker";
 
 const DateRangeSelector = ({
@@ -8,7 +8,7 @@ const DateRangeSelector = ({
     endDate
 
 }) => {
-    const [isLessThan768] = useMediaQuery('(max-width: 768px)');
+    const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
     return (
         <div className="flex items-center justify-end">
 
