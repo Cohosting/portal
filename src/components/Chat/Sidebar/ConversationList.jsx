@@ -5,7 +5,7 @@ import React from 'react'
 import ConversationListItem from './ConversationListItem'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { markAsSeen } from '../../../services/chat';
-import _ from 'lodash';
+import { capitalize } from '@/utils';
 
 
 const ConversationList = ({
@@ -34,7 +34,7 @@ const ConversationList = ({
                             type: "individual",
                             avatar: participants[0]?.avatar_url,
                             // lodash make capitalize
-                            name: _.capitalize(portal?.brand_settings?.brandName),
+                            name: capitalize(portal?.brand_settings?.brandName),
                         }
                     } else {
                         chat = {

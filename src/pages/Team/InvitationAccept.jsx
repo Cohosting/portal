@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
-import { XCircleIcon, CheckCircleIcon } from '@heroicons/react/20/solid';
 import InvitationHeader from './components/InvitationHeader';
 import InvitationAuthForm from './components/InvitationAuthForm';
 import { useInvitationAcceptance } from '../../hooks/useInvitationAcceptance';
-import { Log } from '@phosphor-icons/react';
+import { LogOut, XCircle, CheckCircle } from 'lucide-react';
+
 
 
 
@@ -77,7 +77,7 @@ const InvitationAccept = () => {
                                 onClick={() => navigate('/logout')}
                                 className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
                             >
-                                <Log className="w-5 h-5 mr-2" />
+                                <LogOut className="w-5 h-5 mr-2" />
                                 Logout
                             </button>
                         </div>
@@ -103,7 +103,7 @@ const InvitationAccept = () => {
                     <div className="rounded-md bg-red-50 p-4">
                         <div className="flex">
                             <div className="flex-shrink-0">
-                                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                                <XCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
                             </div>
                             <div className="ml-3">
                                 <h3 className="text-sm font-medium text-red-800">{error}</h3>
@@ -138,7 +138,7 @@ const InvitationAccept = () => {
                             <div className="bg-green-50 rounded-md p-4">
                                 <div className="flex">
                                     <div className="flex-shrink-0">
-                                        <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+                                        <CheckCircle className="h-5 w-5 text-green-400" aria-hidden="true" />
                                     </div>
                                     <div className="ml-3">
                                         <h3 className="text-sm font-medium text-green-800">Invitation accepted successfully!</h3>

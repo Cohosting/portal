@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, UserPlus } from "@phosphor-icons/react";
+import { Building2, UserPlus } from 'lucide-react';
 
 const InvitationHeader = ({ inviterName, teamName, isLoggedIn, currentUserEmail, currentUserName }) => (
     <>
@@ -17,7 +17,7 @@ const InvitationHeader = ({ inviterName, teamName, isLoggedIn, currentUserEmail,
         </p>
         <div className="bg-gray-50 rounded-md p-4 mb-8">
             <div className="flex items-center justify-center mb-3">
-                <Building className="h-5 w-5 text-gray-400 mr-2" />
+                <Building2 className="h-5 w-5 text-gray-400 mr-2" />
                 <span className="font-semibold text-gray-700">{teamName}</span>
             </div>
             <p className="text-xs text-center text-gray-500">

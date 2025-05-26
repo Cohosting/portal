@@ -1,13 +1,13 @@
 import React from 'react'
 import BillingActivityList from './BillingActivityList'
-import { Spinner } from '@phosphor-icons/react'
+import { Loader } from 'lucide-react'
 
 const BillingActivity = ({ groupedInvoices, isLoading, colorSettings }) => {
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-96">
-                <Spinner className=" animate-spin w-12 h-12 text-primary" />
+                <Loader className=" animate-spin w-12 h-12 text-primary" />
             </div>
         )
     }

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PlusIcon } from '@heroicons/react/24/solid';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const EmptyStateFeedback = ({
@@ -13,16 +13,15 @@ const EmptyStateFeedback = ({
   buttonIcon = true,
   customButtonIcon = null,
 }) => {
-  // Determine which icon to render for the button
   const renderButtonIcon = () => {
     if (!buttonIcon) return null;
-    
+
     if (customButtonIcon) {
       const CustomIcon = customButtonIcon;
       return <CustomIcon className="h-4 w-4 mr-2" aria-hidden="true" />;
     }
-    
-    return <PlusIcon className="h-4 w-4 mr-2" aria-hidden="true" />;
+
+    return <Plus className="h-4 w-4 mr-2" aria-hidden="true" />;
   };
 
   return (
@@ -36,6 +35,7 @@ const EmptyStateFeedback = ({
 
       <h3 className="text-lg font-medium text-gray-900">{title}</h3>
       <p className="mt-1 text-sm text-gray-500 max-w-md">{message}</p>
+
       {buttonText && (
         <div className="mt-4">
           <Button

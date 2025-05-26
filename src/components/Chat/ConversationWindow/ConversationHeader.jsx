@@ -1,7 +1,7 @@
 import React from 'react'
 import DropdownMenu from '../../internal/DropdownMenu/'
 import IconButton from '../../IconButton'
-import { CaretLeft, DotsThreeVertical } from '@phosphor-icons/react'
+import { ChevronLeft, MoreVertical } from 'lucide-react';
 import { useMediaQuery } from 'react-responsive'
 import { useNavigate } from 'react-router-dom'
 
@@ -36,7 +36,7 @@ const ConversationHeader = ({
                     onClick={() => window.location.hostname.includes('dashboard.') ? navigate('/messages') : navigate('/portal/messages')}
                     variant="neutral"
                     icon={
-                        <CaretLeft
+                        <ChevronLeft
                             color="#525866"
                             aria-hidden="true"
                             size={20}
@@ -69,7 +69,7 @@ const ConversationHeader = ({
                         <IconButton
                             variant="neutral"
                             icon={
-                                <DotsThreeVertical
+                                <MoreVertical
                                     color="#525866"
                                     aria-hidden="true"
                                     size={20}

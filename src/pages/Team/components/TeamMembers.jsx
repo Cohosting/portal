@@ -1,5 +1,4 @@
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import React, { Fragment, useState } from 'react'
 import Button from '../../../components/internal/Button'
 import InviteTeamMemberModal from './InviteTeamMemberModal'
@@ -8,6 +7,7 @@ import useTeamManagement from '../../../hooks/useTeamManagement'
 import useRealtimeSeats from '../../../hooks/react-query/useRealtimeSeats'
 import { useQueryClient } from 'react-query'
 import { queryKeys } from '../../../hooks/react-query/queryKeys'
+import { ChevronDown } from 'lucide-react'
 
 const TeamMembers = ({ teamMembers, portal }) => {
     const queryClient = useQueryClient();
@@ -97,7 +97,7 @@ const TeamMembers = ({ teamMembers, portal }) => {
                                                 <div>
                                                     <MenuButton className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500">
                                                         <span className="sr-only">Open options</span>
-                                                        <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                                                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                                                     </MenuButton>
                                                 </div>
                                                 <Transition

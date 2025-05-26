@@ -8,12 +8,12 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
-import { BanknotesIcon } from '@heroicons/react/24/outline';
-import { Spinner } from '@phosphor-icons/react';
+import { Banknote } from 'lucide-react';
 
 import PageHeader from '@/components/internal/PageHeader';
 import BillingTable from './InvoiceTable';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export const Invoices = () => {
   const navigate = useNavigate();
@@ -98,14 +98,14 @@ export const Invoices = () => {
       <div className="p-0">
         {isOpen && !invoices.length &&  (
           <div className="flex justify-center items-center h-96">
-            <Spinner size={46} />
+            <Loader2 size={46} />
           </div>
         )}
 
         {!invoices.length && !isOpen && (
           <div className="mt-16">
             <EmptyStateFeedback
-              IconComponent={BanknotesIcon}
+              IconComponent={Banknote}
               title="Create Your First Invoice"
               message="It looks like you haven’t created any invoices yet. Click the button below to create your first invoice."
               centered

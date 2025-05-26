@@ -9,11 +9,11 @@ import InputField from '../../../components/InputField';
 import { useInvoiceCounts, useInvoicesWithFilter } from '../../../hooks/react-query/useInvoice';
 import DateRangeSelector from '../../../components/DateRangeSelector/DateRangeSelector';
 import { formatInvoiceDates } from '../../../utils/invoices';
-import debounce from 'lodash/debounce';
 
 import PageHeader from './components/PageHeader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { debounce } from '@/utils';
  
 
 

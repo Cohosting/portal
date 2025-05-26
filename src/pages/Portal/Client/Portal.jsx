@@ -5,7 +5,6 @@ import { PortalComponentDecider } from './PortalComponentDecider';
 import Layout from './Layout/Layout';
 import { useConversationContext } from '../../../context/useConversationContext';
 import PortalAccessUnavailable from '../../../components/internal/PortalAccessUnavailable';
-import { Spinner } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 import PortalLoadingSkeleton from './components/PortalLoadingSkeleton';
 

@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useClientMessage } from '../../../../hooks/useClientMessage'
-import { Spinner } from '@phosphor-icons/react'
 import ConversationHeader from '../../../../components/Chat/ConversationWindow/ConversationHeader'
 import MessageList from '../../../../components/Chat/ConversationWindow/MessageList'
 import MessageInput from '../../../../components/Chat/ConversationWindow/MessageInput'
@@ -12,6 +10,7 @@ import { useMarkConversationAsSeen } from '../../../../hooks/conversations/useMa
 import { useHandleNewMessage } from '../../../../hooks/conversations/useHandleNewMessage'
 import FloatingNewMessageAlert from '../../../../components/internal/FloatingNewMessageAlert'
 import { markAsSeen } from '../../../../services/chat'
+import { Loader2 } from 'lucide-react'
 
 const Conversation = ({ conversationId, user, conversations, isClientExperience, colorSettings }) => {
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
@@ -97,7 +96,7 @@ const Conversation = ({ conversationId, user, conversations, isClientExperience,
                                 className="bg-gray-100 flex gap-x-2 items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-500"
                             >
                                 {moreLoading && (
-                                    <Spinner className='animate-spin' size={16} />
+                                    <Loader2 className='animate-spin' size={16} />
                                 )}
                                 Load more
                             </button>

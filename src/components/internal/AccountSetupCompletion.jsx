@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 import { signUpUserWithPortalAndSeat } from '../../utils/signupUtils';
 import { supabase } from '../../lib/supabase';
@@ -7,15 +7,13 @@ import { AuthListenerContext } from '../../pages/Auth/AuthListener';
 import { useDispatch } from 'react-redux';
 import { setCurrentSelectedPortal, setUser } from '../../store/slices/authSlice';
 
-
-const AccountSetupCompletion = ({
-  setShouldShowStep
-}) => {
+const AccountSetupCompletion = ({ setShouldShowStep }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isComplete, setIsComplete] = useState(false);
   const [session, setSession] = useState(null);
   const dispatch = useDispatch();
   const { refetchUserData } = useContext(AuthListenerContext);
+
   useEffect(() => {
     // Set up Supabase Auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -47,19 +45,16 @@ const AccountSetupCompletion = ({
         email: session.user.email,
       });
 
-
-
       const data = await refetchUserData();
       const userData = {
         ...data.user,
         portals: data.portals,
         default_portal: data?.user?.default_portal,
-      }
+      };
       dispatch(setUser(userData));
       dispatch(setCurrentSelectedPortal(userData?.default_portal));
 
-
-      console.log(`user`, data);
+      console.log('user', data);
 
       setShouldShowStep(true);
       setIsComplete(true);
@@ -105,7 +100,7 @@ const AccountSetupCompletion = ({
       >
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center mb-4 text-amber-500">
-            <ExclamationTriangleIcon className="h-6 w-6 mr-2" />
+            <AlertTriangle className="h-6 w-6 mr-2" />
             <h2 className="text-lg font-semibold">Account Setup Incomplete</h2>
           </div>
           <p className="text-gray-600 mb-6">
@@ -130,7 +125,7 @@ const AccountSetupCompletion = ({
         <div className="bg-green-50 p-4 rounded-md border border-green-200">
           <div className="flex">
             <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+              <CheckCircle className="h-5 w-5 text-green-400" aria-hidden="true" />
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">Success!</h3>

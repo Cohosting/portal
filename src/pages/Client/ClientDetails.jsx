@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from '../Dashboard/Layout';
 import { Menu, Transition } from '@headlessui/react';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { property } from '../../utils/constant';
+import { Plus } from 'lucide-react';
 
 export const ClientDetails = () => {
   const [customProperties, setCustomProperties] = useState([]);
@@ -54,7 +53,7 @@ export const ClientDetails = () => {
                 <div>
                   <Menu.Button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
                     Open
-                    <AiOutlinePlus className="ml-2" />
+                    <Plus className="ml-2" />
                   </Menu.Button>
                 </div>
                 <Transition

@@ -1,14 +1,14 @@
 import React from 'react';
-import { File, FilePdf, DownloadSimple } from '@phosphor-icons/react';
+import { File, FileText, Download } from 'lucide-react';
 
 const FileItem = ({ fileName, fileType, fileSize }) => {
   const isPdf = fileType === 'pdf';
 
   const getFileIcon = () => {
     if (isPdf) {
-      return <FilePdf size={24} weight="fill" className="text-red-500 sm:w-8 sm:h-8" />;
+      return <FileText size={24} strokeWidth={2.5} className="text-red-500 sm:w-8 sm:h-8" />;
     } else {
-      return <File size={24} weight="fill" className="text-blue-500 sm:w-8 sm:h-8" />;
+      return <File size={24} strokeWidth={2.5} className="text-blue-500 sm:w-8 sm:h-8" />;
     }
   };
 
@@ -19,10 +19,10 @@ const FileItem = ({ fileName, fileType, fileSize }) => {
       </div>
       <div className="flex-grow min-w-0">
         <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{fileName}</p>
-        <p className="text-xs sm:text-xs text-gray-500 capitalize mt-0.5 sm:mt-1 truncate">{fileType}: {fileSize}</p>
+        <p className="text-xs text-gray-500 capitalize mt-0.5 sm:mt-1 truncate">{fileType}: {fileSize}</p>
       </div>
       <button className="ml-2 text-gray-400 hover:text-gray-500">
-        <DownloadSimple size={16} className="sm:w-5 sm:h-5" />
+        <Download size={16} className="sm:w-5 sm:h-5" strokeWidth={2.5} />
       </button>
     </div>
   );

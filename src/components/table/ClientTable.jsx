@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { MoreVertical, EllipsisVerticalIcon } from "lucide-react";
-import { PencilIcon, TrashIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
-import { Button } from "@/components/ui/button";
+import {
+    MoreVertical,
+    Pencil,
+    Trash2,
+    Mail
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,11 +37,10 @@ const ClientTable = ({ clients, refetch }) => {
     };
 
     const handleEditSuccess = (client) => {
-        // You might want to refresh the client list here
-        setIsEditModalOpen(false);
-        setClientToEdit(null);
-        setClientToInvite(client);
-    };
+      setIsEditModalOpen(false);
+      setClientToEdit(null);
+      setClientToInvite(client);
+  };
 
     const handleDeleteClick = (client) => {
         setClientToDelete(client);
@@ -54,31 +56,28 @@ const ClientTable = ({ clients, refetch }) => {
                     .delete()
                     .eq('id', clientToDelete.id);
 
-                if (error) throw error;
-                await refetch();
-                setIsDeleteModalOpen(false);
-
-                toast.success('Client deleted successfully');
-            } catch (error) {
-                console.error("Error deleting client:", error.message);
-                // Handle error (e.g., show error message to user)
-                toast.error('Error deleting client');
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
+          if (error) throw error;
+          await refetch();
+          setIsDeleteModalOpen(false);
+          toast.success('Client deleted successfully');
+      } catch (error) {
+          console.error("Error deleting client:", error.message);
+              toast.error('Error deleting client');
+          } finally {
+              setLoading(false);
+          }
+      }
+  };
 
     const handleSendEmail = (client) => {
         setClientToInvite(client);
         setIsInviteModalOpen(true);
     };
 
-    // Status badge component
     const StatusBadge = ({ status }) => {
         let bgColor = 'bg-green-100';
         let textColor = 'text-green-800';
-        
+
         switch (status) {
             case 'pending':
                 bgColor = 'bg-amber-100';
@@ -96,7 +95,7 @@ const ClientTable = ({ clients, refetch }) => {
                 bgColor = 'bg-gray-100';
                 textColor = 'text-gray-800';
         }
-        
+
         return (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${bgColor} ${textColor}`}>
                 {status}
@@ -114,128 +113,119 @@ const ClientTable = ({ clients, refetch }) => {
                                 <th scope="col" className="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900">
                                     Name
                                 </th>
-                                <th
-                                    scope="col"
-                                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
-                                >
-                                    Added at
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                                >
-                                    Email
-                                </th>
-                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                    Status
-                                </th>
-                                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                                    <span className="sr-only">Actions</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                            {clients.map((client) => (
-                                <tr key={client.id} className="hover:bg-gray-50">
-                                    <td className="w-full max-w-0 py-4 pl-6 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none">
-                                        {client.name}
-                                        
-                                        {/* Mobile-only information that stacks */}
-                                        <dl className="font-normal lg:hidden">
-                                            <div className="flex items-center mt-1">
-                                                <dt className="sr-only">Added at</dt>
-                                                <dd className="text-gray-500">{formatDate(client.created_at)}</dd>
-                                            </div>
-                                            <dt className="sr-only sm:hidden">Email</dt>
-                                            <div className="sm:hidden mt-1">
-                                                <dd className="text-gray-500">{client.email}</dd>
-                                            </div>
-                                        </dl>
-                                    </td>
-                                    <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">
-                                        {formatDate(client.created_at)}
-                                    </td>
-                                    <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                                        {client.email}
-                                    </td>
-                                    <td className="px-3 py-4 text-sm text-gray-500">
-                                        <StatusBadge status={client.status} />
-                                    </td>
-                                    <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                                                <span className="sr-only">Open options</span>
-                                                <EllipsisVerticalIcon className="h-5 w-5" />
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-32 bg-white p-0">
-                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
-                                                    <button 
-                                                        onClick={() => handleEditClick(client)} 
-                                                        className="w-full text-left flex items-center px-3  text-sm leading-6 text-gray-900"
-                                                    >
-                                                        <PencilIcon className="h-5 w-5   mr-2" />
-                                                        Edit
-                                                    </button>
-                                                </DropdownMenuItem>
-                                                
-                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
-                                                    <button 
-                                                        onClick={() => handleDeleteClick(client)} 
-                                                        className="w-full text-left flex items-center px-3  text-sm leading-6 text-gray-900"
-                                                    >
-                                                        <TrashIcon className="h-5 w-5 text-red-500 mr-2" />
-                                                        Delete
-                                                    </button>
-                                                </DropdownMenuItem>
-                                                
-                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
-                                                    <button 
-                                                        onClick={() => handleSendEmail(client)} 
-                                                        className="w-full text-left flex items-center px-3   text-sm leading-6 text-gray-900"
-                                                    >
-                                                        <EnvelopeIcon className="h-5 w-5 text-green-500 mr-2" />
-                                                        Invite
-                                                    </button>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            {/* Modals */}
-            <AlertDialog
-                title={'Are you sure you want to delete this client?'}
-                message={'This action cannot be undone.'}
-                confirmButtonText={loading ? 'Deleting...' : 'Delete'}
-                cancelButtonText={'Cancel'}
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleDeleteConfirm}
-                clientToDelete={clientToDelete}
-                confirmButtonColor="bg-red-500"
-            />
-            <InviteForm
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onToggleSuccess={handleEditSuccess}
-                setTemporaryClient={() => {}} // You might want to handle this differently for editing
-                isEditing={true}
-                clientToEdit={clientToEdit}
-            />
-            <ClientInviteSuccessModal
-                isOpen={isInviteModalOpen}
-                onClose={() => setIsInviteModalOpen(false)}
-                client={clientToInvite}
-                sendEmail={sendEmail}
-                refetch={refetch}
-            />
-        </>
-    );
+                              <th scope="col" className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell">
+                                  Added at
+                              </th>
+                              <th scope="col" className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell">
+                                  Email
+                              </th>
+                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                  Status
+                              </th>
+                              <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                                  <span className="sr-only">Actions</span>
+                              </th>
+                          </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                          {clients.map((client) => (
+                              <tr key={client.id} className="hover:bg-gray-50">
+                                  <td className="w-full max-w-0 py-4 pl-6 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none">
+                                      {client.name}
+                          <dl className="font-normal lg:hidden">
+                              <div className="flex items-center mt-1">
+                                  <dt className="sr-only">Added at</dt>
+                                  <dd className="text-gray-500">{formatDate(client.created_at)}</dd>
+                              </div>
+                              <dt className="sr-only sm:hidden">Email</dt>
+                              <div className="sm:hidden mt-1">
+                                  <dd className="text-gray-500">{client.email}</dd>
+                              </div>
+                          </dl>
+                      </td>
+                      <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">
+                          {formatDate(client.created_at)}
+                      </td>
+                      <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                          {client.email}
+                      </td>
+                      <td className="px-3 py-4 text-sm text-gray-500">
+                          <StatusBadge status={client.status} />
+                      </td>
+                      <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                          <DropdownMenu>
+                              <DropdownMenuTrigger className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+                                  <span className="sr-only">Open options</span>
+                                  <MoreVertical className="h-5 w-5" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32 bg-white p-0">
+                                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
+                                      <button
+                                          onClick={() => handleEditClick(client)}
+                                          className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                      >
+                                          <Pencil className="h-5 w-5 mr-2" />
+                                          Edit
+                                      </button>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
+                                      <button
+                                          onClick={() => handleDeleteClick(client)}
+                                          className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                      >
+                                          <Trash2 className="h-5 w-5 text-red-500 mr-2" />
+                                          Delete
+                                      </button>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
+                                      <button
+                                          onClick={() => handleSendEmail(client)}
+                                          className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                      >
+                                          <Mail className="h-5 w-5 text-green-500 mr-2" />
+                                          Invite
+                                      </button>
+                                  </DropdownMenuItem>
+                              </DropdownMenuContent>
+                          </DropdownMenu>
+                      </td>
+                  </tr>
+              ))}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <AlertDialog
+              title={'Are you sure you want to delete this client?'}
+              message={'This action cannot be undone.'}
+              confirmButtonText={loading ? 'Deleting...' : 'Delete'}
+              cancelButtonText={'Cancel'}
+              isOpen={isDeleteModalOpen}
+              onClose={() => setIsDeleteModalOpen(false)}
+              onConfirm={handleDeleteConfirm}
+              clientToDelete={clientToDelete}
+              confirmButtonColor="bg-red-500"
+          />
+
+          <InviteForm
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              onToggleSuccess={handleEditSuccess}
+              setTemporaryClient={() => { }}
+              isEditing={true}
+              clientToEdit={clientToEdit}
+          />
+
+          <ClientInviteSuccessModal
+              isOpen={isInviteModalOpen}
+              onClose={() => setIsInviteModalOpen(false)}
+              client={clientToInvite}
+              sendEmail={sendEmail}
+              refetch={refetch}
+          />
+      </>
+  );
 };
 
 export default ClientTable;

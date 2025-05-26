@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { AiFillBank } from "react-icons/ai";
-import { FaPlus, FaRegCreditCard } from "react-icons/fa";
+import { Bank, CreditCard, Plus } from "lucide-react";
 import { SetupPaymentMethod } from "./internal/SetupPaymentMethod";
 import { useSelector } from "react-redux";
 import { usePortalData } from "../hooks/react-query/usePortalData";
 import { useToggle } from "react-use";
 
-const PaymentMethodList = ({ }) => {
+const PaymentMethodList = () => {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -15,6 +14,7 @@ const PaymentMethodList = ({ }) => {
 
     const { currentSelectedPortal } = useSelector(state => state.auth)
     const { data: portal } = usePortalData(currentSelectedPortal)
+
     useEffect(() => {
         if (!portal) return;
 
@@ -25,7 +25,7 @@ const PaymentMethodList = ({ }) => {
             try {
                 const response = await fetch(`${import.meta.env.VITE_NODE_URL}/api/customers/${portal.customerId}/payment-methods`);
                 const data = await response.json();
-                console.log({ response })
+                console.log({ response });
                 setPaymentMethods(data);
             } catch (error) {
                 setError(error);
@@ -49,9 +49,9 @@ const PaymentMethodList = ({ }) => {
                         <div className="flex items-center">
                             <span className="mr-2">
                                 {paymentMethod.type === "card" ? (
-                                    <FaRegCreditCard className="text-purple-500" />
+                                    <CreditCard className="text-purple-500 w-5 h-5" />
                                 ) : (
-                                    <AiFillBank className="text-teal-500" />
+                                        <Bank className="text-teal-500 w-5 h-5" />
                                 )}
                             </span>
                             <p className="font-bold">{paymentMethod.type}</p>
@@ -62,35 +62,40 @@ const PaymentMethodList = ({ }) => {
                     </div>
                     <hr className="my-2" />
                     <p>
-                        {paymentMethod.maskedNumber}{paymentMethod.type === "card" && ` (${paymentMethod.expDate})`}
+                        {paymentMethod.maskedNumber}
+                        {paymentMethod.type === "card" && ` (${paymentMethod.expDate})`}
                     </p>
                 </div>
             ))}
+
             <button className="bg-blue-600 text-white rounded-full my-2 w-12 h-12 flex items-center justify-center" onClick={onToggle}>
-                <FaPlus />
+                <Plus className="w-5 h-5" />
             </button>
+
             <SetupPaymentMethod
                 isOpen={isOpen}
                 handleClose={onToggle}
             />
 
-            <button onClick={async () => {
-                const res = await fetch(`${import.meta.env.VITE_NODE_URL}/api/customers/portal-session`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        customerId: portal.customerId
-                    }),
-
-                });
-                const data = await res.json();
-
-                window.location.href = data.url
-
-                console.log(data)
-            }} className="bg-green-500 text-white w-min my-3 mt-1 px-4 py-2 rounded">Manage payment method</button>
+            <button
+                onClick={async () => {
+                    const res = await fetch(`${import.meta.env.VITE_NODE_URL}/api/customers/portal-session`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            customerId: portal.customerId
+                        }),
+                    });
+                    const data = await res.json();
+                    window.location.href = data.url;
+                    console.log(data);
+                }}
+                className="bg-green-500 text-white w-min my-3 mt-1 px-4 py-2 rounded"
+            >
+                Manage payment method
+            </button>
         </div>
     );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
-import { XCircleIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { XCircle, Plus, RotateCcw } from 'lucide-react';
 
 export const AssetItem = ({
   field,
@@ -23,7 +23,7 @@ export const AssetItem = ({
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `public/${fileName}-${randomId}.${fileExt}`;
 
-      let { error, data } = await supabase.storage
+      let { error } = await supabase.storage
         .from('portal_bucket')
         .upload(`${filePath}`, selectedImage, {
           cacheControl: '3600',
@@ -88,13 +88,13 @@ export const AssetItem = ({
           />
           {isUploading ? (
             <div className="flex items-center justify-center w-full h-full bg-gray-100">
-              <ArrowPathIcon className="h-6 w-6 text-gray-400 animate-spin" />
+              <RotateCcw className="h-6 w-6 text-gray-400 animate-spin" />
             </div>
           ) : downloadURL ? (
             <img src={downloadURL} className="w-full rounded-md h-full object-cover" alt="Uploaded asset" />
           ) : (
             <div className="flex items-center justify-center border-2 rounded-full w-[38px] h-[38px]">
-              <PlusIcon className="h-4 w-4 text-gray-400" />
+                  <Plus className="h-4 w-4 text-gray-400" />
             </div>
           )}
         </div>
@@ -103,7 +103,7 @@ export const AssetItem = ({
             onClick={handleRemove}
             className="absolute -top-1 -right-1 bg-white rounded-full shadow-md p-0.5"
           >
-            <XCircleIcon className="h-5 w-5 text-red-500" />
+            <XCircle className="h-5 w-5 text-red-500" />
           </button>
         )}
       </div>
@@ -115,7 +115,7 @@ export const AssetItem = ({
               onClick={toggleExpand}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1"
             >
-              <XCircleIcon className="h-6 w-6" />
+              <XCircle className="h-6 w-6" />
             </button>
           </div>
         </div>

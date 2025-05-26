@@ -1,16 +1,18 @@
-import {
-  AiOutlineFile,
-  AiOutlineHome,
-  AiOutlineRotateLeft,
-  AiOutlineSetting,
-} from 'react-icons/ai';
-import { BiCustomize, BiMessageMinus } from 'react-icons/bi';
-import { FaRegUserCircle, FaVoicemail } from 'react-icons/fa';
-import { FiUsers } from 'react-icons/fi';
-import { GiSettingsKnobs } from 'react-icons/gi';
-import { MdPayment } from 'react-icons/md';
-import { RiTeamLine } from 'react-icons/ri';
 
+import {
+  FileText,
+  Home,
+  RotateCcw,
+  Settings,
+  Wand2,
+  MessageSquare,
+  UserCircle,
+  Users,
+  SlidersHorizontal,
+  CreditCard,
+  UsersRound,
+  Voicemail,
+} from 'lucide-react';
 export const foundOn = [
   'Tiktok',
   'Event or conference',
@@ -90,98 +92,42 @@ export const defaultAppList = [
 ];
 
 export const property = [
-  {
-    id: 1,
-    title: 'Email',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 2,
-    title: 'Phone',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 3,
-    title: 'Address',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 4,
-    title: 'URL',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 5,
-    title: 'Custom',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 6,
-    title: 'Number',
-    icon: <FaVoicemail />,
-  },
-  {
-    id: 7,
-    title: 'Text',
-    icon: <FaVoicemail />,
-  },
+  { id: 1, title: 'Email', icon: <Voicemail /> },
+  { id: 2, title: 'Phone', icon: <Voicemail /> },
+  { id: 3, title: 'Address', icon: <Voicemail /> },
+  { id: 4, title: 'URL', icon: <Voicemail /> },
+  { id: 5, title: 'Custom', icon: <Voicemail /> },
+  { id: 6, title: 'Number', icon: <Voicemail /> },
+  { id: 7, title: 'Text', icon: <Voicemail /> },
 ];
+
 // Step 1: Modify navItemList to include groups and a property for additional content
 export const navItemList = [
   {
     group: 'Main',
     items: [
-      { icon: <AiOutlineHome />, label: 'Home', path: '/' },
-      { icon: <FiUsers />, label: 'Client', path: '/client' },
-      // Other main items...
+      { icon: <Home />, label: 'Home', path: '/' },
+      { icon: <Users />, label: 'Client', path: '/client' },
     ],
   },
   {
     group: 'Apps',
     items: [
-      { icon: <AiOutlineFile />, label: 'Files', path: '/files' },
-      { icon: <BiMessageMinus />, label: 'Messages', path: '/messages' },
-      { icon: <MdPayment />, label: 'Billing', path: '/billing' },
-      {
-        icon: <MdPayment />,
-        label: 'Extentions',
-        path: '/extentions',
-      },
+      { icon: <FileText />, label: 'Files', path: '/files' },
+      { icon: <MessageSquare />, label: 'Messages', path: '/messages' },
+      { icon: <CreditCard />, label: 'Billing', path: '/billing' },
+      { icon: <CreditCard />, label: 'Extentions', path: '/extentions' },
     ],
   },
   {
     group: 'Preferences',
     items: [
-      {
-        icon: <GiSettingsKnobs />,
-        label: 'App settings',
-        path: '/module-management',
-      },
-      {
-        icon: <BiCustomize />,
-        label: 'Customise',
-        path: '/customize',
-      },
-      {
-        icon: <RiTeamLine />,
-        label: 'Team',
-        path: '/team',
-      },
-      {
-        icon: <AiOutlineRotateLeft />,
-        label: 'Subscription',
-        path: '/subscription',
-      },
-      {
-        icon: <AiOutlineSetting />,
-        label: 'Portal settings',
-        path: '/settings',
-      },
-      {
-        icon: <FaRegUserCircle />,
-        label: 'Profile',
-        path: '/settings/me',
-      },
+      { icon: <SlidersHorizontal />, label: 'App settings', path: '/module-management' },
+      { icon: <Wand2 />, label: 'Customise', path: '/customize' },
+      { icon: <UsersRound />, label: 'Team', path: '/team' },
+      { icon: <RotateCcw />, label: 'Subscription', path: '/subscription' },
+      { icon: <Settings />, label: 'Portal settings', path: '/settings' },
+      { icon: <UserCircle />, label: 'Profile', path: '/settings/me' },
     ],
   },
 ];

@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
-import { Fa500Px, FaAirbnb, FaAlgolia, FaAws } from 'react-icons/fa';
+import {
+  Asterisk,
+  Hotel,
+  SearchCode,
+  Cloud,
+} from 'lucide-react';
 
 const IconPicker = ({ onIconSelect, icon }) => {
   const [selectedIcon, setSelectedIcon] = useState(icon || null);
   const [showIcons, setShowIcons] = useState(false);
 
   const icons = [
-    { icon: <Fa500Px />, name: 'Icon 1' },
-    { icon: <FaAirbnb />, name: 'Icon 2' },
-    { icon: <FaAlgolia />, name: 'Icon 3' },
-    // Add more icons here
+    { icon: <Asterisk />, name: 'Asterisk' },
+    { icon: <Hotel />, name: 'Hotel' },
+    { icon: <SearchCode />, name: 'SearchCode' },
   ];
 
   const handleBoxClick = () => {
     setShowIcons(!showIcons);
   };
 
-  const handleIconClick = icon => {
+  const handleIconClick = (icon) => {
     setSelectedIcon(icon.name);
     setShowIcons(false);
-    onIconSelect(icon.name); // Pass the selected icon outside the component
+    onIconSelect(icon.name); // Notify parent of selection
   };
 
   return (
@@ -30,30 +34,23 @@ const IconPicker = ({ onIconSelect, icon }) => {
       >
         {selectedIcon ? (
           <div className="selected-icon">
-            {icons.find(icon => icon.name === selectedIcon).icon}
+            {icons.find(i => i.name === selectedIcon)?.icon}
           </div>
         ) : (
-          <FaAws
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          />
+            <Cloud className="w-full h-full" />
         )}
       </div>
 
       {showIcons && (
-        <div
-          className="bg-white p-1.5 rounded-lg shadow-md max-w-max"
-        >
+        <div className="bg-white p-1.5 rounded-lg shadow-md max-w-max mt-2">
           {icons.map((icon, index) => (
             <div
-              className={`my-1 cursor-pointer icon ${selectedIcon === icon.icon ? 'selected' : ''}`}
+              className={`flex items-center gap-2 p-1 cursor-pointer hover:bg-gray-100 rounded ${selectedIcon === icon.name ? 'bg-gray-200' : ''}`}
               key={index}
               onClick={() => handleIconClick(icon)}
             >
               {icon.icon}
-              <span>{icon.name}</span>
+              <span className="text-sm">{icon.name}</span>
             </div>
           ))}
         </div>

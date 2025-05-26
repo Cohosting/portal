@@ -1,28 +1,21 @@
 import React, { useCallback } from 'react';
-import { FaCheckCircle } from 'react-icons/fa';
-import { AiOutlineCloseCircle } from 'react-icons/ai';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../utils/validationUtils';
 import { setPersonalInfoStep } from '../store/slices/authSlice';
 import { validatePortalURL } from '../store/thunk/authThunks';
-import _ from 'lodash';
-import InputField from './InputField';
+import { debounce } from '@/utils';
 
 const isValidSubdomain = value => {
-    // Regex for valid subdomain:
-    // - Starts and ends with alphanumeric characters
-    // - Can contain hyphens, but not at the start or end
-    // - Length between 1 and 63 characters
     const subdomainRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/;
     return subdomainRegex.test(value);
 };
 
-// This is a styled version of your existing component
 const PortalURLInput = ({ value, handleChange, setStopGoForward }) => {
     const dispatch = useDispatch();
     const { portalURLValidation, personalInfoStep } = useSelector((state) => state.auth);
 
-    const debounceValidateURL = useCallback(_.debounce((url) => {
+    const debounceValidateURL = useCallback(debounce((url) => {
         dispatch(validatePortalURL(url));
     }, 500), [dispatch]);
 
@@ -63,9 +56,9 @@ const PortalURLInput = ({ value, handleChange, setStopGoForward }) => {
                         {portalURLValidation.isChecking ? (
                             <span className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-gray-600"></span>
                         ) : portalURLValidation.isAvailable ? (
-                            <FaCheckCircle className="text-green-500 text-xl" />
+                                <CheckCircle className="text-green-500 w-5 h-5" />
                         ) : (
-                            <AiOutlineCloseCircle className="text-red-500 text-xl" />
+                                    <XCircle className="text-red-500 w-5 h-5" />
                         )}
                     </button>
                 </div>

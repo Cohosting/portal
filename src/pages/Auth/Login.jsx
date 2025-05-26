@@ -1,5 +1,4 @@
 import React from 'react';
-import { CircleNotch } from '@phosphor-icons/react';
 import { useDomainInfo } from '../../hooks/useDomainInfo';
 import { LoginForm } from './LoginForm';
 import { ClientLogin } from '../Portal/Client/Login';

@@ -1,6 +1,6 @@
-import { Download } from '@phosphor-icons/react';
 import React from 'react';
 import useSubscriptionBillingHistory from '../../../hooks/react-query/useSubscriptionBillingHistory';
+import { Download } from 'lucide-react';
 
 const StatusBadge = ({ status }) => {
     const statusStyles = {

@@ -2,13 +2,13 @@ import React from 'react';
 import MessageItem from './MessageItem';
 import EmptyStateFeedback from '@/components/EmptyStateFeedback';
 import { XCircle } from 'lucide-react';
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { MessagesSquare } from 'lucide-react';
 
 const MessageList = ({ messages, user, hasMore, observeLastElement, colorSettings }) => {
 
     if (messages.length === 0) return ( <div className='mt-16'>
 
-  <EmptyStateFeedback title={"No Messages Yet"} message="Looks like your inbox is empty. Start a conversation to see messages here." IconComponent={ChatBubbleLeftRightIcon} centered />
+        <EmptyStateFeedback title={"No Messages Yet"} message="Looks like your inbox is empty. Start a conversation to see messages here." IconComponent={MessagesSquare} centered />
   </div> 
   )
 

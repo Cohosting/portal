@@ -7,8 +7,15 @@ import { Button } from '@headlessui/react';
 import DashboardSkeleton from '@/components/SkeletonLoading';
 import { Layout } from '../Dashboard/Layout';
 import PageHeader from '@/components/internal/PageHeader';
-import { CheckCircle, XCircle, Spinner, CreditCard, ArrowClockwise } from '@phosphor-icons/react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Loader,
+  XCircle,
+  CheckCircle2,
+  CreditCard,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
 
 export const StripeReturn = () => {
   const [stripeUser, setStripeUser] = useState(null);
@@ -92,8 +99,7 @@ export const StripeReturn = () => {
   };
 
   const getSetupButtonText = () => {
-    if (needsMoreInfo) return 'Update Information';
-    return 'Complete Setup';
+    return needsMoreInfo ? 'Update Information' : 'Complete Setup';
   };
 
   return (
@@ -102,12 +108,12 @@ export const StripeReturn = () => {
       <div className="max-w-3xl mx-auto p-6">
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
-            <Spinner size={32} className="animate-spin text-gray-600" />
+            <Loader size={32} className="animate-spin text-gray-600" />
           </div>
         ) : (
           <div className="space-y-8">
             <div className="flex items-center">
-              <CreditCard size={32} weight="duotone" className="text-gray-700 mr-3" />
+                <CreditCard size={32} className="text-gray-700 mr-3" />
               <h2 className="text-2xl font-medium">Stripe Account Status</h2>
             </div>
 
@@ -115,9 +121,9 @@ export const StripeReturn = () => {
               <div className="space-y-6">
                 <div className="flex items-center">
                   {stripeUser.details_submitted ? (
-                    <CheckCircle size={24} weight="fill" className="text-green-500 mr-3" />
+                      <CheckCircle2 size={24} className="text-green-500 mr-3" />
                   ) : (
-                    <XCircle size={24} weight="fill" className="text-red-500 mr-3" />
+                        <XCircle size={24} className="text-red-500 mr-3" />
                   )}
                   <span className="text-lg">
                     {stripeUser.details_submitted
@@ -128,9 +134,9 @@ export const StripeReturn = () => {
 
                 <div className="flex items-center">
                   {stripeUser.charges_enabled ? (
-                    <CheckCircle size={24} weight="fill" className="text-green-500 mr-3" />
+                      <CheckCircle2 size={24} className="text-green-500 mr-3" />
                   ) : (
-                    <XCircle size={24} weight="fill" className="text-red-500 mr-3" />
+                        <XCircle size={24} className="text-red-500 mr-3" />
                   )}
                   <span className="text-lg">
                     {stripeUser.charges_enabled
@@ -142,7 +148,7 @@ export const StripeReturn = () => {
                 {isVerificationPending && (
                   <div className="border border-gray-200 rounded-lg p-5 bg-gray-50">
                     <div className="flex items-start">
-                      <ArrowClockwise size={24} className="text-amber-500 mr-3 mt-1" />
+                        <RotateCcw size={24} className="text-amber-500 mr-3 mt-1" />
                       <div>
                         <p className="text-amber-700 font-medium mb-1">Verification in progress</p>
                         <p className="text-gray-600 text-sm">
@@ -156,7 +162,7 @@ export const StripeReturn = () => {
                 {!isVerificationPending && needsMoreInfo && (
                   <div className="border border-gray-200 rounded-lg p-5 bg-gray-50 space-y-6">
                     <div className="flex items-start">
-                      <XCircle size={24} weight="fill" className="text-red-500 mr-3 mt-1" />
+                        <XCircle size={24} className="text-red-500 mr-3 mt-1" />
                       <div>
                         <p className="text-red-700 font-medium">Additional information required</p>
                         <p className="text-gray-600">
@@ -171,7 +177,7 @@ export const StripeReturn = () => {
                         className="flex items-center justify-between w-full px-4 py-2 text-sm text-amber-700 hover:bg-gray-50"
                       >
                         <div className="flex items-center">
-                          <XCircle size={18} weight="fill" className="text-red-500 mr-2" />
+                            <XCircle size={18} className="text-red-500 mr-2" />
                           {isRequirementsOpen ? 'Hide required information' : 'Show required information'}
                         </div>
                         {isRequirementsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -182,7 +188,7 @@ export const StripeReturn = () => {
                           <p className="text-sm mb-4">Please provide the following information to complete verification:</p>
                           {allRequirements.map(requirement => (
                             <div key={requirement} className="mb-4 flex items-start">
-                              <XCircle size={18} weight="fill" className="text-red-500 mt-0.5 mr-2" />
+                              <XCircle size={18} className="text-red-500 mt-0.5 mr-2" />
                               <div>
                                 <div className="text-sm font-medium text-gray-800">{getRequirementLabel(requirement)}</div>
                                 <div className="text-xs text-gray-500 font-mono mt-1">{requirement}</div>
@@ -197,7 +203,7 @@ export const StripeReturn = () => {
                       <Button
                         className={`bg-black text-white px-5 py-2.5 rounded-md hover:bg-gray-800 ${
                           isLoadingFill ? 'opacity-70 cursor-not-allowed' : ''
-                         }`}
+                            }`}
                         disabled={isLoadingFill}
                         onClick={() =>
                           createStripeConnectAccount(
@@ -210,7 +216,7 @@ export const StripeReturn = () => {
                       >
                         {isLoadingFill ? (
                           <span className="flex items-center">
-                            <Spinner size={18} className="animate-spin mr-2" />
+                              <Loader size={18} className="animate-spin mr-2" />
                             Processing...
                           </span>
                         ) : (

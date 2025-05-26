@@ -6,8 +6,9 @@ import {
     ListboxOption,
     ListboxOptions,
 } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Button from './Button'
+import { ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 
 
 const PeopleMultiSelectWithAvatar = ({ people, onChange, label = "Assigned to" }) => {
@@ -47,7 +48,7 @@ const PeopleMultiSelectWithAvatar = ({ people, onChange, label = "Assigned to" }
                         )}
                     </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
-                        <ChevronUpDownIcon
+                        <ChevronDown
                             aria-hidden="true"
                             className="h-5 w-5 text-gray-400"
                         />
@@ -85,7 +86,7 @@ const PeopleMultiSelectWithAvatar = ({ people, onChange, label = "Assigned to" }
                                             className={`absolute inset-y-0 right-0 flex items-center pr-4 ${active ? "text-white" : "text-indigo-600"
                                                 }`}
                                         >
-                                            <CheckIcon aria-hidden="true" className="h-5 w-5" />
+                                            <Check aria-hidden="true" className="h-5 w-5" />
                                         </span>
                                     )}
                                 </>

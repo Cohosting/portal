@@ -69,3 +69,66 @@ export const generateSecurePassword = () => {
   return password.trim();
 };
 
+
+
+
+
+// utils/utilities.js
+
+/**
+ * Simple debounce implementation
+ * Creates a debounced function that delays invoking func until after wait milliseconds
+ * have elapsed since the last time the debounced function was invoked.
+ */
+export const debounce = (func, wait) => {
+  let timeoutId;
+  
+  const debounced = (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), wait);
+  };
+  
+  // Add cancel method like lodash
+  debounced.cancel = () => {
+    clearTimeout(timeoutId);
+    timeoutId = undefined;
+  };
+  
+  // Add flush method like lodash  
+  debounced.flush = () => {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+      func.apply(this, arguments);
+      timeoutId = undefined;
+    }
+  };
+  
+  return debounced;
+};
+
+/**
+ * Simple capitalize implementation
+ * Converts the first character of string to upper case and the remaining to lower case.
+ */
+export const capitalize = (string) => {
+  if (!string || typeof string !== 'string') return '';
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};
+
+// Alternative even simpler versions if you don't need cancel/flush methods:
+
+/**
+ * Ultra-simple debounce (just 4 lines!)
+ */
+export const simpleDebounce = (func, wait) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), wait);
+  };
+};
+
+/**
+ * One-liner capitalize
+ */
+export const simpleCapitalize = (str) => str && str[0].toUpperCase() + str.slice(1).toLowerCase();

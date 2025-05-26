@@ -6,12 +6,12 @@ import PricingPage from "../Pricing/PricingPage";
 import BillingHistory from "./components/BillingHistory";
 import PaymentSettings from "./components/PaymentSettings";
 import PlanSelector from "./components/PlanSelector";
-import { Spinner } from "@phosphor-icons/react";
 import useRealtimeSubscription from "../../hooks/react-query/useRealtimeSubscription";
 import { formatDate } from "../../utils/dateUtils";
 import SubscriptionError from "../../components/internal/SubscriptionError";
 import RestrictedAccess from "../../components/internal/RestrictedAccess";
 import { useState } from "react";
+import { Loader } from "lucide-react";
 
 let subscriptionStatusStyle = {
   active: "bg-green-500",
@@ -51,7 +51,7 @@ const SubscriptionPage = () => {
   if (loading) {
     return (
       <div className="flex mt-36 items-center justify-center">
-        <Spinner size={36} className="animate-spin m-5 " />
+        <Loader size={36} className="animate-spin m-5 " />
       </div>
 
     )

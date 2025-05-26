@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogBackdrop, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { X } from 'lucide-react';
 const MediaModal = ({ isOpen, onClose, mediaType, mediaUrl }) => {
 
     return (
@@ -24,7 +24,7 @@ const MediaModal = ({ isOpen, onClose, mediaType, mediaUrl }) => {
                             className="absolute z-10 top-4 right-4 p-1 bg-white rounded-full shadow-lg"
                             onClick={onClose}
                         >
-                            <XMarkIcon className="h-6 w-6 text-gray-600" />
+                            <X className="h-6 w-6 text-gray-600" />
                         </button>
                         <div className="w-full h-[80vh] flex items-center justify-center">
                             {mediaType === 'image' && (

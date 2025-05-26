@@ -1,4 +1,4 @@
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { AlertCircle } from 'lucide-react';
 import React from 'react'
 
 let defaultHeading = "Access Unavailable"
@@ -13,7 +13,7 @@ const PortalAccessUnavailable = ({
             <div className="max-w-md w-full bg-white shadow-lg rounded-lg overflow-hidden">
                 <div className="p-6">
                     <div className="flex items-center">
-                        <ExclamationCircleIcon className="h-6 w-6 text-yellow-500 mr-3" aria-hidden="true" />
+                        <AlertCircle className="h-6 w-6 text-yellow-500 mr-3" aria-hidden="true" />
                         <h2 className="text-lg font-semibold text-gray-900">{heading}</h2>
                     </div>
                     <p className="mt-4 text-sm text-gray-600">

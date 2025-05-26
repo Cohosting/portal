@@ -7,16 +7,13 @@ import { useSelector } from 'react-redux';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
 import ClientTable from '../../components/table/ClientTable';
 import StripeConnect from '../../components/internal/StripeConnect';
-import { Spinner, Warning } from '@phosphor-icons/react';
+import { AlertTriangle, FilePlus, Loader } from 'lucide-react';
 import { useStripeUser } from '../../hooks/useStripeUser';
 import { useNavigate } from 'react-router-dom';
 import { useSendEmail } from '../../hooks/useEmailApi';
 import PageHeader from '@/components/internal/PageHeader';
 import { Button } from '@/components/ui/button';
 import EmptyStateFeedback from '@/components/EmptyStateFeedback';
-import { BanknotesIcon } from '@heroicons/react/24/outline';
-import { FilePlus } from 'lucide-react';
-
 // New WarningBanner component
 const WarningBanner = ({ message }) => {
   const navigate = useNavigate()
@@ -26,7 +23,7 @@ const WarningBanner = ({ message }) => {
     <div className="bg-yellow-50 border-r-4 border-yellow-400 p-4">
       <div className="flex">
         <div className="flex-shrink-0">
-          <Warning className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+          <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
         </div>
         <div className="ml-3">
           <p className="text-sm text-yellow-700">
@@ -96,7 +93,7 @@ export const Client = () => {
  
       />
       <div className="flex items-center justify-center  mt-12">
-        <Spinner className="h-10 w-10 text-gray-500 animate-spin" />
+          <Loader className="h-10 w-10 text-gray-500 animate-spin" />
         <span className="ml-2 text-gray-500">Loading...</span>
       </div>
       </Layout>
@@ -168,7 +165,7 @@ export const Client = () => {
       ) : (
         <div className='mt-16'>
         <EmptyStateFeedback
-              IconComponent={Warning  }
+              IconComponent={AlertTriangle}
               title="Stripe Account Required"
               message="You need to connect your Stripe account to add clients. Please complete the setup in the settings."
               buttonText = "Go To Settings"

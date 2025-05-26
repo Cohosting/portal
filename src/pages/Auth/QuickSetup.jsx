@@ -5,10 +5,10 @@ import { useState } from 'react';
 import SignupSteps from './SignupSteps';
 import { useSelector } from 'react-redux';
 import { AuthListenerContext } from './AuthListener';
-import { Spinner } from '@phosphor-icons/react';
 import { useDispatch } from 'react-redux';
 import { setStep } from '../../store/slices/authSlice';
 import { Layout } from './Layout';
+import { Loader } from 'lucide-react';
 
 const QuickSetup = () => {
     const [shouldShowStep, setShouldShowStep] = useState(false);
@@ -23,7 +23,7 @@ const QuickSetup = () => {
     if (isLoading) {
         return (
             <div className='flex justify-center items-center h-screen'>
-                <Spinner className='w-7 h-7 animate-spin' />
+                <Loader className='w-7 h-7 animate-spin' />
             </div>
         )
     }

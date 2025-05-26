@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Spinner } from '@phosphor-icons/react';
 
 import { createStripeConnectAccount } from '../../utils/stripe';
 import { useStripeUser } from '../../hooks/useStripeUser';
@@ -17,6 +16,7 @@ import StripeConnectStatus from '../Pricing/components/StripeConnectStatus.jsx';
 import { CustomDomainForm } from './CustomDomainForm';
 import { DomainConfiguration } from './CheckDomainConfig';
 import { Button } from '@/components/ui/button';
+import { Loader } from 'lucide-react';
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
   if (portal && !portal.stripe_connect_account_id) {
@@ -131,7 +131,7 @@ export const Settings = () => {
   if (!portal || stripeUserLoading) {
     return (
       <div className="flex items-center justify-center m-4">
-        <Spinner className="animate-spin h-8 w-8" />
+        <Loader className="animate-spin h-8 w-8" />
       </div>
     );
   }

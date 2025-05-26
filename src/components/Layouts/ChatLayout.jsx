@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useMediaQuery } from 'react-responsive';
 import { useToggle } from 'react-use';
-import { Spinner } from '@phosphor-icons/react';
 
 import ConversionHeader from '../Chat/Sidebar/ConversationHeader';
 import ConversationList from '../Chat/Sidebar/ConversationList';
@@ -12,6 +11,7 @@ import MassMessageForm from '../Forms/MassMessageForm';
 import NewConversationForm from '../Forms/NewConversationForm';
 import { useChatConversations } from '../../hooks/react-query/useChat';
 import { usePortalData } from '../../hooks/react-query/usePortalData';
+import { Loader } from 'lucide-react';
 
 const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, optimisticMarkLastMessageAsSeen }) => {
     const { user, currentSelectedPortal } = useSelector(state => state.auth);
@@ -51,7 +51,7 @@ const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, o
                         />
                         {isLoading ? (
                             <div className="flex justify-center mt-5 items-center">
-                                <Spinner className='animate-spin' size={32} />
+                                <Loader className='animate-spin' size={32} />
                             </div>
                         ) : conversations.length > 0 ? (
                             <ul className="flex flex-1 flex-col gap-y-7">

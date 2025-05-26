@@ -1,6 +1,6 @@
-import moment from 'moment';
+import { DateTime } from "luxon";
 
-export const calculateTotal = items => {
+export const calculateTotal = (items) => {
   if (!items) return 0;
   return items
     .reduce((total, item) => {
@@ -9,32 +9,32 @@ export const calculateTotal = items => {
     .toFixed(2);
 };
 
-export const getPaymentMethodsType = settings => {
+export const getPaymentMethodsType = (settings) => {
   let payment_methods = [];
 
   if (settings.card) {
-    payment_methods.push('card');
+    payment_methods.push("card");
   }
 
   if (settings.ach_debit) {
-    payment_methods.push('us_bank_account');
+    payment_methods.push("us_bank_account");
   }
 
   return payment_methods;
 };
 
-export const generateLabelAndDescriptionForBankOrCard = paymentMethod => {
+export const generateLabelAndDescriptionForBankOrCard = (paymentMethod) => {
   if (paymentMethod.us_bank_account) {
     const us_bank_account = paymentMethod.us_bank_account;
     return {
       label: `${us_bank_account.bank_name} - (${us_bank_account.account_holder_type})`,
-      description: '**** **** **** ' + us_bank_account.last4,
+      description: "**** **** **** " + us_bank_account.last4,
     };
   } else if (paymentMethod.card) {
     const card = paymentMethod.card;
     return {
       label: `${card.brand} - ${card.funding}`,
-      description: '**** **** **** ' + card.last4,
+      description: "**** **** **** " + card.last4,
     };
   }
 };
@@ -47,34 +47,42 @@ export const formatInvoiceDates = (
   if (!invoices.length) {
     return [];
   }
-  // Sort invoices by creation date, most recent first
-  const sortedInvoices = invoices?.sort((a, b) =>
-    moment(b?.created).diff(moment(a?.created))
-  );
+
+  const sortedInvoices = invoices.sort((a, b) => {
+    return (
+      DateTime.fromISO(b?.created).toMillis() -
+      DateTime.fromISO(a?.created).toMillis()
+    );
+  });
 
   const formattedData = [];
-  const today = moment().startOf('day');
-  const yesterday = moment().subtract(1, 'day').startOf('day');
+  const today = DateTime.local().startOf("day");
+  const yesterday = today.minus({ days: 1 });
 
   let currentDate = startDate
-    ? moment(startDate).startOf('day')
-    : moment(sortedInvoices[0].created).startOf('day');
-  const lastDate = endDate
-    ? moment(endDate).startOf('day')
-    : moment(sortedInvoices[sortedInvoices.length - 1].created).startOf('day');
+    ? DateTime.fromISO(startDate).startOf("day")
+    : DateTime.fromISO(sortedInvoices[0].created).startOf("day");
 
-  while (currentDate.isSameOrAfter(lastDate)) {
+  const lastDate = endDate
+    ? DateTime.fromISO(endDate).startOf("day")
+    : DateTime.fromISO(
+        sortedInvoices[sortedInvoices.length - 1].created
+      ).startOf("day");
+
+  while (currentDate >= lastDate) {
     let dateLabel;
-    if (currentDate.isSame(today, 'day')) {
-      dateLabel = 'Today';
-    } else if (currentDate.isSame(yesterday, 'day')) {
-      dateLabel = 'Yesterday';
+    if (currentDate.hasSame(today, "day")) {
+      dateLabel = "Today";
+    } else if (currentDate.hasSame(yesterday, "day")) {
+      dateLabel = "Yesterday";
     } else {
-      dateLabel = currentDate.format('dddd, MMMM D');
+      dateLabel = currentDate.toFormat("cccc, LLLL d"); // e.g., "Tuesday, May 28"
     }
 
-    const dayInvoices = sortedInvoices.filter(invoice =>
-      moment(invoice.created).startOf('day').isSame(currentDate, 'day')
+    const dayInvoices = sortedInvoices.filter((invoice) =>
+      DateTime.fromISO(invoice.created)
+        .startOf("day")
+        .hasSame(currentDate, "day")
     );
 
     if (dayInvoices.length > 0 || startDate) {
@@ -84,7 +92,7 @@ export const formatInvoiceDates = (
       });
     }
 
-    currentDate.subtract(1, 'day');
+    currentDate = currentDate.minus({ days: 1 });
   }
 
   return formattedData;

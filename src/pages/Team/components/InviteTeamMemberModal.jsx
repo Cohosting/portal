@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { supabase } from '../../../lib/supabase';
-import { Spinner, UserPlus, X } from '@phosphor-icons/react';
+import { Loader, UserPlus, X } from 'lucide-react';
 
 const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null, isLoading }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    role: 'member',
-    name: '',
-  });
+  const [formData, setFormData] = useState({ email: '', role: 'member', name: '' });
   const [error, setError] = useState('');
   const [emailState, setEmailState] = useState({
     isValid: false,
@@ -99,7 +95,6 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
       return;
     }
     await onSubmit(formData);
-
     onClose();
   };
 
@@ -111,17 +106,13 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
   };
 
   const renderAdditionalFields = () => {
-    if (!emailState.isValid || emailState.isChecking || !emailState.checkComplete) {
-      return null;
-    }
+    if (!emailState.isValid || emailState.isChecking || !emailState.checkComplete) return null;
 
     return (
       <>
         {!emailState.isExisting && (
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
             <input
               type="text"
               id="name"
@@ -134,9 +125,7 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
           </div>
         )}
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-            Access Level
-          </label>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700">Access Level</label>
           <select
             id="role"
             name="role"
@@ -154,33 +143,14 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
 
   return (
     <Transition show={isOpen} as={React.Fragment}>
-      <Dialog
-        onClose={resetOnClose}
-        className="relative z-50"
-      >
-        <TransitionChild
-          as={React.Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
+      <Dialog onClose={resetOnClose} className="relative z-50">
+        <TransitionChild as={React.Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as={React.Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
+            <TransitionChild as={React.Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
               <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between">
                   <span className="flex items-center">
@@ -199,9 +169,7 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
                 <form onSubmit={handleSubmit} className="mt-4">
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email
-                      </label>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                       <input
                         type="email"
                         id="email"
@@ -224,7 +192,7 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
                       disabled={!emailState.isValid || emailState.isChecking || !emailState.checkComplete || isLoading}
                     >
                       {selectedSeat ? 'Assign to Seat' : 'Send Invitation'}
-                      {isLoading && <Spinner className="w-4 h-4 ml-2" />}
+                      {isLoading && <Loader className="w-4 h-4 ml-2 animate-spin" />}
                     </button>
                   </div>
                 </form>

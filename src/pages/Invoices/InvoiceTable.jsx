@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { EllipsisVerticalIcon } from 'lucide-react';
-import { ArrowDownOnSquareIcon, CheckBadgeIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -14,7 +12,14 @@ import { calculateTotal } from '../../utils/invoices';
 import axiosInstance from '../../api/axiosConfig';
 import { supabase } from '../../lib/supabase';
 import AlertDialog from '@/components/Modal/AlertDialog';
-
+import {
+  Download,
+  BadgeCheck,
+  Pencil,
+  Trash2,
+  X,
+  EllipsisVerticalIcon
+} from 'lucide-react';
 const InvoiceTable = ({
   invoices = [],
   stripe_connect_account_id,
@@ -220,7 +225,7 @@ const InvoiceTable = ({
                                   onClick={() => navigate(`edit?id=${invoice.id}`)} 
                                   className="w-full text-left flex items-center px-3   text-sm leading-6 text-gray-900"
                                 >
-                                  <PencilIcon className="h-5 w-5 text-blue-500 mr-2" />
+                                  <Pencil className="h-5 w-5 text-blue-500 mr-2" />
                                   Edit
                                 </button>
                               </DropdownMenuItem>
@@ -230,7 +235,7 @@ const InvoiceTable = ({
                                   onClick={() => handleDeleteInvoice(invoice)} 
                                   className="w-full text-left flex items-center px-3  text-sm leading-6 text-gray-900"
                                 >
-                                  <TrashIcon className="h-5 w-5 text-red-500 mr-2" />
+                                  <Trash2 className="h-5 w-5 text-red-500 mr-2" />
                                   Delete
                                 </button>
                               </DropdownMenuItem>
@@ -240,7 +245,7 @@ const InvoiceTable = ({
                                   onClick={() => handleInvoiceFinalized(invoice)} 
                                   className="w-full text-left flex items-center px-3   text-sm leading-6 text-gray-900"
                                 >
-                                  <CheckBadgeIcon className="h-5 w-5 text-green-500 mr-2" />
+                                  <BadgeCheck className="h-5 w-5 text-green-500 mr-2" />
                                   Finalize
                                 </button>
                               </DropdownMenuItem>
@@ -253,7 +258,7 @@ const InvoiceTable = ({
                                 onClick={() => handleVoidInvoice(invoice)} 
                                 className="w-full text-left flex items-center px-3   text-sm leading-6 text-gray-900"
                               >
-                                <XMarkIcon className="h-5 w-5 text-red-500 mr-2" />
+                                <X className="h-5 w-5 text-red-500 mr-2" />
                                 Void
                               </button>
                             </DropdownMenuItem>
@@ -265,7 +270,7 @@ const InvoiceTable = ({
                                 onClick={() => window.open(invoice.invoice_pdf, "_blank", "noopener,noreferrer")} 
                                 className="w-full text-left flex items-center px-3   text-sm leading-6 text-gray-900"
                               >
-                                <ArrowDownOnSquareIcon className="h-5 w-5 text-blue-500 mr-2" />
+                                <Download className="h-5 w-5 text-blue-500 mr-2" />
                                 Download
                               </button>
                             </DropdownMenuItem>

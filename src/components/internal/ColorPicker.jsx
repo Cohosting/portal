@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { SketchPicker } from 'react-color';
+import { HexColorPicker } from 'react-colorful';
 
 export const BrandColorPicker = ({
   onCompletePick, field, defaultColor, title
@@ -21,13 +21,20 @@ export const BrandColorPicker = ({
     };
   }, [ref]);
 
-  const handleChangeComplete = (color) => {
-    setColor(color.hex);
-    onCompletePick(field, color.hex);
+  // Handle live color changes (just visual feedback, no parent update)
+  const handleChange = (hexColor) => {
+    setColor(hexColor);
   };
 
-  const handleChange = (color) => {
-    setColor(color.hex);
+  // Handle when user finishes changing color (mouseup/click)
+  const handleChangeComplete = (hexColor) => {
+    setColor(hexColor);
+    onCompletePick(field, hexColor);
+  };
+
+  // Add mouse up handler to detect when user stops dragging
+  const handleMouseUp = () => {
+    onCompletePick(field, color);
   };
 
   const handleInputChange = (event) => {
@@ -60,11 +67,12 @@ export const BrandColorPicker = ({
         />
         {showPicker && (
           <div ref={ref} className="absolute top-full left-0 mt-2 z-10">
-            <SketchPicker
-              color={color}
-              onChange={handleChange}
-              onChangeComplete={handleChangeComplete}
-            />
+            <div onMouseUp={handleMouseUp}>
+              <HexColorPicker
+                color={color}
+                onChange={handleChange}
+              />
+            </div>
           </div>
         )}
       </div>

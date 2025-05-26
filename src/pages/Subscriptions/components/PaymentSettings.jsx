@@ -6,11 +6,11 @@ import { useSelector } from "react-redux";
 import { useCustomerPaymentMethods } from "../../../hooks/react-query/usePayment";
 import { deletePaymentMethod, retryPayment } from "../../../services/payment";
 import { updateSubscriptionPaymentMethod } from "../../../services/subscriptionService";
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { queryKeys } from "../../../hooks/react-query/queryKeys";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { Spinner } from "@phosphor-icons/react";
+import { Loader } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 const PaymentSettings = ({
     subscription
@@ -66,7 +66,7 @@ const PaymentSettings = ({
                 {
                     isLoading && (
                         <div className="flex items-center ">
-                            <Spinner size={36} className="animate-spin m-5 " />
+                            <Loader size={36} className="animate-spin m-5 " />
                         </div>
                     )
                 }
@@ -75,7 +75,7 @@ const PaymentSettings = ({
                     <div className="rounded-md bg-red-50 p-4 my-2">
                         <div className="flex">
                             <div className="flex-shrink-0">
-                                <ExclamationCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                                <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
                             </div>
                             <div className="ml-3">
                                 <h3 className="text-sm font-medium text-red-800">Payment Failed</h3>

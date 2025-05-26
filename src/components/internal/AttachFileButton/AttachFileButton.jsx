@@ -1,4 +1,4 @@
-import { PaperClipIcon } from '@heroicons/react/24/solid';
+import { Paperclip } from 'lucide-react';
 import React, { useRef } from 'react';
 
 const AttachFileButton = ({ onFileSelect }) => {
@@ -22,7 +22,7 @@ const AttachFileButton = ({ onFileSelect }) => {
                 onClick={handleButtonClick}
                 className="-m-2.5 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:text-gray-500"
             >
-                <PaperClipIcon aria-hidden="true" className="h-5 w-5" />
+                <Paperclip aria-hidden="true" className="h-5 w-5" />
                 <span className="sr-only">Attach a file</span>
             </button>
             <input

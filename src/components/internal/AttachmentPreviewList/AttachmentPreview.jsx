@@ -1,9 +1,9 @@
-import { XMarkIcon } from '@heroicons/react/24/solid';
 import React, { useEffect, useRef, useState } from 'react';
 import { uploadFile } from '../../../services/fileUploadService';
 import { useParams } from 'react-router-dom';
 import { Dialog, DialogBackdrop } from '@headlessui/react';
 import imageCompression from 'browser-image-compression';
+import { X } from 'lucide-react';
 
 const compressFile = async (file) => {
     const options = {
@@ -126,7 +126,7 @@ const AttachmentPreview = ({ file, onRemove, onFileUpload, setIsFileUploading })
                         onClick={onRemove}
                         className="absolute top-0 right-0 p-1 bg-white rounded-full"
                     >
-                        <XMarkIcon className="h-4 w-4 text-red-600" />
+                        <X className="h-4 w-4 text-red-600" />
                     </button>
                 )
             }
@@ -140,7 +140,7 @@ const AttachmentPreview = ({ file, onRemove, onFileUpload, setIsFileUploading })
                         onClick={closeModal}
                         className="absolute top-0 right-0 p-1 bg-white rounded-full"
                     >
-                        <XMarkIcon className="h-4 w-4 text-red-600" />
+                        <X className="h-4 w-4 text-red-600" />
                     </button>
                     {isImage ? (
                         <img

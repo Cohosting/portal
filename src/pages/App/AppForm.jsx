@@ -3,9 +3,9 @@ import { Layout } from '../Dashboard/Layout';
 import { AppFormFields } from './AppFormFields';
 import { useNavigate } from 'react-router-dom';
 import { useAppForm } from './useAppForm';
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import PageHeader from '@/components/internal/PageHeader';
 import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 export const AppForm = () => {
   const {
@@ -53,7 +53,7 @@ export const AppForm = () => {
         )}
         {isError && <div className='text-red-500 flex items-center mt-4 '>
           {/* error message with icon */}
-          <ExclamationCircleIcon className='w-6 h-6 mr-2' />
+          <AlertTriangle className='w-6 h-6 mr-2' />
           <span>{isError}</span>
         </div>}
         {/* Action div */}

@@ -3,12 +3,12 @@ import { useTeamSeats } from "../../hooks/react-query/useTeamSeats";
 import { Layout } from "../Dashboard/Layout";
 import TeamOverview from "./components/TeamOverview";
 import TeamSeating from "./components/TeamSeating";
-import { Spinner } from "@phosphor-icons/react";
 import { usePortalData } from "../../hooks/react-query/usePortalData";
 import PortalAccessUnavailable from "../../components/internal/PortalAccessUnavailable";
 import { useState } from "react";
 import TeamMembers from "./components/TeamMembers";
 import { useTeamMembers } from "../../hooks/react-query/useTeamMembers";
+import { Loader } from "lucide-react";
 
 
 let headingText = "Subscription Required - Access Restricted"
@@ -23,7 +23,7 @@ export const Team = () => {
   if (portalLoading || isLoading || teamMemberLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Spinner className="w-12 h-12" />
+        <Loader className="w-12 h-12" />
       </div>
     )
   }

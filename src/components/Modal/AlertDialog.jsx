@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
   AlertDialogOverlay
 } from '@/components/ui/alert-dialog';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { AlertTriangle } from 'lucide-react';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -82,7 +82,7 @@ const AlertDialog = ({
         
         <div className="sm:flex sm:items-start">
           <div className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${iconBgColor} sm:mx-0 sm:h-10 sm:w-10`}>
-            {icon || <ExclamationTriangleIcon className={`h-6 w-6 ${iconColor}`} />}
+            {icon || <AlertTriangle className={`h-6 w-6 ${iconColor}`} />}
           </div>
           <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
             <AlertDialogHeader>

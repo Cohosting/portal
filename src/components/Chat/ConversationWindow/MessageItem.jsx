@@ -1,5 +1,5 @@
 import React, { useState, memo } from "react";
-import { DotsThreeVertical } from "@phosphor-icons/react";
+import { MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -145,7 +145,7 @@ const MessageItem = ({
                                     <DropdownMenuTrigger asChild>
                                         <IconButton
                                             variant="ghost"
-                                            icon={<DotsThreeVertical color="#525866" aria-hidden="true" size={16} weight="bold" />}
+                                            icon={<MoreVertical color="#525866" aria-hidden="true" size={16} weight="bold" />}
                                             size="small"
                                             tooltip="Settings"
                                         />

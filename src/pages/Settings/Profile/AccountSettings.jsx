@@ -4,7 +4,7 @@ import ChangePassword from '../components/ChangePassword';
 import LogoutOtherSessions from '../components/LogoutOtherSessions';
 import DeleteAccount from '../components/DeleteAccount';
 import { useSupabase } from '../../../hooks/useSupabase';
-import { Spinner } from '@phosphor-icons/react';
+import { Loader } from 'lucide-react';
 
 
 export const AccountSettings = () => {
@@ -19,7 +19,7 @@ export const AccountSettings = () => {
       {
         loading ? (
           <div className="  w-full h-full bg-white bg-opacity-70 z-50 flex items-center justify-center">
-            <Spinner className='animate-spin w-8 h-8 ' />
+            <Loader className='animate-spin w-8 h-8 ' />
           </div>
         ) : (
           <>

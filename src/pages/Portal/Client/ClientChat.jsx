@@ -2,8 +2,6 @@ import React from 'react'
 import { useClientAuth } from '../../../hooks/useClientAuth';
 import { useClientConversations } from '../../../hooks/useClientConversations';
 import ClientChatLayout from './Layout/ClientChatLayout';
-import { Spinner } from '@phosphor-icons/react';
-import PortalLoadingSkeleton from './components/PortalLoadingSkeleton';
 
 const Chat = ({ portalData }) => {
     const { clientUser } = useClientAuth(portalData.id);

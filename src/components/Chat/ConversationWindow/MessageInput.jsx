@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import AttachFileButton from "../../internal/AttachFileButton";
-import MoodSelector from "../../internal/MoodSelector";
-import { useMoodSelection } from "../../../hooks/useMoodSelection";
 import ImagePreviewList from "../../internal/AttachmentPreviewList";
 import { useMediaQuery } from "react-responsive";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 const MessageInput = ({ onSendMessage, onMoodChange, isFileUploading, setIsFileUploading, colorSettings }) => {
-    const { selected, handleMoodChange } = useMoodSelection(onMoodChange);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedFilePublicUrls, setSelectedFilePublicUrls] = useState([]);
     const [message, setMessage] = useState("");
@@ -21,7 +18,7 @@ const MessageInput = ({ onSendMessage, onMoodChange, isFileUploading, setIsFileU
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        onSendMessage(message, selected, selectedFiles, selectedFilePublicUrls);
+        onSendMessage(message, selectedFiles, selectedFilePublicUrls);
         setMessage("");
         setSelectedFiles([]);
         setSelectedFilePublicUrls([]);
