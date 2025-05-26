@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,12 +12,12 @@ export default defineConfig({
 
   }),
 
-    visualizer({
-      filename: 'build/stats.html', // Updated to match new build directory
-      open: true, // automatically open the report in browser
-      gzipSize: true,
-      brotliSize: true,
-    })
+    // visualizer({
+    //   filename: 'build/stats.html', // Updated to match new build directory
+    //   open: true, // automatically open the report in browser
+    //   gzipSize: true,
+    //   brotliSize: true,
+    // })
 
 
 ],
