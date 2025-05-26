@@ -1,0 +1,94 @@
+import React from 'react'
+import DropdownMenu from '../../internal/DropdownMenu/'
+import IconButton from '../../IconButton'
+import { CaretLeft, DotsThreeVertical } from '@phosphor-icons/react'
+import { useMediaQuery } from 'react-responsive'
+import { useNavigate } from 'react-router-dom'
+
+const ConversationHeader = ({
+    name,
+    handleDeleteConversation,
+    refetchConversations,
+    participants,
+
+}) => {
+    const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
+    const navigate = useNavigate();
+
+    const onDeleteConversation = async () => {
+        await handleDeleteConversation();
+
+        refetchConversations && await refetchConversations();
+        if (window.location.pathname.includes('portal')) {
+            navigate('/portal/messages');
+        } else {
+            navigate('/messages');
+        }
+    }
+
+    return (
+        <div className="flex flex-1 items-center gap-x-4 justify-between lg:gap-x-6 ">
+
+            {/* Render the back button only when hasManyConversation is true */}
+            {isLessThan768 && (
+                <IconButton
+                    className={'cursor-pointer'}
+                    onClick={() => window.location.hostname.includes('dashboard.') ? navigate('/messages') : navigate('/portal/messages')}
+                    variant="neutral"
+                    icon={
+                        <CaretLeft
+                            color="#525866"
+                            aria-hidden="true"
+                            size={20}
+                            weight="bold"
+                        />
+                    }
+                    tooltip="Back"
+                />
+            )}
+            <div className="flex flex-col">
+                <h6 className="text-sm font-medium text-[#0A0D14]">
+                    {name}
+                </h6>
+                {/* display participants name if more than one */}
+                {participants && participants.length > 1 && (
+                    <div className="flex items-center gap-x-2">
+                        {participants.map((participant, index) => (
+                            <span key={index} className="text-xs text-gray-500">
+                                {participant.name}
+                                {index < participants.length - 1 && ', '}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+                <DropdownMenu
+                    trigger={
+                        <IconButton
+                            variant="neutral"
+                            icon={
+                                <DotsThreeVertical
+                                    color="#525866"
+                                    aria-hidden="true"
+                                    size={20}
+                                    weight="bold"
+                                />
+                            }
+                            tooltip="Settings"
+                        />
+                    }
+                    options={[
+                        {
+                            name: "Delete Conversation",
+                            onClick: handleDeleteConversation && onDeleteConversation,
+                        },
+                    ]}
+                />
+            </div>
+        </div>
+    )
+}
+
+export default ConversationHeader

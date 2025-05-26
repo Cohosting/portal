@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.custom-sidebar-button > svg:not([class*='size-']) {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}

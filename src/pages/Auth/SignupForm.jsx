@@ -1,0 +1,111 @@
+import { cn } from "@/lib/utils";
+import { useNavigate } from 'react-router-dom';
+import { useSignup } from '../../hooks/useSignup';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+function SignupForm({
+  className,
+  ...props
+}) {
+  const navigate = useNavigate();
+  const { handleChange, signup, email, password, error, isLoading } = useSignup();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    signup();
+  };
+
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className="border bg-white">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Create a new account</CardTitle>
+          <CardDescription>
+            Sign up to get started with our service
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-6">
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={handleChange}
+                    placeholder="m@example.com"
+                    required
+                    className="bg-white"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <a
+                      href="#"
+                      className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                      Forgot your password?
+                    </a>
+                  </div>
+                  <Input 
+                    id="password" 
+                    name="password"
+                    type="password" 
+                    value={password}
+                    onChange={handleChange}
+                    required
+                    className="bg-white"
+                  />
+                </div>
+                {error && (
+                  <div className="text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+                <Button 
+                  type="submit" 
+                  className="w-full bg-black text-white hover:bg-gray-800"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Loading...' : 'Sign up'}
+                </Button>
+              </div>
+              <div className="text-center text-sm">
+                Already have an account?{" "}
+                <a 
+                  href="#" 
+                  className="text-primary underline underline-offset-4 hover:text-gray-800"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/login');
+                  }}
+                >
+                  Log in
+                </a>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+      <div className="text-balance text-center text-xs text-muted-foreground max-w-xs mx-auto [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-gray-800">
+        By signing up, you agree to our <a href="#">Terms of Service</a>{" "}
+        and <a href="#">Privacy Policy</a>.
+      </div>
+    </div>
+  );
+}
+
+export default SignupForm;
