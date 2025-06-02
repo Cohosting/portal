@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { DialogTitle } from "@headlessui/react";
 
-import Button from './../../internal/Button'
 import PeopleMultiSelectWithAvatar from "../../internal/PeopleMultiSelectWithAvatar";
-import TextArea from "../../internal/TextArea";
 import { usePortalClients } from "../../../hooks/react-query/usePortalData";
 import { useSelector } from "react-redux";
 import { createMassMessage } from "../../../services/chat";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const MassMessageForm = ({ onClose }) => {
     const [selectedPeople, setSelectedPeople] = useState([]);
     const [comment, setComment] = useState("");
     const [isCreating, setIsCreating] = useState(false);
 
-    const { user, currentSelectedPortal } = useSelector(state => state.auth)
-    const { data: clients, isLoading } = usePortalClients(currentSelectedPortal)
-
+    const { user, currentSelectedPortal } = useSelector(state => state.auth);
+    const { data: clients, isLoading } = usePortalClients(currentSelectedPortal);
 
     const handleChange = (selected) => {
         setSelectedPeople(selected);
@@ -28,7 +28,7 @@ const MassMessageForm = ({ onClose }) => {
 
     const handleMassMessageSubmit = async (e) => {
         e.preventDefault();
-        console.log(`this is the selected people: `, selectedPeople)
+        console.log(`this is the selected people: `, selectedPeople);
 
         try {
             setIsCreating(true);
@@ -47,33 +47,30 @@ const MassMessageForm = ({ onClose }) => {
 
             await createMassMessage(newMessage, participants, currentSelectedPortal);
             setIsCreating(false);
-            onClose()
+            onClose();
         } catch (error) {
-            console.log(`Error creating mass message: `, error)
-
+            console.log(`Error creating mass message: `, error);
         }
+    };
 
-
-
-
-    }
-
-    if (isLoading) return <div className="flex items-center justify-center py-2"> Loading...  </div>
-
+    if (isLoading) return <div className="flex items-center justify-center py-2 text-black">Loading...</div>;
 
     return (
-        <div >
+        <div>
             <div>
                 <div className="mb-6">
-                    <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900 mb-2">
+                    <DialogTitle as="h3" className="text-base font-semibold leading-6 text-black mb-2">
                         Mass Message
                     </DialogTitle>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-black">
                         Send a direct message to multiple clients. Recipients cannot see each others’ replies.
                     </p>
                 </div>
                 <div className="flex flex-col gap-4">
-                    <TextArea
+                    <Label>
+                        Add your comment
+                    </Label>
+                    <Textarea
                         label="Add your comment"
                         id="comment"
                         name="comment"
@@ -91,15 +88,17 @@ const MassMessageForm = ({ onClose }) => {
                 </div>
             </div>
             <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                <Button size="lg" onClick={onClose} variant="secondary">
+                <Button size="lg" onClick={onClose} variant="outline"  >
                     Cancel
                 </Button>
-                <Button onClick={
-                    handleMassMessageSubmit
-                } size="lg" type="submit" data-autofocus  >
-                    {
-                        isCreating ? 'Sending...' : 'Send'
-                    }
+                <Button
+                    onClick={handleMassMessageSubmit}
+                    size="lg"
+                    type="submit"
+                    data-autofocus
+                    className="bg-black text-white"
+                >
+                    {isCreating ? 'Sending...' : 'Send'}
                 </Button>
             </div>
         </div>

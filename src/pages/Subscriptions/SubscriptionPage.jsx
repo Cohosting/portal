@@ -12,6 +12,7 @@ import SubscriptionError from "../../components/internal/SubscriptionError";
 import RestrictedAccess from "../../components/internal/RestrictedAccess";
 import { useState } from "react";
 import { Loader } from "lucide-react";
+import PageHeader from "@/components/internal/PageHeader";
 
 let subscriptionStatusStyle = {
   active: "bg-green-500",
@@ -63,34 +64,27 @@ const SubscriptionPage = () => {
     return <RestrictedAccess />
   }
 
+  let title = "Subscription";
+  let description = "Manage your subscription, billing, and payment settings.";
+
   return (
-    <div className="p-8">
-
-
-
-
+    <div >
+      <PageHeader
+        title={title}
+        description={description}
+      />
+      <div className="p-6">
       {
         subscription && shouldShowSubscription ? (
           <>
-            <div className="border-b  border-gray-200 pb-4">
-              <div className="flex items-center gap-2 mb-4">
+ 
+              <div className="flex items-center gap-2  ">
                 <p>Subscription Status:</p>
                 <div className={`bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full ${subscriptionStatusStyle[subscription.status]}`}>
                   {getSubscriptionStatus(subscription.status)}
                 </div>
 
               </div>
-              {
-                subscription.subscription_error && (
-                  <SubscriptionError subscriptionError={subscription.subscription_error} />
-                )
-              }
-              <SectionHeader
-                heading="Plan and Billing"
-                description="Manage your subscription plan and billing information"
-                hideButton
-              />
-            </div>
             <PlanSelector subscription={subscription} />
             <PaymentSettings subscription={subscription} />
             <BillingHistory subscription={subscription} />
@@ -103,6 +97,12 @@ const SubscriptionPage = () => {
         )
 
       }
+      </div>
+
+
+
+
+
     </div>
   );
 }

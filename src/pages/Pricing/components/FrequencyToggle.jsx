@@ -12,13 +12,13 @@ const FrequencyToggle = ({ frequency, setFrequency }) => {
                 <RadioGroup
                     value={frequency}
                     onChange={setFrequency}
-                    className="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs font-semibold leading-5 ring-1 ring-inset ring-gray-200"
+                    className="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs font-semibold leading-5 ring-1 ring-inset ring-gray-300 bg-white"
                 >
                     {frequencies.map((option) => (
                         <Radio
                             key={option.value}
                             value={option.value}
-                            className="cursor-pointer rounded-full px-2.5 py-1 text-gray-500 data-[checked]:bg-indigo-600 data-[checked]:text-white"
+                            className="cursor-pointer rounded-full px-3 py-1 text-black data-[checked]:bg-black data-[checked]:text-white transition-colors duration-150"
                         >
                             {option.label}
                         </Radio>

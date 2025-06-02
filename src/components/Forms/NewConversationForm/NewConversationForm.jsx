@@ -1,9 +1,9 @@
 import { useState } from "react";
 import PeopleMultiSelectWithAvatar from "../../internal/PeopleMultiSelectWithAvatar";
-import Button from './../../internal/Button';
 import { useSelector } from "react-redux";
 import { createConversation } from "../../../services/chat";
 import { usePortalClients, usePortalData } from "../../../hooks/react-query/usePortalData";
+import { Button } from "@/components/ui/button";
 
 const NewConversationForm = ({ onClose }) => {
     const [selectedPeople, setSelectedPeople] = useState([]);
@@ -79,10 +79,10 @@ const NewConversationForm = ({ onClose }) => {
                 )}
             </div>
             <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                <Button size="lg" onClick={onClose} variant="secondary">
+                <Button size="lg" onClick={onClose} variant="outline">
                     Cancel
                 </Button>
-                <Button size="lg" data-autofocus onClick={handleCreateConversation}>
+                <Button className="bg-gray-900 text-white" size="lg" variant="default" data-autofocus onClick={handleCreateConversation}>
                     {
                         isCreating ? 'Creating...' : 'Create'
                     }

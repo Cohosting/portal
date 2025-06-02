@@ -13,6 +13,7 @@ import {
 import { AlertTriangle } from 'lucide-react';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { Button } from '../ui/button';
 
 const AlertDialog = ({
   isOpen,
@@ -89,24 +90,15 @@ const AlertDialog = ({
               <AlertDialogTitle className="text-base font-semibold leading-6 text-gray-900">
                 {title}
               </AlertDialogTitle>
-              <AlertDialogDescription className="mt-2 text-sm text-gray-500">
+              <AlertDialogDescription className="  text-sm text-gray-500">
                 {message}
               </AlertDialogDescription>
             </AlertDialogHeader>
           </div>
         </div>
         
-        <AlertDialogFooter className="sm:flex sm:flex-row-reverse">
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              onConfirm();
-            }}
-            className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:w-auto ${confirmButtonColor}`}
-          >
-            {confirmButtonText}
-          </AlertDialogAction>
-          <AlertDialogCancel
+        <AlertDialogFooter className=" ">
+          <Button
             onClick={(e) => {
               e.preventDefault();
               onClose();
@@ -114,7 +106,17 @@ const AlertDialog = ({
             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
           >
             {cancelButtonText}
-          </AlertDialogCancel>
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-base text-white shadow-sm  sm:w-auto ${confirmButtonColor}`}
+          >
+            {confirmButtonText}
+          </Button>
+
         </AlertDialogFooter>
       </AlertDialogContent>
     </ShadcnAlertDialog>

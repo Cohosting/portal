@@ -57,6 +57,15 @@ const ClientList = ({ clients, app, currentSelectedMember, setCurrentSelectedMem
       descriptionFontSize="text-[15px]"
     />
     <ul>
+      {
+        clients.length === 0 && (
+          <div>
+            <p className="text-center mx-6 text-sm text-gray-500 mt-4">
+              No clients found.
+            </p>
+          </div>
+        )
+      }
       {clients?.map((client) => (
         <li
           key={client.id}

@@ -17,6 +17,7 @@ import { CustomDomainForm } from './CustomDomainForm';
 import { DomainConfiguration } from './CheckDomainConfig';
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
+import { CustomSkeleton } from '@/components/SkeletonLoading';
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
   if (portal && !portal.stripe_connect_account_id) {
@@ -130,9 +131,12 @@ export const Settings = () => {
 
   if (!portal || stripeUserLoading) {
     return (
-      <div className="flex items-center justify-center m-4">
-        <Loader className="animate-spin h-8 w-8" />
-      </div>
+      <header className="bg-white border-b border-gray-200 p-6">
+        <div className="flex flex-col">
+          <CustomSkeleton className="h-6 w-32 mb-2" />
+          <CustomSkeleton className="h-4 w-80" />
+        </div>
+      </header>
     );
   }
   console.log('settings', settings);

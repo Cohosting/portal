@@ -25,6 +25,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { currentSelectedPortal } = useSelector(state => state.auth);
   const { data: recentActivities } = useRecentActivities(currentSelectedPortal);
+
   const { data: portal, isLoading: isPortalLoading } = usePortalData(currentSelectedPortal);
   const [summary, setSummary] = useState({
     total_clients: { value: 0, change: 0 },
@@ -119,7 +120,8 @@ export const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="divide-y divide-gray-100 flex-grow">
+              {/* Updated section: Scrollable Recent Activities */}
+              <div className="divide-y divide-gray-100 overflow-y-auto max-h-96">
                 {recentActivities?.length > 0 ? (
                   recentActivities.map((activity) => (
                     <div key={activity.id} className="p-4 hover:bg-gray-50 transition-colors">
@@ -150,7 +152,7 @@ export const Dashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 flex-grow">
+                    <div className="flex flex-col items-center justify-center py-12">
                     <AlertCircle className="h-10 w-10 text-gray-300 mb-3" />
                     <p className="text-sm text-gray-500">No recent activities</p>
                   </div>
@@ -158,10 +160,12 @@ export const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Quick Actions Column */}
           <div className="col-span-3">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5 h-full flex flex-col">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5 flex flex-col">
               <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-              <div className="space-y-3 flex-grow flex flex-col justify-between">
+              <div className="space-y-3 flex-grow flex flex-col">
                 {[
                   { title: 'Create New Invoice', icon: PlusCircle, onClick: () => navigate('/billing/add'), color: 'bg-green-50 text-green-600' },
                   { title: 'Send Invoice Reminders', icon: Send, onClick: () => setIsOpen(true), color: 'bg-blue-50 text-blue-600' },

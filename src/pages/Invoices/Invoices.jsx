@@ -8,12 +8,11 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
-import { Banknote } from 'lucide-react';
+import { Banknote, Loader } from 'lucide-react';
 
 import PageHeader from '@/components/internal/PageHeader';
 import BillingTable from './InvoiceTable';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
 
 export const Invoices = () => {
   const navigate = useNavigate();
@@ -98,7 +97,7 @@ export const Invoices = () => {
       <div className="p-0">
         {isOpen && !invoices.length &&  (
           <div className="flex justify-center items-center h-96">
-            <Loader2 size={46} />
+            <Loader className='animate-spin' size={46} />
           </div>
         )}
 

@@ -1,5 +1,6 @@
-import { useState, Fragment } from "react"
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react"
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import useSubscription from "../../../hooks/useSubscription"
@@ -11,8 +12,6 @@ const plans = [
     { id: 4, name: 'Pro', interval: 'yearly', price: 1908, priceId: 'price_1PpotxG6ekPTMWCwFjy8Gr8V' },
 ]
 
-
-
 const PlanSelectionModal = ({ currentPlan = { name: 'Pro', interval: 'monthly' }, subscription }) => {
     const [selectedPlan, setSelectedPlan] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -20,6 +19,7 @@ const PlanSelectionModal = ({ currentPlan = { name: 'Pro', interval: 'monthly' }
 
     const { upgradeSubscription, downgradeSubscription, loading } =
         useSubscription();
+    
     const getPlanChangeType = (planName, planInterval) => {
         if (planName === currentPlan.name && planInterval === currentPlan.interval) return 'current'
         if (planName === 'Pro' && currentPlan.name === 'Starter') return 'upgrade'
@@ -55,7 +55,6 @@ const PlanSelectionModal = ({ currentPlan = { name: 'Pro', interval: 'monthly' }
                 throw new Error('Invalid plan change type')
             }
 
-
             toast.success('Plan changed successfully!')
             setIsOpen(false)
         } catch (error) {
@@ -69,112 +68,90 @@ const PlanSelectionModal = ({ currentPlan = { name: 'Pro', interval: 'monthly' }
 
     return (
         <>
-            <button
-                onClick={() => { setIsOpen(true); setSelectedPlan(null) }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            <Button
+                variant="outline"
+                onClick={() => { 
+                    setIsOpen(true); 
+                    // Set current plan as default selected
+                    const currentPlanId = plans.find(p => p.name === currentPlan.name && p.interval === currentPlan.interval)?.id;
+                    setSelectedPlan(currentPlanId || null);
+                }}
             >
                 Change Plan
-            </button>
-            <Transition appear show={isOpen} as={Fragment}>
-                <Dialog as="div" className="relative z-[100]" onClose={() => setIsOpen(false)}>
-                    <TransitionChild
-                        as={Fragment}
-                        enter="ease-out duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="ease-in duration-200"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                    >
-                        <div className="fixed inset-0 bg-black bg-opacity-25" />
-                    </TransitionChild>
+            </Button>
+            
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="sm:max-w-md bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Select a Plan</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="mt-4 space-y-2">
+                        {plans.map((plan) => {
+                            const changeType = getPlanChangeType(plan.name, plan.interval)
+                            const badgeStyle = getBadgeStyle(changeType)
 
-                    <div className="fixed inset-0 overflow-y-auto">
-                        <div className="flex min-h-full items-center justify-center p-4 text-center">
-                            <TransitionChild
-                                as={Fragment}
-                                enter="ease-out duration-300"
-                                enterFrom="opacity-0 scale-95"
-                                enterTo="opacity-100 scale-100"
-                                leave="ease-in duration-200"
-                                leaveFrom="opacity-100 scale-100"
-                                leaveTo="opacity-0 scale-95"
-                            >
-                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                                    <DialogTitle
-                                        as="h3"
-                                        className="text-lg font-medium leading-6 text-gray-900"
-                                    >
-                                        Select a Plan
-                                    </DialogTitle>
-                                    <div className="mt-4 space-y-2">
-                                        {plans.map((plan) => {
-                                            const changeType = getPlanChangeType(plan.name, plan.interval)
-                                            const badgeStyle = getBadgeStyle(changeType)
-
-                                            return (
-                                                <div
-                                                    key={plan.id}
-                                                    className={`p-3 rounded-lg border ${selectedPlan === plan.id ? 'border-indigo-500' : 'border-gray-200'
-                                                        } transition-all duration-200 ease-in-out`}
+                            return (
+                                <div
+                                    key={plan.id}
+                                    className={`p-3 rounded-lg border ${selectedPlan === plan.id ? 'border-indigo-500' : 'border-gray-200'
+                                        } transition-all duration-200 ease-in-out`}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center space-x-2">
+                                            <div>
+                                                <h3 className="text-sm font-semibold">{plan.name}</h3>
+                                                <p className="text-xs text-gray-500 capitalize">{plan.interval}</p>
+                                            </div>
+                                            {changeType && (
+                                                <span className={`${badgeStyle} px-2 py-1 rounded-full text-xs font-medium capitalize transition-colors duration-200`}>
+                                                    {changeType}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <p className="text-sm font-bold">${plan.price}/{plan.interval === 'monthly' ? 'mo' : 'yr'}</p>
+                                            {changeType !== 'current' ? (
+                                                <Button
+                                                    size="sm"
+                                                    variant={  "outline"}
+                                                    onClick={() => setSelectedPlan(plan.id)}
+                                                    disabled={isLoading}
+                                                    className="text-xs bg-black text-white hover:bg-gray-800"
                                                 >
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="flex items-center space-x-2">
-                                                            <div>
-                                                                <h3 className="text-sm font-semibold">{plan.name}</h3>
-                                                                <p className="text-xs text-gray-500 capitalize">{plan.interval}</p>
-                                                            </div>
-                                                            {changeType && (
-                                                                <span className={`${badgeStyle} px-2 py-1 rounded-full text-xs font-medium capitalize transition-colors duration-200`}>
-                                                                    {changeType}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            <p className="text-sm font-bold">${plan.price}/{plan.interval === 'monthly' ? 'mo' : 'yr'}</p>
-                                                            <button
-                                                                className={`px-3 py-1 text-xs font-medium rounded-md ${selectedPlan === plan.id
-                                                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                                                    } transition-colors duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                                onClick={() => setSelectedPlan(plan.id)}
-                                                                disabled={isLoading}
-                                                            >
-                                                                {selectedPlan === plan.id ? 'Selected' : 'Select'}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })}
+                                                    {selectedPlan === plan.id ? 'Selected' : 'Select'}
+                                                </Button>
+                                            ) : (
+                                                <span className="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-md">
+                                                    Current
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="mt-6 flex justify-end space-x-4">
-                                        <button
-                                            type="button"
-                                            className={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            onClick={() => setIsOpen(false)}
-                                            disabled={isLoading}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(!selectedPlan || isLoading || (selectedPlan === plans.find(p => p.name === currentPlan.name && p.interval === currentPlan.interval)?.id))
-                                                ? 'opacity-50 cursor-not-allowed'
-                                                : ''
-                                                }`}
-                                            onClick={handleConfirmChange}
-                                            disabled={!selectedPlan || isLoading || (selectedPlan === plans.find(p => p.name === currentPlan.name && p.interval === currentPlan.interval)?.id)}
-                                        >
-                                            {isLoading ? 'Changing...' : 'Confirm Change'}
-                                        </button>
-                                    </div>
-                                </DialogPanel>
-                            </TransitionChild>
-                        </div>
+                                </div>
+                            )
+                        })}
                     </div>
-                </Dialog>
-            </Transition>
+                    
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsOpen(false)}
+                            disabled={isLoading}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleConfirmChange}
+                            disabled={!selectedPlan || isLoading || (selectedPlan === plans.find(p => p.name === currentPlan.name && p.interval === currentPlan.interval)?.id)}
+                            className="bg-black text-white hover:bg-black/80"
+                        >
+                            {isLoading ? 'Changing...' : 'Confirm Change'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            
             <ToastContainer position="bottom-right" autoClose={3000} />
         </>
     )

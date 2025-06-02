@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../api/axiosConfig';
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Field, Label, Checkbox } from '@headlessui/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Field, Label, Checkbox } from '@headlessui/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js';
-import Button from '../../../components/internal/Button';
 import { useQueryClient } from 'react-query';
 import { queryKeys } from '../../../hooks/react-query/queryKeys';
 import { Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 
 const stripePromise = loadStripe(
@@ -74,7 +75,7 @@ const SetupForm = ({ clientSecret, subscriptionId, onClose, customerId }) => {
         <Label className={'text-sm font-medium cursor-pointer'}>Set as default payment method</Label>
       </Field>
       <Button disabled={loading} type='submit'
-        className="mt-6 w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300" >
+        className="mt-6 w-full rounded px-4 py-2 text-white  " >
         {
           loading ? <Loader className='animate-spin' /> : 'Add Payment Method'
         }
@@ -107,15 +108,15 @@ const AddCardPaymentModal = ({
   }, [customerId]);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <DialogBackdrop className="fixed inset-0 bg-black/30" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel
-          className="w-full max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-lg"
-        >
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-lg bg-white">
+        <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-800">
             Add Payment Method
           </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
           <p className="text-sm text-gray-500">
             Please enter your payment details to add a new payment method.
           </p>
@@ -129,17 +130,13 @@ const AddCardPaymentModal = ({
                 </Elements>
               ) : (
                 <div className='flex items-center justify-center'>
-                  <Spinner className='animate-spin' size={25} />
+                  <Loader className='animate-spin' size={25} />
                 </div>
               )
             }
-
-
           </div>
-
-
-        </DialogPanel>
-      </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };

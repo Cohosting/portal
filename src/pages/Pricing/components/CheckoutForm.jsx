@@ -6,8 +6,8 @@ import {
 } from '@stripe/react-stripe-js';
 import { useSelector } from 'react-redux';
 import useSubscription from './../../../hooks/useSubscription';
-import Button from '../../../components/internal/Button';
 import { usePortalData } from '../../../hooks/react-query/usePortalData';
+import { Button } from '@/components/ui/button';
 
 
 
@@ -36,7 +36,6 @@ const CheckoutForm = ({ selectedTier, priceId, isYearly, setShouldShowSubscripti
     const handleSubmit = async event => {
         event.preventDefault();
         setLoading(true);
-        setShouldShowSubscription(false);
 
         if (!stripe) {
             return;
@@ -48,8 +47,11 @@ const CheckoutForm = ({ selectedTier, priceId, isYearly, setShouldShowSubscripti
         const { error: submitError } = await elements.submit();
         if (submitError) {
             handleError(submitError);
+            setShouldShowSubscription(true);
             return;
         }
+        setShouldShowSubscription(false);
+
 
         const response = await createSubscription({
 
@@ -97,6 +99,7 @@ const CheckoutForm = ({ selectedTier, priceId, isYearly, setShouldShowSubscripti
             <PaymentElement />
             <div className='my-4'>
                 <Button
+                    className='bg-black text-white hover:bg-gray-800'
                     loading={loading}
                     type="submit"
                     disabled={!stripe || loading}
@@ -104,8 +107,6 @@ const CheckoutForm = ({ selectedTier, priceId, isYearly, setShouldShowSubscripti
                     Submit Payment
                 </Button>
             </div>
-
-            {error && <div>{error}</div>}
         </form>
     );
 };
