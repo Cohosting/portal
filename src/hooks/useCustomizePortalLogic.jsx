@@ -72,6 +72,9 @@ export const useCustomizePortalLogic = () => {
     };
 
     useEffect(() => {
+        console.log({
+            portal
+        })
         if (portal && portal.brand_settings) {
             console.log(portal.brand_settings)
             setBrandSettings({

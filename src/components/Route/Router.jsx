@@ -30,6 +30,8 @@ import SubscriptionSuccess from '../internal/SubscriptionSuccess.jsx';
 import Files from '../../pages/Files/Files.jsx';
 import { SetPasswordPage } from '@/pages/Portal/Client/SetPasswordPage';
 import { ForgetPassword } from '@/pages/Portal/Client/ForgetPassword';
+import MainForgotPassword from '@/pages/Auth/ForgotPassword';
+import MainSetPassword from '@/pages/Auth/SetPassword';
 
 
 
@@ -230,12 +232,23 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: '/set-password',
+    path: '/portal/set-password',
     element: <SetPasswordPage />,
 
   },
-{  path:'/forgot-password',
+  // portal client forgot password
+{  path:'/portal/forgot-password',
   element: <ForgetPassword />,
+},
+
+{
+  path:'/forgot-password',
+  element: <MainForgotPassword />,
+},
+
+{
+  path:'/set-password',
+  element: <MainSetPassword />,
 },
 
   {

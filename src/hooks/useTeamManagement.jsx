@@ -10,15 +10,18 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "react-query";
 import { queryKeys } from "./react-query/queryKeys";
 import { useSendEmail } from "./useEmailApi";
+import { useEffect } from "react";
 
 
 
 
-const useTeamManagement = (portal) => {
+const useTeamManagement = (portal, shouldFetchCurrentTeamMember = false) => {
     let portalId = portal?.id;
     const queryClient = useQueryClient();
 
     const [loading, setLoading] = useState(false);
+    const [loadingCurrentTeamMember, setLoadingCurrentTeamMember] = useState(false);
+    const [currentTeamMember, setCurrentTeamMember] = useState(null);
     const [error, setError] = useState(null);
     const { user } = useSelector(state => state.auth);
     const { sendEmail } = useSendEmail();
@@ -46,8 +49,11 @@ const useTeamManagement = (portal) => {
                 invitation_id: invitationId
             }, portal?.subscription_id);
             await queryClient.invalidateQueries(queryKeys.teamSeats(portalId));
-            await sendEmail(memberData.email, `Invitation to join team`, `You have been invited to join the team. Please use the following link: ${window.location.origin}/invitations/${invitationId}/accept/${tokenObject.invitation_token}`);
-            toast.success('Team member invited successfully');
+            await sendEmail(
+                memberData.email,
+                `Invitation to join team`,
+                `You have been invited to join the team. Please click <a href="${window.location.origin}/invitations/${invitationId}/accept/${tokenObject.invitation_token}">here</a> to accept the invitation.`
+              );            toast.success('Team member invited successfully');
         } catch (error) {
             console.log(`Error inviting team member: ${error.message}. Please try again`);
             setError(error);
@@ -82,14 +88,39 @@ const useTeamManagement = (portal) => {
         }
     }
 
+    const fetchCurrentTeamMember = async () => {
+        try {
+            setLoadingCurrentTeamMember(true);
+            setError(null);
+            const { data, error } = await supabase.from('team_members').select('*').eq('portal_id', portalId).eq('user_id', user.id);
+            if (error) {
+                throw new Error(error.message);
+            }
+            setCurrentTeamMember(data[0]);
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoadingCurrentTeamMember(false);
+        }
+    }
 
 
-    console.log({ error })
+    useEffect(() => {
+        if (shouldFetchCurrentTeamMember) {
+            fetchCurrentTeamMember();
+        }
+    }, [shouldFetchCurrentTeamMember]);
+
+
+
     return {
         loading,
+        loadingCurrentTeamMember,
         error,
         invite,
-        removeTeamMember
+        removeTeamMember,
+        fetchCurrentTeamMember,
+        currentTeamMember
     }
 
 

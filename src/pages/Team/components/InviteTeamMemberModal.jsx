@@ -1,22 +1,69 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from '@/components/ui/select';
 import { supabase } from '../../../lib/supabase';
-import { Loader, UserPlus, X } from 'lucide-react';
+import { Loader, UserPlus } from 'lucide-react';
 
-const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null, isLoading }) => {
+const InviteTeamMemberModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  selectedSeat = null,
+  isLoading,
+  currentTeamMember,
+  teamMembers = [],
+}) => {
+  // Only owners and admins may invite new members
+  const isAllowedToInvite = ['owner', 'admin'].includes(currentTeamMember?.role);
+
+  if (!isAllowedToInvite) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-md p-6 bg-white">
+          <DialogHeader>
+            <DialogTitle>Not Authorized</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm text-gray-700">
+            Only Owners or Admins may invite new team members.
+          </div>
+          <DialogFooter>
+            <Button onClick={onClose}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   const [formData, setFormData] = useState({ email: '', role: 'member', name: '' });
   const [error, setError] = useState('');
   const [emailState, setEmailState] = useState({
     isValid: false,
     isChecking: false,
     isExisting: false,
+    isTeamMember: false,
     checkComplete: false,
   });
   const timeoutRef = useRef(null);
 
   useEffect(() => {
     if (selectedSeat !== null) {
-      setFormData(prev => ({ ...prev, seat: selectedSeat }));
+      setFormData((prev) => ({ ...prev, seat: selectedSeat }));
     }
   }, [selectedSeat]);
 
@@ -25,75 +72,224 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
     return re.test(String(email).toLowerCase());
   };
 
-  const checkExistingUser = useCallback(async (email) => {
-    if (!email) return;
-    setEmailState(prev => ({ ...prev, isChecking: true, isExisting: false, checkComplete: false }));
-    setFormData(prev => ({ ...prev, name: '' }));
+  const checkExistingUser = useCallback(
+    async (email) => {
+      if (!email) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name')
-        .eq('email', email)
-        .single();
+      // Before checking Supabase, see if the email is already a team member
+      const normalized = email.trim().toLowerCase();
+      const alreadyOnTeam = teamMembers.some(
+        (member) => member.email.trim().toLowerCase() === normalized
+      );
 
-      if (error?.code === 'PGRST116') {
-        setEmailState(prev => ({ ...prev, isExisting: false, checkComplete: true }));
-      } else {
-        setEmailState(prev => ({ ...prev, isExisting: !!data, checkComplete: true }));
-        if (data?.name) {
-          setFormData(prev => ({ ...prev, name: data.name }));
-        }
+      if (alreadyOnTeam) {
+        setEmailState((prev) => ({
+          ...prev,
+          isChecking: false,
+          isExisting: false,
+          isTeamMember: true,
+          checkComplete: true,
+        }));
+        setError('This user is already a member of the team.');
+        setFormData((prev) => ({ ...prev, name: '' }));
+        return;
       }
-    } catch (error) {
-      console.error('Error checking user:', error);
-      setError('Error checking user. Please try again.');
-      setEmailState(prev => ({ ...prev, checkComplete: true }));
-    } finally {
-      setEmailState(prev => ({ ...prev, isChecking: false }));
+
+      setEmailState((prev) => ({
+        ...prev,
+        isChecking: true,
+        isExisting: false,
+        isTeamMember: false,
+        checkComplete: false,
+      }));
+      setFormData((prev) => ({ ...prev, name: '' }));
+      setError('');
+
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('users')
+          .select('id, name')
+          .eq('email', normalized)
+          .single();
+
+        if (fetchError?.code === 'PGRST116') {
+          // No matching user
+          setEmailState((prev) => ({
+            ...prev,
+            isExisting: false,
+            checkComplete: true,
+          }));
+        } else {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (data?.id === user?.id) {
+            setError('You cannot invite yourself.');
+            setEmailState((prev) => ({
+              ...prev,
+              isExisting: false,
+              checkComplete: true,
+            }));
+            return;
+          }
+
+          setEmailState((prev) => ({
+            ...prev,
+            isExisting: !!data,
+            checkComplete: true,
+          }));
+
+          if (data?.name) {
+            setFormData((prev) => ({ ...prev, name: data.name }));
+          }
+        }
+      } catch (err) {
+        console.error('Error checking user:', err);
+        setError('Error checking user. Please try again.');
+        setEmailState((prev) => ({
+          ...prev,
+          checkComplete: true,
+        }));
+      } finally {
+        setEmailState((prev) => ({
+          ...prev,
+          isChecking: false,
+        }));
+      }
+    },
+    [teamMembers]
+  );
+
+  const handleEmailChange = useCallback(
+    (e) => {
+      // Strip all whitespace characters from the input
+      const raw = e.target.value;
+      const value = raw.replace(/\s+/g, '');
+      setFormData((prev) => ({ ...prev, email: value }));
+      setError('');
+
+      if (!value) {
+        setError('Email cannot be blank.');
+        setEmailState({
+          isValid: false,
+          isChecking: false,
+          isExisting: false,
+          isTeamMember: false,
+          checkComplete: false,
+        });
+        return;
+      }
+
+      const isValid = validateEmail(value);
+      setEmailState((prev) => ({
+        ...prev,
+        isValid,
+        isTeamMember: false,
+        checkComplete: false,
+      }));
+
+      if (isValid) {
+        // Debounce existing checks
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => checkExistingUser(value), 300);
+      } else {
+        setError('Please enter a valid email.');
+        setEmailState({
+          isValid: false,
+          isChecking: false,
+          isExisting: false,
+          isTeamMember: false,
+          checkComplete: false,
+        });
+      }
+    },
+    [checkExistingUser]
+  );
+
+  const preventSpace = (e) => {
+    if (e.key === ' ') {
+      e.preventDefault();
     }
-  }, []);
+  };
 
-  const handleEmailChange = useCallback((e) => {
-    const { value } = e.target;
-    setFormData(prev => ({ ...prev, email: value }));
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+    const sanitized = pasteData.replace(/\s+/g, '');
+    setFormData((prev) => ({ ...prev, email: sanitized }));
+    setError('');
 
-    if (!value.trim()) {
+    if (!sanitized) {
       setError('Email cannot be blank.');
-      setEmailState({ isValid: false, isChecking: false, isExisting: false, checkComplete: false });
+      setEmailState({
+        isValid: false,
+        isChecking: false,
+        isExisting: false,
+        isTeamMember: false,
+        checkComplete: false,
+      });
       return;
     }
 
-    const isValid = validateEmail(value);
-
-    setEmailState(prev => ({ ...prev, isValid, checkComplete: false }));
+    const isValid = validateEmail(sanitized);
+    setEmailState((prev) => ({
+      ...prev,
+      isValid,
+      isTeamMember: false,
+      checkComplete: false,
+    }));
 
     if (isValid) {
-      setError('');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => checkExistingUser(value), 300);
+      timeoutRef.current = setTimeout(() => checkExistingUser(sanitized), 300);
     } else {
       setError('Please enter a valid email.');
-      setEmailState(prev => ({ ...prev, isChecking: false, isExisting: false, checkComplete: false }));
+      setEmailState({
+        isValid: false,
+        isChecking: false,
+        isExisting: false,
+        isTeamMember: false,
+        checkComplete: false,
+      });
     }
-  }, [checkExistingUser]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!formData.email.trim() || !emailState.isValid) {
+
+    if (!isAllowedToInvite) {
+      setError('You are not permitted to send invitations.');
+      return;
+    }
+
+    if (!formData.email || !emailState.isValid) {
       setError('Please enter a valid email.');
       return;
     }
+
+    // Final check: is the email already on the team?
+    const normalized = formData.email.trim().toLowerCase();
+    const alreadyOnTeam = teamMembers.some(
+      (member) => member.email.trim().toLowerCase() === normalized
+    );
+    if (alreadyOnTeam) {
+      setError('This user is already a member of the team.');
+      return;
+    }
+
     if (!emailState.isExisting && !formData.name.trim()) {
       setError('Please enter a name for the new user.');
       return;
     }
+
     await onSubmit(formData);
     onClose();
   };
@@ -101,107 +297,149 @@ const InviteTeamMemberModal = ({ isOpen, onClose, onSubmit, selectedSeat = null,
   const resetOnClose = () => {
     setFormData({ email: '', role: 'member', name: '' });
     setError('');
-    setEmailState({ isValid: false, isChecking: false, isExisting: false, checkComplete: false });
+    setEmailState({
+      isValid: false,
+      isChecking: false,
+      isExisting: false,
+      isTeamMember: false,
+      checkComplete: false,
+    });
     onClose();
   };
 
   const renderAdditionalFields = () => {
-    if (!emailState.isValid || emailState.isChecking || !emailState.checkComplete) return null;
+    if (
+      !emailState.isValid ||
+      emailState.isChecking ||
+      !emailState.checkComplete ||
+      emailState.isTeamMember
+    ) {
+      return null;
+    }
 
     return (
-      <>
+      <div className="space-y-4">
         {!emailState.isExisting && (
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
+            <Label className="mb-2" htmlFor="name">
+              Name
+            </Label>
+            <Input
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="
+                border border-black/30
+                focus:ring-0 focus:border-black focus:outline-none
+              "
               required
             />
           </div>
         )}
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">Access Level</label>
-          <select
-            id="role"
-            name="role"
+          <Label className="mb-2" htmlFor="role">
+            Access Level
+          </Label>
+          <Select
             value={formData.role}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            onValueChange={(val) => setFormData((prev) => ({ ...prev, role: val }))}
           >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
-          </select>
+            <SelectTrigger
+              id="role"
+              name="role"
+              className="
+                w-full border border-black/30
+                focus:ring-0 focus:border-black focus:outline-none
+              "
+            >
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
-      </>
+      </div>
     );
   };
 
   return (
-    <Transition show={isOpen} as={React.Fragment}>
-      <Dialog onClose={resetOnClose} className="relative z-50">
-        <TransitionChild as={React.Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        </TransitionChild>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <TransitionChild as={React.Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between">
-                  <span className="flex items-center">
-                    <UserPlus className="mr-2 h-5 w-5 text-indigo-600" />
-                    {selectedSeat ? `Assign Member to Seat ${selectedSeat.seatNumber}` : 'Invite Team Member'}
-                  </span>
-                  <button
-                    onClick={resetOnClose}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    aria-label="Close"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </DialogTitle>
-
-                <form onSubmit={handleSubmit} className="mt-4">
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleEmailChange}
-                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${emailState.isValid && emailState.checkComplete ? 'border-green-500' : error ? 'border-red-500' : ''
-                          }`}
-                        required
-                      />
-                      {emailState.isChecking && <p className="text-sm text-gray-500 mt-1">Checking user...</p>}
-                      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-                    </div>
-                    {renderAdditionalFields()}
-                  </div>
-                  <div className="mt-6 flex items-center justify-end">
-                    <button
-                      type="submit"
-                      className={`inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={!emailState.isValid || emailState.isChecking || !emailState.checkComplete || isLoading}
-                    >
-                      {selectedSeat ? 'Assign to Seat' : 'Send Invitation'}
-                      {isLoading && <Loader className="w-4 h-4 ml-2 animate-spin" />}
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
+    <Dialog open={isOpen} onOpenChange={resetOnClose}>
+      <DialogContent className="max-w-md p-6 bg-white">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center text-lg font-medium">
+              <UserPlus className="mr-2 h-5 w-5" />
+              {selectedSeat ? `Assign Member to Seat ${selectedSeat.seatNumber}` : 'Invite Team Member'}
+            </DialogTitle>
           </div>
-        </div>
-      </Dialog>
-    </Transition>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <div>
+            <Label className="mb-2" htmlFor="email">
+              Email
+            </Label>
+            <Input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleEmailChange}
+              onKeyDown={preventSpace}
+              onPaste={handlePaste}
+              className={`
+                border border-black/30
+                focus:ring-0 focus:border-black focus:outline-none
+                ${
+                  emailState.isValid && emailState.checkComplete && !emailState.isTeamMember
+                    ? 'border-green-500'
+                    : error
+                    ? 'border-red-500'
+                    : ''
+                }
+              `}
+              required
+            />
+            {emailState.isChecking && <p className="mt-1 text-sm text-gray-500">Checking user…</p>}
+            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          </div>
+
+          {renderAdditionalFields()}
+
+          <DialogFooter className="flex justify-end">
+            <Button
+              type="submit"
+              className={`
+                bg-black text-white hover:bg-gray-800
+                ${
+                  (!emailState.isValid ||
+                    emailState.isChecking ||
+                    !emailState.checkComplete ||
+                    emailState.isTeamMember ||
+                    isLoading) &&
+                  'opacity-50 cursor-not-allowed'
+                }
+              `}
+              disabled={
+                !emailState.isValid ||
+                emailState.isChecking ||
+                !emailState.checkComplete ||
+                emailState.isTeamMember ||
+                isLoading
+              }
+            >
+              {selectedSeat ? 'Assign to Seat' : 'Send Invitation'}
+              {isLoading && <Loader className="ml-2 h-4 w-4 animate-spin" />}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

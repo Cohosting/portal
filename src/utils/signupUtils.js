@@ -69,8 +69,19 @@ export const initializeOrganizationSetup = async (
         portal_url: personalInfoStep.portal_url,
         brand_settings: {
           brandName: personalInfoStep.company_name,
+          poweredByCopilot: false,
+          sidebarBgColor: '#1E293B',
+          sidebarTextColor: '#CBD5E1',
+          sidebarActiveTextColor: '#38BDF8',
+          accentColor: '#5b749a',
+          loginFormTextColor: '#eeeff1',
+          loginButtonColor: '#49628a',
+          loginButtonTextColor: '#fff5f5',
+          squareIcon: '',
+          fullLogo: '',
+          squareLoginImage: ''
         },
-        customer_id,
+        customer_id
       })
       .eq('id', portalData.id)
       .select('*');

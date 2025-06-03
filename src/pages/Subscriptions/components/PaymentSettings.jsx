@@ -55,6 +55,10 @@ const PaymentSettings = ({
             toast.error('Error retrying payment');
         }
     }
+    console.log({
+        subscription
+    })
+    const error = subscription.subscription_error;
 
     return (
         <>
@@ -71,21 +75,33 @@ const PaymentSettings = ({
                     )
                 }
 
-                {subscription.subscription_error && (
-                    <div className="rounded-md bg-red-50 p-4 my-2">
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
-                            </div>
-                            <div className="ml-3">
-                                <h3 className="text-sm font-medium text-red-800">Payment Failed</h3>
-                                <div className="mt-2 text-sm text-red-700">
-                                    <p>Your last payment attempt was unsuccessful. Please retry or select a different payment method.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
+{error && (
+  <div className="rounded-md bg-red-50 p-4 my-2">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+      </div>
+      <div className="ml-3">
+        <h3 className="text-sm font-medium text-red-800">
+          {error.type === "payment_failed" ? "Payment Failed" : "Subscription Paused"}
+        </h3>
+        <div className="mt-2 text-sm text-red-700">
+          <p>
+            {error.type === "payment_failed" ? "Your last payment attempt was unsuccessful. Please retry or select a different payment method." : "Your subscription is paused. Please resolve the issue to continue."}
+          </p>
+           <p>Attempt: {error.attempt_count}</p>
+          {error.next_payment_attempt && (
+            <p>
+              Next attempt:{" "}
+              {new Date(error.next_payment_attempt * 1000).toLocaleString()}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
                 <div className="space-y-4">
                     {paymentMethods?.map(method => (
                         <PaymentMethod
@@ -97,7 +113,7 @@ const PaymentSettings = ({
                             onDelete={deletePaymentMethod}
                             onRetry={retryPaymentMethod}
                             customerId={portal?.customer_id}
-                            showRetryOptions={subscription.subscription_error}
+                            showRetryOptions={error}
                         />
                     ))}
                 </div>

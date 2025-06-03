@@ -1,80 +1,103 @@
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader } from "lucide-react";
 
 const InvitationAuthForm = ({
-    invitationData,
-    isExistingUser,
-    email,
-    password,
-    onPasswordChange,
-    onSubmit,
-    onBack,
-    isProcessing,
-    children
+  invitationData,
+  isExistingUser,
+  email,
+  password,
+  onPasswordChange,
+  onSubmit,
+  onBack,
+  isProcessing,
+  children,
 }) => {
-    return (
-        <form onSubmit={onSubmit} className="space-y-6">
-            <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
-                </label>
-                <div className="mt-1">
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={email}
-                        disabled
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>
+  const [showPassword, setShowPassword] = useState(false);
 
-            <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Password
-                </label>
-                <div className="mt-1">
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={password}
-                        onChange={onPasswordChange}
-                        required
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>
+  return (
+    <form onSubmit={onSubmit} className="space-y-6">
+      {/* Email Field (disabled) */}
+      <div>
+        <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+          Email
+        </Label>
+        <div className="mt-1">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={email}
+            disabled
+            className="w-full"
+          />
+        </div>
+      </div>
 
-            <div>
-                <button
-                    type="submit"
-                    disabled={isProcessing}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    {isProcessing ? (
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    ) : null}
-                    {isProcessing ? 'Processing...' : (isExistingUser ? 'Log In' : 'Sign Up')}
-                </button>
-            </div>
-            {children}
+      {/* Password Field with Visibility Toggle */}
+      <div>
+        <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+          Password
+        </Label>
+        <div className="relative mt-1">
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={onPasswordChange}
+            required
+            className="w-full pr-10"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-0 h-8 w-8"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+          </Button>
+        </div>
+      </div>
 
-            <div>
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    <ArrowLeft className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                    Back
-                </button>
-            </div>
-        </form>
-    );
+      {/* Submit Button */}
+      <div>
+        <Button
+          type="submit"
+          disabled={isProcessing}
+          className="w-full bg-black text-white hover:bg-gray-800 focus:ring-2 focus:ring-offset-2 focus:ring-black"
+        >
+          {isProcessing ? (
+            <>
+                <Loader className="animate-spin" size={20} />
+              Processing...
+            </>
+          ) : (
+            isExistingUser ? "Log In" : "Sign Up"
+          )}
+        </Button>
+      </div>
+
+      {children}
+
+      {/* Back Button */}
+      <div>
+        <Button
+          type="button"
+          onClick={onBack}
+          variant="outline"
+          className="w-full flex items-center justify-center border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-black"
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" aria-hidden="true" />
+          Back
+        </Button>
+      </div>
+    </form>
+  );
 };
 
 export default InvitationAuthForm;

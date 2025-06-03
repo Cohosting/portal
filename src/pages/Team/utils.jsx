@@ -1,4 +1,4 @@
-import { Flex, useMediaQuery } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 export const boxStyle = {
   flexDirection: 'column',
   boxShadow: '0px 0px 24px rgba(0, 0, 0, 0.07)',

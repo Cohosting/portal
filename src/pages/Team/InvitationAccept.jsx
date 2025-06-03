@@ -5,6 +5,9 @@ import InvitationHeader from './components/InvitationHeader';
 import InvitationAuthForm from './components/InvitationAuthForm';
 import { useInvitationAcceptance } from '../../hooks/useInvitationAcceptance';
 import { LogOut, XCircle, CheckCircle } from 'lucide-react';
+import { Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 
 
 
@@ -12,13 +15,13 @@ import { LogOut, XCircle, CheckCircle } from 'lucide-react';
 
 const AuthToggleButton = ({ isLogin, onToggle }) => {
     return (
-        <button
+        <Button
             type="button"
             onClick={onToggle}
-            className="mt-2 w-full text-sm text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150"
+            className="mt-2 w-full text-sm"
         >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
-        </button>
+        </Button>
     );
 };
 
@@ -47,11 +50,17 @@ const InvitationAccept = () => {
 
     if (isValidatingToken || isCheckingUserExistence) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+               <Loader className="animate-spin" size={46} />
+               <p className="text-center text-gray-600 mt-2">Loading...</p>
             </div>
         );
     }
+    const signOut = async () => {
+        await supabase.auth.signOut();
+ 
+    }
+
 
     if (session && session.user.email !== invitationData?.email) {
         return (
@@ -64,7 +73,7 @@ const InvitationAccept = () => {
                             </h2>
                             <p className="mt-2 text-center text-sm text-gray-600">
                                 You are logged in as{' '}
-                                <span className="font-medium text-indigo-600 hover:text-indigo-500">
+                                <span className="font-medium text-black hover:text-gray-500">
                                     {session?.user?.email}
                                 </span>
                             </p>
@@ -73,13 +82,13 @@ const InvitationAccept = () => {
                             </p>
                         </div>
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 sm:px-10">
-                            <button
-                                onClick={() => navigate('/logout')}
-                                className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
+                            <Button
+                                onClick={signOut}
+                                className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:ring-2 focus:ring-offset-2 focus:ring-black"
                             >
                                 <LogOut className="w-5 h-5 mr-2" />
                                 Logout
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -110,14 +119,14 @@ const InvitationAccept = () => {
                             </div>
                             <div className="ml-auto pl-3">
                                 <div className="-mx-1.5 -my-1.5">
-                                    <button
+                                    <Button
                                         type="button"
                                         onClick={clearError}
                                         className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
                                     >
                                         <span className="sr-only">Dismiss</span>
-                                        <XCircleIcon className="h-5 w-5" aria-hidden="true" />
-                                    </button>
+                                        <XCircle className="h-5 w-5" aria-hidden="true" />
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -146,12 +155,12 @@ const InvitationAccept = () => {
                                 </div>
                             </div>
                             <div className="mt-6">
-                                <button
+                                <Button
                                     onClick={() => navigate('/')}
-                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    className="bg-black text-white hover:bg-gray-800 w-full"
                                 >
                                     Go to Dashboard
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : !invitationData ? (
@@ -163,8 +172,8 @@ const InvitationAccept = () => {
                             This invite has expired or been accepted. Please contact the sender for a new invitation.
                         </p>
                     ) : session ? (
-                        <button
-                            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        <Button
+                        className='bg-black text-white hover:bg-gray-800 w-full'
                             onClick={initiateInvitationAcceptance}
                             disabled={isProcessing}
                         >
@@ -175,10 +184,10 @@ const InvitationAccept = () => {
                                 </svg>
                             ) : null}
                             {isProcessing ? 'Processing...' : `Continue as ${session.user.name || session.user.email}`}
-                        </button>
+                        </Button>
                     ) : !showAuthForm ? (
-                        <button
-                            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        <Button
+                        className='bg-black text-white hover:bg-gray-800 w-full'
                             onClick={initiateInvitationAcceptance}
                             disabled={isProcessing}
                         >
@@ -189,7 +198,7 @@ const InvitationAccept = () => {
                                 </svg>
                             ) : null}
                             {isProcessing ? 'Processing...' : 'Accept Invitation'}
-                        </button>
+                        </Button>
                     ) : (
                         <>
                             <InvitationAuthForm

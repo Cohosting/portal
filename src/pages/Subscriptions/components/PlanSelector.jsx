@@ -59,7 +59,7 @@ const PlanSelector = ({ subscription }) => {
                 )
             }
 
-            <PlanSelectionModal currentPlan={getCurrentPlan(subscription.price_id)} subscription={subscription} />
+            <PlanSelectionModal cancelSubscriptionDowngrade={cancelSubscriptionDowngrade} currentPlan={getCurrentPlan(subscription.price_id)} subscription={subscription} />
 
         </div>
     );

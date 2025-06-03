@@ -1,69 +1,75 @@
 import React from 'react';
 import { Users, BarChart2 } from 'lucide-react';
 
-const TeamOverview = ({ companyName, teamMembers, totalSeats, filledSeats, freeSeatsLimit, additionalSeatCost }) => {
-    const freeMembersLimit = 5;
-    const memberCount = teamMembers.length;
-    const paidMembersCount = Math.max(0, memberCount - freeMembersLimit);
-    const freeSlots = Math.max(0, freeMembersLimit - memberCount);
+const TeamOverview = ({
+  companyName,
+  teamMembers,
+  totalSeats,
+  filledSeats,
+  freeSeatsLimit,
+  additionalSeatCost,
+}) => {
+  const FREE_MEMBERS_LIMIT = 5;
+  const memberCount = teamMembers.length;
+  const paidMembersCount = Math.max(0, memberCount - FREE_MEMBERS_LIMIT);
+  const freeSlots = Math.max(0, FREE_MEMBERS_LIMIT - memberCount);
+  const usagePercentage = Math.min((memberCount / FREE_MEMBERS_LIMIT) * 100, 100);
 
-    const usagePercentage = Math.min((memberCount / freeMembersLimit) * 100, 100);
-
-    return (
-        <div className="px-2 py-4 sm:px-4 sm:py-6">
-            <div className="grid gap-4 mb-6 sm:gap-6 sm:mb-8 md:grid-cols-2 xl:grid-cols-4">
-                <div className="flex items-center p-3 bg-white rounded-lg shadow-xs sm:p-4">
-                    <div className="p-2 mr-3 text-blue-500 bg-blue-100 rounded-full sm:p-3 sm:mr-4">
-                      <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div>
-                      <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Total Members</p>
-                      <p className="text-base font-semibold text-gray-700 sm:text-lg">{memberCount}</p>
-                      <p className="text-xs text-gray-500 sm:text-sm">
-                          {freeSlots > 0
-                              ? `${freeSlots} free slot${freeSlots > 1 ? 's' : ''} remaining`
-                              : `${paidMembersCount} paid member${paidMembersCount > 1 ? 's' : ''}`}
-                      </p>
-                  </div>
-              </div>
-
-              <div className="flex items-center p-3 bg-white rounded-lg shadow-xs sm:p-4">
-                  <div className="p-2 mr-3 text-green-500 bg-green-100 rounded-full sm:p-3 sm:mr-4">
-                      <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div>
-                      <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Admins</p>
-                      <p className="text-base font-semibold text-gray-700 sm:text-lg">
-                          {teamMembers.filter(member => member.role === "admin").length}
-                      </p>
-                  </div>
-              </div>
-
-              <div className="flex items-center p-3 bg-white rounded-lg shadow-xs col-span-2 sm:p-4">
-                  <div className="p-2 mr-3 text-purple-500 bg-purple-100 rounded-full sm:p-3 sm:mr-4">
-                      <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="w-full">
-                      <p className="mb-1 text-xs font-medium text-gray-600 sm:mb-2 sm:text-sm">Team Member Usage</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                              className="bg-purple-600 h-2 rounded-full transition-all duration-500 ease-in-out"
-                              style={{ width: `${usagePercentage}%` }}
-                          />
-                      </div>
-                      <div className="flex justify-between mt-1 text-xs text-gray-500 sm:mt-2">
-                          <span>0</span>
-                          <span>{freeMembersLimit} (Free Limit)</span>
-                      </div>
-                      <p className="mt-1 text-xs text-gray-600 sm:mt-2 sm:text-sm">
-                          {paidMembersCount > 0
-                              ? `Current additional cost: $${paidMembersCount * 20} /month`
-                              : "You're within the free member limit"}
-                      </p>
-                  </div>
-              </div>
+  return (
+    <div className=" px-6 ">
+      <div className="grid gap-6 mb-8 md:grid-cols-4">
+        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="p-2 bg-blue-100 rounded-full flex-shrink-0">
+            <Users className="w-6 h-6 text-blue-600" />
           </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Total Members</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900">{memberCount}</p>
+            <p className="mt-1 text-sm text-gray-500">
+              {freeSlots > 0
+                ? `${freeSlots} free slot${freeSlots > 1 ? 's' : ''} remaining`
+                : `${paidMembersCount} paid member${paidMembersCount > 1 ? 's' : ''}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="p-2 bg-green-100 rounded-full flex-shrink-0">
+            <Users className="w-6 h-6 text-green-600" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Admins</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900">
+              {teamMembers.filter((m) => m.role === 'admin').length}
+            </p>
+          </div>
+        </div>
+
+        <div className="col-span-1 md:col-span-2 flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="p-2 bg-purple-100 rounded-full flex-shrink-0">
+            <BarChart2 className="w-6 h-6 text-purple-600" />
+          </div>
+          <div className="ml-4 w-full">
+            <p className="text-sm font-medium text-gray-600">Team Member Usage</p>
+            <div className="mt-2 w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-purple-600 rounded-full transition-all duration-500 ease-in-out"
+                style={{ width: `${usagePercentage}%` }}
+              />
+            </div>
+            <div className="mt-1 flex justify-between text-xs text-gray-500">
+              <span>0</span>
+              <span>{FREE_MEMBERS_LIMIT} (Free Limit)</span>
+            </div>
+            <p className="mt-2 text-sm text-gray-600">
+              {paidMembersCount > 0
+                ? `Current additional cost: $${paidMembersCount * 20} /month`
+                : "You're within the free member limit"}
+            </p>
+          </div>
+        </div>
       </div>
+    </div>
   );
 };
 

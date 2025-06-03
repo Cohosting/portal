@@ -5,8 +5,8 @@ const RestrictedAccess = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-slate-100 to-slate-200 p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center  p-4">
+            <div className="max-w-md w-full bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white">
                   <ShieldAlert className="h-12 w-12 mb-4 animate-pulse" />
                   <h1 className="text-3xl font-bold mb-2">Access Restricted</h1>

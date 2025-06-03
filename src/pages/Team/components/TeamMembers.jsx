@@ -1,169 +1,208 @@
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
-import React, { Fragment, useState } from 'react'
-import Button from '../../../components/internal/Button'
+import React, { useState } from 'react'
+import { useQueryClient } from 'react-query'
+import { ChevronDown, Trash2 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import AlertDialog from '@/components/Modal/AlertDialog'
 import InviteTeamMemberModal from './InviteTeamMemberModal'
-import AlertDialog from '../../../components/Modal/AlertDialog'
 import useTeamManagement from '../../../hooks/useTeamManagement'
 import useRealtimeSeats from '../../../hooks/react-query/useRealtimeSeats'
-import { useQueryClient } from 'react-query'
 import { queryKeys } from '../../../hooks/react-query/queryKeys'
-import { ChevronDown } from 'lucide-react'
+import { Loader } from 'lucide-react'
 
-const TeamMembers = ({ teamMembers, portal }) => {
-    const queryClient = useQueryClient();
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedMember, setSelectedMember] = useState(null);
-    const [isAlertOpen, setIsAlertOpen] = useState(false);
-    const { invite, removeTeamMember, loading, } = useTeamManagement(portal);
-    const { seats, isSeatLoading } = useRealtimeSeats(portal?.id);
-    const [isOpen, setIsOpen] = useState(false);
+const TeamMembersTable = ({ teamMembers = [], portal }) => {
+  const queryClient = useQueryClient()
+  const { invite, removeTeamMember, loading: removeLoading, loadingCurrentTeamMember, currentTeamMember } = useTeamManagement(portal, true)
+  const { seats } = useRealtimeSeats(portal?.id)
 
+  const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-    const onSubmit = async (data) => {
-        if (isLoading) return;
-        setIsLoading(true);
-        let { seat, ...restData } = data
+  const handleInvite = async (data) => {
+    if (isLoading) return
+    setIsLoading(true)
 
-        const teamMemberData = {
-            portal_id: portal?.id,
-            status: 'invited',
-            ...restData
-        }
+    let { seat, ...restData } = data
+    const teamMemberData = {
+      portal_id: portal?.id,
+      status: 'invited',
+      ...restData,
+    }
 
-        try {
-            let availableSeat = seats.find(seat => seat.status === 'available');
-            if (availableSeat) {
-                await invite(availableSeat.id, teamMemberData);
-                await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id));
-            } else {
-                console.log('No available seat. Seat is creating and inviting member....');
+    try {
+      const availableSeat = seats.find((s) => s.status === 'available')
+      if (availableSeat) {
+        await invite(availableSeat.id, teamMemberData)
+      } else {
+        await invite(null, teamMemberData)
+      }
+      await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id))
+    } catch (error) {
+      console.error('Error inviting team member:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-                const response = await invite(null, teamMemberData);
-                console.log(response)
-            }
+  const openRemoveDialog = (member) => {
+    setSelectedMember(member)
+    setIsAlertOpen(true)
+  }
 
-        } catch (error) {
-            console.log(`Error inviting team member: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
+  const onRemoveConfirm = async () => {
+    if (!selectedMember) return
+    try {
+      await removeTeamMember(selectedMember.id)
+      await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id))
+    } catch (error) {
+      console.error('Error removing team member:', error)
+    } finally {
+      setIsAlertOpen(false)
+      setSelectedMember(null)
+    }
+  }
 
-
-    };
-
-
-
-    console.log({
-        seats
-    })
+  if (loadingCurrentTeamMember) {
     return (
-        <div className="px-2 py-4 sm:px-4 sm:py-6">
-            <div className='flex items-center justify-between mb-4 sm:mb-6'>
-                <p className='text-lg font-semibold sm:text-2xl'>Team members</p>
-                <Button onClick={() => setIsOpen(true)} >
-                    Add member
-                </Button>
-            </div>
-            <ul className="divide-y divide-gray-200">
-                {teamMembers.map((member) => {
-                    let userDetails = {
-                        name: member?.user?.name || member?.name || 'Unknown',
-                        email: member?.user?.email || member?.email || 'Unknown',
-                        avatar_url: member?.user?.avatar_url || 'https://ui-avatars.com/api/?name=' + member?.user?.name
-                    }
-                    return (
-                        <li key={member.id}>
-                            <div className="py-3 sm:py-4 flex items-center">
-                                <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                                    <div className="flex items-center">
-                                        <img className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" src={userDetails.avatar_url} alt="" />
-                                        <div className="ml-3 sm:ml-4">
-                                            <p className="text-sm font-medium text-gray-900 sm:text-base">{userDetails.name}</p>
-                                            <p className="text-xs text-gray-500 sm:text-sm">{userDetails.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 flex-shrink-0 sm:mt-0 sm:ml-5">
-                                        <p className="px-2 py-1 inline-flex text-xs leading-4 font-medium rounded-full bg-green-100 text-green-800   sm:leading-5">
-                                            {member.role}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="ml-2 sm:ml-5 flex-shrink-0">
-
-                                    {
-                                        member?.role !== 'owner' && (
-                                            <Menu as="div" className="relative inline-block text-left">
-
-                                                <div>
-                                                    <MenuButton className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500">
-                                                        <span className="sr-only">Open options</span>
-                                                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                                                    </MenuButton>
-                                                </div>
-                                                <Transition
-                                                    as={Fragment}
-                                                    enter="transition ease-out duration-100"
-                                                    enterFrom="transform opacity-0 scale-95"
-                                                    enterTo="transform opacity-100 scale-100"
-                                                    leave="transition ease-in duration-75"
-                                                    leaveFrom="transform opacity-100 scale-100"
-                                                    leaveTo="transform opacity-0 scale-95"
-                                                >
-                                                    <MenuItems className="origin-top-right absolute right-0 mt-2 w-48 sm:w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                        <div className="py-1">
-                                                            <MenuItem>
-                                                                {({ active }) => (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSelectedMember(member);
-                                                                            setIsAlertOpen(true);
-                                                                        }}
-                                                                        className={`${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                                                            } w-full text-left block px-4 py-2 text-xs sm:text-sm`}
-                                                                    >
-                                                                        Remove
-                                                                    </button>
-                                                                )}
-                                                            </MenuItem>
-                                                        </div>
-
-                                                    </MenuItems>
-                                                </Transition>
-                                            </Menu>
-                                        )
-                                    }
-
-                                </div>
-                            </div>
-                        </li>
-                    )
-                })}
-            </ul>
-
-            <InviteTeamMemberModal
-                isLoading={isLoading}
-                portalId={portal?.id}
-                onSubmit={onSubmit}
-                isOpen={isOpen}
-                onClose={() => {
-                    setIsOpen(false);
-                }}
-            />
-            <AlertDialog
-                isOpen={isAlertOpen}
-                onClose={() => setIsAlertOpen(false)}
-                title="Remove Member"
-                message="Are you sure you want to remove this member?"
-                confirmButtonText={loading ? 'Removing...' : 'Remove'}
-                cancelButtonText="Cancel"
-                onConfirm={async () => {
-                    await removeTeamMember(selectedMember.id)
-                    await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id));
-                    setIsAlertOpen(false);
-                }}
-            />
-        </div>
+      <div className="flex items-center  justify-center">
+        <Loader className="animate-spin" size={46} />
+      </div>
     )
+  }
+
+ 
+  return (
+    <>
+      <div className="flex items-center justify-between mb-4 px-6 sm:mb-6">
+        <p className="text-lg font-semibold sm:text-2xl">Team Members</p>
+        {
+          (currentTeamMember?.role === 'owner' || currentTeamMember?.role === 'admin') && (
+            <Button
+              className="bg-black text-white hover:bg-gray-800"
+              onClick={() => setIsInviteOpen(true)}
+            >
+              Add Member
+            </Button>
+          ) 
+        }
+      </div>
+
+      <div className="sm:-mx-0">
+        <table className="  divide-y divide-gray-300 bg-white" style={{ width: 'calc(100% - 10px)' }}>
+          <thead className="border-b border-gray-200">
+            <tr>
+              <th
+                scope="col"
+                className="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900"
+              >
+                Name
+              </th>
+              <th
+                scope="col"
+                className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+              >
+                Email
+              </th>
+              <th
+                scope="col"
+                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              >
+                Role
+              </th>
+              <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                <span className="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-200">
+            {teamMembers.map((member) => {
+              const user = member.user || {}
+              const displayName = user.name || member.name || 'Unknown'
+              const displayEmail = user.email || member.email || 'Unknown'
+              const avatarUrl =
+                user.avatar_url ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}`
+
+              return (
+                <tr key={member.id} className="hover:bg-gray-50">
+                  <td className="py-4 pl-6 pr-3 text-sm font-medium text-gray-900 sm:w-auto sm:max-w-none">
+                    <div className="flex items-center">
+                      <img
+                        className="h-8 w-8 rounded-full mr-3"
+                        src={avatarUrl}
+                        alt={displayName}
+                      />
+                      <span>{displayName}</span>
+                    </div>
+                    <div className=" ml-11 sm:hidden">
+                      <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
+                    </div>
+                  </td>
+                  <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                    {displayEmail}
+                  </td>
+                  <td className="px-3 py-4 text-sm text-gray-500">
+                    <span className="px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-green-100 text-green-800">
+                      {member.role}
+                    </span>
+                  </td>
+                  <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                    {member.role !== 'owner' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="-m-2.5 inline-flex p-2.5 text-gray-500 hover:text-gray-900">
+                          <span className="sr-only">Open options</span>
+                          <ChevronDown className="h-5 w-5" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32 bg-white p-0">
+                          <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
+                            <button
+                              onClick={() => openRemoveDialog(member)}
+                              className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                            >
+                              <Trash2 className="h-5 w-5 text-red-500 mr-2" />
+                              Remove
+                            </button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <InviteTeamMemberModal
+        isLoading={isLoading}
+        portalId={portal?.id}
+        onSubmit={handleInvite}
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        currentTeamMember={currentTeamMember}
+        teamMembers={teamMembers}
+       />
+
+      <AlertDialog
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        title="Remove Member"
+        message="Are you sure you want to remove this member?"
+        confirmButtonText={removeLoading ? 'Removing...' : 'Remove'}
+        cancelButtonText="Cancel"
+        onConfirm={onRemoveConfirm}
+      />
+    </>
+  )
 }
 
-export default TeamMembers
+export default TeamMembersTable
