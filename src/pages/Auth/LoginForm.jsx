@@ -99,12 +99,12 @@ export function LoginForm({ className, ...props }) {
                   <div className="grid gap-2">
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
-                      <a
-                        href="#"
+                      <Button
+                        onClick={() => navigate("/forgot-password")}
                         className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
                       >
                         Forgot your password?
-                      </a>
+                      </Button>
                     </div>
                     <div className="relative">
                       <Input

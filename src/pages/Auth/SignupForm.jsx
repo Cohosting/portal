@@ -57,12 +57,7 @@ function SignupForm({ className, ...props }) {
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
+ 
                   </div>
                   <div className="relative">
                     <Input
@@ -107,8 +102,7 @@ function SignupForm({ className, ...props }) {
               <div className="text-center text-sm">
                 Already have an account?{" "}
                 <a
-                  href="#"
-                  className="text-primary underline underline-offset-4 hover:text-gray-800"
+                   className="text-primary cursor-pointer underline underline-offset-4 hover:text-gray-800"
                   onClick={(e) => {
                     e.preventDefault();
                     navigate("/login");
