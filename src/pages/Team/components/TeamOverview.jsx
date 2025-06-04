@@ -1,14 +1,7 @@
 import React from 'react';
 import { Users, BarChart2 } from 'lucide-react';
 
-const TeamOverview = ({
-  companyName,
-  teamMembers,
-  totalSeats,
-  filledSeats,
-  freeSeatsLimit,
-  additionalSeatCost,
-}) => {
+const TeamOverview = ({ teamMembers }) => {
   const FREE_MEMBERS_LIMIT = 5;
   const memberCount = teamMembers.length;
   const paidMembersCount = Math.max(0, memberCount - FREE_MEMBERS_LIMIT);
@@ -16,8 +9,8 @@ const TeamOverview = ({
   const usagePercentage = Math.min((memberCount / FREE_MEMBERS_LIMIT) * 100, 100);
 
   return (
-    <div className=" px-6 ">
-      <div className="grid gap-6 mb-8 md:grid-cols-4">
+    <div className="px-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="p-2 bg-blue-100 rounded-full flex-shrink-0">
             <Users className="w-6 h-6 text-blue-600" />
@@ -32,7 +25,6 @@ const TeamOverview = ({
             </p>
           </div>
         </div>
-
         <div className="flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="p-2 bg-green-100 rounded-full flex-shrink-0">
             <Users className="w-6 h-6 text-green-600" />
@@ -44,8 +36,7 @@ const TeamOverview = ({
             </p>
           </div>
         </div>
-
-        <div className="col-span-1 md:col-span-2 flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="p-2 bg-purple-100 rounded-full flex-shrink-0">
             <BarChart2 className="w-6 h-6 text-purple-600" />
           </div>

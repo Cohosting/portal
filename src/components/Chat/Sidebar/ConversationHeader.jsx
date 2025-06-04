@@ -59,19 +59,7 @@ const ConversionHeader = ({ handleNewConversation, handleMassConversation }) => 
                       { name: "Mass Message", onClick: handleMassConversation },
                   ]}
               />
-              <IconButton
-                  size="small"
-                  variant="neutral"
-                  icon={
-              <Search
-                  size={14}
-                  color="#525866"
-                  strokeWidth={2.5}
-                          aria-hidden="true"
-                      />
-                  }
-                  tooltip="Settings"
-              />
+ 
           </div>
       </div>
   );

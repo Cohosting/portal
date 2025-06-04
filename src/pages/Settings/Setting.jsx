@@ -17,7 +17,11 @@ import { CustomDomainForm } from './CustomDomainForm';
 import { DomainConfiguration } from './CheckDomainConfig';
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
-import { CustomSkeleton } from '@/components/SkeletonLoading';
+import DashboardSkeleton, { CustomSkeleton } from '@/components/SkeletonLoading';
+import { Layout } from '../Dashboard/Layout';
+import useCurrentTeamMember from '@/hooks/react-query/useCurrentTeamMember';
+import EmptyStateFeedback from '@/components/EmptyStateFeedback';
+import { AlertCircle } from 'lucide-react';
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
   if (portal && !portal.stripe_connect_account_id) {
@@ -79,6 +83,8 @@ export const Settings = () => {
   const { user, currentSelectedPortal } = useSelector((state) => state.auth);
   const { data: portal } = usePortalData(currentSelectedPortal);
   const [open, setOpen] = useState(false);
+      const { data: teamMember, isLoading: teamMemberLoading  } = useCurrentTeamMember(user?.id);
+  
 
   const [isLoading, setIsLoading] = useState(false);
   const { stripeUser, isLoading: stripeUserLoading } = useStripeUser(
@@ -129,19 +135,26 @@ export const Settings = () => {
     }
   }, [portal]);
 
-  if (!portal || stripeUserLoading) {
-    return (
-      <header className="bg-white border-b border-gray-200 p-6">
-        <div className="flex flex-col">
-          <CustomSkeleton className="h-6 w-32 mb-2" />
-          <CustomSkeleton className="h-4 w-80" />
-        </div>
-      </header>
-    );
-  }
-  console.log('settings', settings);
+  if (!portal || stripeUserLoading ) return <DashboardSkeleton />
 
+  if (teamMember?.role !== 'owner') {
+    return (
+      <Layout hideMobileNav headerName="Settings">
+        <PageHeader
+          title="Page Not Found"
+          description="The page you are looking for does not exist or has been moved."
+        />
+<div className="flex flex-col items-center justify-center py-20">
+  <AlertCircle size={56} className="text-gray-400 mb-4" />
+  <h2 className="text-3xl font-semibold text-gray-800">Oops! 404</h2>
+  </div>
+        
+      </Layout>
+    )
+  }
+ 
   return (
+    <Layout hideMobileNav headerName="Settings">
     <div className=' pb-14'>
       <PageHeader
         title="Portal Settings"
@@ -193,5 +206,6 @@ export const Settings = () => {
         />
       </div>
     </div>
+    </Layout>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQueryClient } from 'react-query'
-import { ChevronDown, Trash2 } from 'lucide-react'
+import { ChevronDown, Trash2, Loader } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,16 @@ import InviteTeamMemberModal from './InviteTeamMemberModal'
 import useTeamManagement from '../../../hooks/useTeamManagement'
 import useRealtimeSeats from '../../../hooks/react-query/useRealtimeSeats'
 import { queryKeys } from '../../../hooks/react-query/queryKeys'
-import { Loader } from 'lucide-react'
 
 const TeamMembersTable = ({ teamMembers = [], portal }) => {
   const queryClient = useQueryClient()
-  const { invite, removeTeamMember, loading: removeLoading, loadingCurrentTeamMember, currentTeamMember } = useTeamManagement(portal, true)
+  const {
+    invite,
+    removeTeamMember,
+    loading: removeLoading,
+    loadingCurrentTeamMember,
+    currentTeamMember,
+  } = useTeamManagement(portal, true)
   const { seats } = useRealtimeSeats(portal?.id)
 
   const [isInviteOpen, setIsInviteOpen] = useState(false)
@@ -71,31 +76,47 @@ const TeamMembersTable = ({ teamMembers = [], portal }) => {
 
   if (loadingCurrentTeamMember) {
     return (
-      <div className="flex items-center  justify-center">
+      <div className="flex items-center justify-center">
         <Loader className="animate-spin" size={46} />
       </div>
     )
   }
+  const canRemove = (memberRole) => {
+    const myRole = currentTeamMember?.role
+  
+    if (myRole === 'owner') {
+      // Owner can remove anyone except other owners
+      return memberRole !== 'owner'
+    }
+  
+    if (myRole === 'admin') {
+      // Admin can remove only non-admin/non-owner (i.e. “member” role)
+      return memberRole !== 'owner' && memberRole !== 'admin'
+    }
+  
+    return false
+  }
+  
 
- 
   return (
     <>
       <div className="flex items-center justify-between mb-4 px-6 sm:mb-6">
         <p className="text-lg font-semibold sm:text-2xl">Team Members</p>
-        {
-          (currentTeamMember?.role === 'owner' || currentTeamMember?.role === 'admin') && (
-            <Button
-              className="bg-black text-white hover:bg-gray-800"
-              onClick={() => setIsInviteOpen(true)}
-            >
-              Add Member
-            </Button>
-          ) 
-        }
+        {(currentTeamMember?.role === 'owner' || currentTeamMember?.role === 'admin') && (
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => setIsInviteOpen(true)}
+          >
+            Add Member
+          </Button>
+        )}
       </div>
 
       <div className="sm:-mx-0">
-        <table className="  divide-y divide-gray-300 bg-white" style={{ width: 'calc(100% - 10px)' }}>
+        <table
+          className="divide-y divide-gray-300 bg-white"
+          style={{ width: 'calc(100% - 10px)' }}
+        >
           <thead className="border-b border-gray-200">
             <tr>
               <th
@@ -142,7 +163,7 @@ const TeamMembersTable = ({ teamMembers = [], portal }) => {
                       />
                       <span>{displayName}</span>
                     </div>
-                    <div className=" ml-11 sm:hidden">
+                    <div className="ml-11 sm:hidden">
                       <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
                     </div>
                   </td>
@@ -155,7 +176,7 @@ const TeamMembersTable = ({ teamMembers = [], portal }) => {
                     </span>
                   </td>
                   <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                    {member.role !== 'owner' && (
+                    {canRemove(member.role) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger className="-m-2.5 inline-flex p-2.5 text-gray-500 hover:text-gray-900">
                           <span className="sr-only">Open options</span>
@@ -190,7 +211,7 @@ const TeamMembersTable = ({ teamMembers = [], portal }) => {
         onClose={() => setIsInviteOpen(false)}
         currentTeamMember={currentTeamMember}
         teamMembers={teamMembers}
-       />
+      />
 
       <AlertDialog
         isOpen={isAlertOpen}

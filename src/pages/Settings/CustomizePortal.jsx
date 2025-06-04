@@ -15,6 +15,8 @@ import PageHeader from '@/components/internal/PageHeader';
 import { MessageSquare, FileText, Settings, Eye, EyeOff, Monitor } from 'lucide-react';
 import BottomActionBar from '@/components/ui/BottomActionBar';
 import LoginPreview from './LoginPreview';
+import DashboardSkeleton, { CustomSkeleton } from '@/components/SkeletonLoading';
+import { Loader } from 'lucide-react';
 
 const Heading = ({ text, subText }) => (
   <div className="pb-4">
@@ -303,7 +305,7 @@ export const CustomizePortal = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [hasChanges]);
 
-  if (!portal) return <Layout>Loading...</Layout>;
+  if (!portal)  return <DashboardSkeleton />
 
   // Determine if we should show preview inline or use modal
   const showInlinePreview = windowWidth >= 1280;

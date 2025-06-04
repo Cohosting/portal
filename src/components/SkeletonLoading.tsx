@@ -1,19 +1,18 @@
-import React from "react";
-
+import { Loader } from "lucide-react";
+ 
 export const CustomSkeleton = (props) => (
   <div
     className={`bg-gray-200 rounded ${props.className}`}
     style={{ opacity: 0.7 }}
   />
 );
-const DashboardSkeleton = () => {
-  // Custom skeleton that doesn't have the visible pulse animation
 
+const DashboardSkeleton = () => {
   return (
     <div className="flex h-screen bg-white">
-      {/* Sidebar - exact match at 220px width with #f9fafb bg */}
-      <div className="w-[220px] bg-[#f9fafb] border-r border-gray-200 flex flex-col h-full">
-        {/* Organization switcher - without bottom border, without right pulse */}
+      {/* Sidebar: hidden below 1024px (lg), flex @ lg+ */}
+      <div className="hidden lg:flex w-[215px] bg-[#f9fafb] border-r border-gray-200 flex-col h-full">
+        {/* Organization switcher */}
         <div className="p-4 flex items-center">
           <div className="flex items-center gap-3">
             <CustomSkeleton className="h-8 w-8 rounded-md" />
@@ -24,7 +23,7 @@ const DashboardSkeleton = () => {
           </div>
         </div>
 
-        {/* Main navigation - with increased spacing between items */}
+        {/* Main navigation */}
         <div className="flex-1 py-2">
           {/* Dashboard */}
           <div className="flex items-center gap-3 py-3 px-6">
@@ -62,7 +61,7 @@ const DashboardSkeleton = () => {
             <CustomSkeleton className="h-4 w-36" />
           </div>
 
-          {/* Ticket support - indented */}
+          {/* Ticket support (indented) */}
           <div className="flex items-center gap-3 py-3 pl-12 pr-6">
             <CustomSkeleton className="h-4 w-24" />
           </div>
@@ -90,25 +89,25 @@ const DashboardSkeleton = () => {
             <CustomSkeleton className="h-4 w-28" />
           </div>
 
-          {/* Settings - indented */}
+          {/* Settings (indented) */}
           <div className="flex items-center gap-3 py-3 pl-12 pr-6">
             <CustomSkeleton className="h-4 w-4" />
             <CustomSkeleton className="h-4 w-16" />
           </div>
 
-          {/* Account - indented */}
+          {/* Account (indented) */}
           <div className="flex items-center gap-3 py-3 pl-12 pr-6">
             <CustomSkeleton className="h-4 w-4" />
             <CustomSkeleton className="h-4 w-16" />
           </div>
 
-          {/* Subscriptions - indented */}
+          {/* Subscriptions (indented) */}
           <div className="flex items-center gap-3 py-3 pl-12 pr-6">
             <CustomSkeleton className="h-4 w-4" />
             <CustomSkeleton className="h-4 w-24" />
           </div>
 
-          {/* Teams - indented */}
+          {/* Teams (indented) */}
           <div className="flex items-center gap-3 py-3 pl-12 pr-6">
             <CustomSkeleton className="h-4 w-4" />
             <CustomSkeleton className="h-4 w-14" />
@@ -124,19 +123,27 @@ const DashboardSkeleton = () => {
         </div>
       </div>
 
-      {/* Main content - with white background */}
+      {/* Main content (will fill full width on smaller screens) */}
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
-        {/* Header - as skeleton */}
-        <header className="bg-white border-b border-gray-200 p-6">
+        {/* Header */}
+        <header className="bg-white border-b px-3 sm:px-6 border-gray-200 py-4 sm:py-5 lg:py-6">
           <div className="flex flex-col">
-            <CustomSkeleton className="h-6 w-32 mb-2" />
-            <CustomSkeleton className="h-4 w-80" />
+            {/* icon skeleton  */}
+            <div className="flex items-center mb-0 lg:mb-2  ">
+              <div className="animate-pulse rounded-sm block lg:hidden h-6 w-6 bg-gray-200 mr-4" />
+              <CustomSkeleton className="h-6 w-32" />
+            </div>
+            <CustomSkeleton className="h-4 w-80 hidden lg:block" />
           </div>
         </header>
 
-        {/* Dashboard content - completely empty as requested */}
+        {/* Dashboard content */}
         <main className="flex-1 overflow-auto p-6 bg-white">
-          {/* Intentionally left empty as requested */}
+          {/* Empty as requested */}
+          <div className="flex items-center justify-center">
+            <Loader className="animate-spin" />
+            <p className="ml-2">Loading...</p>
+          </div>
         </main>
       </div>
     </div>

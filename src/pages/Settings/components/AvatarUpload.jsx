@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 
 const AvatarUpload = ({ user }) => {
-  const [avatarUrl, setAvatarUrl] = useState(user.avatar_url || 'https://gravatar.com/avatar');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || 'https://gravatar.com/avatar/');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -132,14 +133,14 @@ const AvatarUpload = ({ user }) => {
           accept="image/*"
           className="hidden"
         />
-        <button
+        <Button
           type="button"
           onClick={handleChangeAvatarClick}
-          className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           disabled={uploading}
+          className="bg-black hover:bg-gray-800 text-white"
         >
           {uploading ? 'Uploading...' : 'Change avatar'}
-        </button>
+        </Button>
         <p className="mt-2 text-xs leading-5 text-gray-400">
           JPG, GIF or PNG. 1MB max.
         </p>

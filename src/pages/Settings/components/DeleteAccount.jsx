@@ -1,14 +1,22 @@
-import React from 'react';
+import AlertDialog from '@/components/Modal/AlertDialog';
+import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
 const DeleteAccount = ({ deleteAccount }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
             try {
-                await deleteAccount();
+                setIsLoading(true);
+                // await deleteAccount();
+                await new Promise((resolve) => setTimeout(resolve, 2000));
                 toast.success('Account deleted successfully.');
             } catch (error) {
                 toast.error('Failed to delete account. Please try again.');
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -21,14 +29,24 @@ const DeleteAccount = ({ deleteAccount }) => {
                 All information related to this account will be deleted permanently.
             </p>
 
-            <div className="mt-6">
-                <button
-                    onClick={handleDelete}
+            <div className="mt-3">
+                <Button
+                    onClick={() => setIsOpen(true)}
                     className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
                 >
                     Yes, delete my account
-                </button>
+                </Button>
             </div>
+
+            <AlertDialog
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            title="Delete Account"
+            message="Are you sure you want to delete your account? This action cannot be undone."
+            onConfirm={handleDelete}
+            confirmButtonText={isLoading ? 'Deleting...' : 'Yes, delete my account'}
+            cancelButtonText="Cancel"
+            />
         </div>
     );
 };

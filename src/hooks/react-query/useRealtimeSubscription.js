@@ -64,7 +64,7 @@ const useRealtimeSubscription = portalId => {
     };
   }, [portalId]);
 
-  return { subscription, loading: !subscription && loading, error };
+  return { subscription, loading: loading, error };
 };
 
 export default useRealtimeSubscription;

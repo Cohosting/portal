@@ -96,8 +96,9 @@ export const Invoices = () => {
    
       <div className="p-0">
         {isOpen && !invoices.length &&  (
-          <div className="flex justify-center items-center h-96">
-            <Loader className='animate-spin' size={46} />
+          <div className="flex justify-center items-center mt-8  ">
+            <Loader className='animate-spin'  />
+            <p className="ml-2">Loading...</p>
           </div>
         )}
 

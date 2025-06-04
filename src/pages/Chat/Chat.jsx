@@ -20,7 +20,7 @@ const Chat = () => {
  
     return (
 
-        <Layout hideMobileNav={true} showSidebar={showSidebar} headerName='Messages' containerPaddingStyle={isLessThan1100 ? 'pl-0' : 'lg:pl-[13.7rem]'}  >
+        <Layout hideMobileNav={true} showSidebar={showSidebar} headerName='Messages' containerPaddingStyle={isLessThan1100 ? 'pl-0' : 'lg:pl-[13.5rem]'}  >
             <div className="flex">
                 <ChatLayout
                     isLoading={isLoading}

@@ -8,6 +8,7 @@ import { useApps } from '../../hooks/useApps';
 import PageHeader from '@/components/internal/PageHeader';
 import { Button } from '@/components/ui/button';
 import BottomActionBar from '@/components/ui/BottomActionBar';
+import DashboardSkeleton from '@/components/SkeletonLoading';
 
 export const AppsList = () => {
   const navigate = useNavigate();
@@ -42,9 +43,7 @@ export const AppsList = () => {
     setList(newList);
   };
 
-  if (!portal) {
-    return <Layout>Loading...</Layout>;
-  }
+  if (!portal) return <DashboardSkeleton />
 
   return (
     <Layout hideMobileNav headerName='Apps'>

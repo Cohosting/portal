@@ -39,31 +39,38 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import PortalSwitcher from '@/components/internal/PortalSwitcher';
+import useCurrentTeamMember from '@/hooks/react-query/useCurrentTeamMember';
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
 
+
+export default function AppSidebar() {
+    const { setSidebarOpen } = useConversationContext();
+    const { user} = useSelector(state => state.auth);
+    const { data: teamMember, isLoading  } = useCurrentTeamMember(user?.id);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { appId } = useParams();
+    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
+    
 // Preference navigation array
 const preference = [
     { name: 'App', href: '/apps', icon: Monitor, current: false },
     { name: 'Customize', href: '/customize', icon: Users, current: false },
     { name: 'Portal Settings', href: '/settings/portal', icon: Settings, current: false, 
       children: [
-        { name: 'Settings', href: '/settings/portal', icon: Cog },
+        // based on role filter out the settings options
+        teamMember?.role ===  'owner'  && ({
+            name: 'Settings', href: '/settings/portal', icon: Cog
+        }),
         { name: 'Account', href: '/settings/account', icon: UserCircle },
         { name: 'Subscriptions', href: '/settings/subscriptions', icon: Cog },
         { name: 'Teams', href: '/settings/teams', icon: Users }
-      ]
+      ].filter(Boolean)
     },
 ];
-
-export default function AppSidebar() {
-    const { setSidebarOpen } = useConversationContext();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { appId } = useParams();
-    const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
     // Route matching function
     let isCurrent = (href) => {
@@ -101,6 +108,7 @@ export default function AppSidebar() {
         navigate(href);
         setSidebarOpen(false);
     };
+    console.log({teamMember});
 
     return (
         <Sidebar className="border-r bg-gray-50">

@@ -8,7 +8,7 @@ export const Layout =
     headerName = 'Dashboard',
     showSidebar = true,
     hideMobileNav = false,
-    containerPaddingStyle = 'lg:pl-[13.8rem]'
+    containerPaddingStyle = 'lg:pl-[13.5rem]'
   }) => {
     const { listRef} = useConversationContext();
     const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
@@ -24,7 +24,7 @@ export const Layout =
 
         <div className={`${containerPaddingStyle} w-full` }>
  
-          <main ref={listRef} className={`flex unique column-reverse overflow-auto relative flex-col h-screen ${shouldAddPadding ? 'pt-[4rem]' : ''}`}>
+          <main ref={listRef} className={`flex unique column-reverse overflow-auto relative flex-col h-screen  }`}>
              {children}
            </main>
         </div>

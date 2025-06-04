@@ -1,75 +1,131 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-
+// (Keeps your old getUser function -- it just fetches one row from "users" by ID)
 const getUser = async (id) => {
-    const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
-    if (error) throw error;
-    return data;
-}
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+};
 
 export const useSupabase = () => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const session = supabase.auth.getSession();
-        setUser(session?.user ?? null);
+  useEffect(() => {
+    let isMounted = true;
 
-        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-            const user = session?.user;
-            if (user) {
-                setLoading(true);
-                console.log(`Getting user ${user.id}`)
-                const currentUser = await getUser(user.id)
-                setUser(currentUser);
-            } else {
-                setUser(null);
+    // Whenever we call this, we:
+    // 1) setLoading(true)
+    // 2) await getSession() → if there's a session.user, look up that "users" row
+    // 3) finally setLoading(false)
+    const fetchSessionUser = async () => {
+      console.log('[useSupabase] fetchSessionUser → START');
+      if (!isMounted) return;
+
+      setLoading(true);
+
+      try {
+        const {
+          data: { session },
+          error: sessionError
+        } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error('[useSupabase] getSession error:', sessionError);
+        }
+
+        if (session && session.user) {
+          try {
+            const profile = await getUser(session.user.id);
+            if (isMounted) {
+              setUser(profile);
+              console.log('[useSupabase] got profile for', session.user.id);
             }
-            setLoading(false);
-        });
+          } catch (err) {
+            console.error('[useSupabase] getUser error:', err);
+            if (isMounted) setUser(null);
+          }
+        } else {
+          // no session (signed out)
+          if (isMounted) {
+            setUser(null);
+            console.log('[useSupabase] no session → set user = null');
+          }
+        }
+      } catch (outer) {
+        console.error('[useSupabase] unexpected fetchSessionUser error:', outer);
+        if (isMounted) setUser(null);
+      }
 
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
-
-    const updateProfile = async (updates) => {
-        if (!user) return;
-        const { error } = await supabase.from('users').update({
-            ...updates,
-        }).eq('id', user.id);
-
-        if (error) throw error;
+      if (isMounted) {
+        setLoading(false);
+        console.log('[useSupabase] fetchSessionUser → DONE, loading=false');
+      }
     };
 
-    const changePassword = useCallback(async (newPassword) => {
-        console.log(`newPassword from hook: ${newPassword}`)
-        const { error } = await supabase.auth.updateUser({
-            password: newPassword
-        }).then(() => {
-            window.location.reload();
-        });
+    // 1) Run it once on mount
+    fetchSessionUser();
 
-        if (error) throw error;
-        console.log('password changed')
-    }, []);
+    // 2) Subscribe to any auth changes (e.g. token refresh, sign in, sign out).
+    //    Whenever Supabase fires an event, just re‐run fetchSessionUser().
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, _session) => {
+      fetchSessionUser();
+    });
 
-    const logoutOtherSessions = async () => {
-        const { error } = await supabase.auth.refreshSession();
-        if (error) throw error;
+    return () => {
+      isMounted = false;
+      listener.subscription.unsubscribe();
     };
+  }, []);
 
-    const deleteAccount = async () => {
-        const { error } = await supabase.auth.admin.deleteUser(user.id);
-        if (error) throw error;
-    };
+  // ——————————— rest of your API stays exactly the same ———————————
 
-    const logout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-    };
+  const updateProfile = async (updates) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('users')
+      .update({ ...updates })
+      .eq('id', user.id);
+    if (error) throw error;
+  };
 
-    return { user, updateProfile, changePassword, logoutOtherSessions, deleteAccount, loading: !user && loading, logout };
+  const changePassword = async (newPassword) => {
+    console.log(`[useSupabase] changePassword → ${newPassword}`);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+
+    // After password change, force a reload so Supabase’s session cookie is updated
+    window.location.reload();
+  };
+
+  const logoutOtherSessions = async () => {
+    const { error } = await supabase.auth.refreshSession();
+    if (error) throw error;
+  };
+
+  const deleteAccount = async () => {
+    if (!user) return;
+    const { error } = await supabase.auth.admin.deleteUser(user.id);
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  return {
+    user,
+    updateProfile,
+    changePassword,
+    logoutOtherSessions,
+    deleteAccount,
+    loading,
+    logout,
+  };
 };

@@ -13,6 +13,8 @@ import RestrictedAccess from "../../components/internal/RestrictedAccess";
 import { useState } from "react";
 import { Loader } from "lucide-react";
 import PageHeader from "@/components/internal/PageHeader";
+import { Layout } from "../Dashboard/Layout";
+import DashboardSkeleton, { CustomSkeleton } from "@/components/SkeletonLoading";
 
 let subscriptionStatusStyle = {
   active: "bg-green-500",
@@ -48,18 +50,30 @@ const SubscriptionPage = () => {
   const { subscription, loading } = useRealtimeSubscription(currentSelectedPortal);
 
 
+  console.log({
+    subscription,
+    loading
+  })
 
-  if (loading) {
-    return (
-      <div className="flex mt-36 items-center justify-center">
-        <Loader size={36} className="animate-spin m-5 " />
-      </div>
+  if (loading) { return ( <Layout>
+            <header className="bg-white border-b px-3 sm:px-6 border-gray-200 py-4 sm:py-5 lg:py-6">
+              <div className="flex flex-col">
+                {/* icon skeleton  */}
+                <div className="flex items-center mb-0 lg:mb-2  ">
+                  <div className="animate-pulse rounded-sm block lg:hidden h-6 w-6 bg-gray-200 mr-4" />
+                  <CustomSkeleton className="h-6 w-32" />
+                </div>
+                <CustomSkeleton className="h-4 w-80 hidden lg:block" />
+              </div>
+            </header>
 
-    )
-  }
-
-
-
+            <div className='flex items-center justify-center mt-6'>
+              <Loader  className='animate-spin  ' />
+              <p className='ml-2'>Loading...</p>
+            </div>
+  </Layout>
+)
+}
   if (subscription?.portal && subscription.portal.created_by !== user.id) {
     return <RestrictedAccess />
   }
@@ -68,11 +82,12 @@ const SubscriptionPage = () => {
   let description = "Manage your subscription, billing, and payment settings.";
 
   return (
-    <div >
+    <Layout hideMobileNav >
       <PageHeader
         title={title}
         description={description}
       />
+ 
       <div className="p-6">
       {
         subscription && shouldShowSubscription ? (
@@ -103,7 +118,7 @@ const SubscriptionPage = () => {
 
 
 
-    </div>
+    </Layout>
   );
 }
 

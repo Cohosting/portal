@@ -3,6 +3,8 @@ import SkeletonLoading from "../SkeletonLoading";
 
 export const ProtectedRoutes = ({ children }) => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
+
+  // return <SkeletonLoading />;
  
   // Get current hostname to determine user type
   const hostname = window.location.hostname;

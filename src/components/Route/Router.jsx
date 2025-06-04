@@ -91,7 +91,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/settings',
-        element: <SettingsLayout />,
+        // element: <SettingsLayout />,
         children: [
           { path: 'portal', element: <Settings /> },
           { path: 'account', element: <AccountSettings /> },
