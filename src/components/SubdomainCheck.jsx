@@ -11,6 +11,14 @@ export const SubdomainCheck = ({
   isLoading
 }) => {
   const navigate = useNavigate();
+  console.log({
+    isLoading,
+    isValid,
+    domain,
+    isProtected,
+    mainDomainComponent,
+    children
+  })
 
   // Handle main domain (no subdomain)
   if (!domain && !mainDomainComponent) return null;

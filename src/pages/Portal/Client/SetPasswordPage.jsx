@@ -215,7 +215,7 @@ export const SetPasswordPage = () => {
     <AuthLayout
       portal={portal}
       title="Complete Your Registration"
-      subtitle={`Welcome ${clientData?.name}. Please set your password to access the portal.`}
+      subtitle={<>Welcome <b>{clientData?.name}</b>. Please set your password to access the portal.</>}
     >
       <SetPassword
         buttonText="Complete Registration"

@@ -13,6 +13,8 @@ import { PreloadedIcons } from "@/components/preloaded-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClientAuth } from "@/hooks/useClientAuth";
 import { classNames } from "../../../../utils/statusStyles";
+import { useMediaQuery } from 'react-responsive';
+import { useSidebar } from '@/components/ui/sidebar';
 
 // ----------------------------------------------
 // 1. Static fallback icon map
@@ -50,7 +52,7 @@ const getResolvedIconName = (app, clientUserId) => {
   //   rawIconName = match?.icon;
   // }
 
-  return rawIconName|| "help-circle" ;
+  return rawIconName || "help-circle";
 };
 
 // ----------------------------------------------
@@ -62,9 +64,6 @@ const RenderIcon = ({ iconName, className }) => {
     const Icon = DEFAULT_ICONS[iconName];
     return <Icon className={className} />;
   }
-  console.log({
-    iconName,
-  })
 
   // Second: try preloaded icons
   const Icon = PreloadedIcons[iconName];
@@ -81,6 +80,9 @@ const Navigation = ({ portal_apps, portal }) => {
   const { clientUser } = useClientAuth(portal?.id);
   const navigate = useNavigate();
   const location = useLocation();
+  const { setOpen } = useSidebar();
+
+  const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
   const {
     sidebarBgColor,
@@ -104,7 +106,7 @@ const Navigation = ({ portal_apps, portal }) => {
   return (
     <div
       style={{ backgroundColor: sidebarBgColor }}
-      className="flex grow flex-col gap-y-5 overflow-y-auto pb-2  "
+      className="flex grow flex-col gap-y-5 overflow-y-auto pb-2"
     >
       <div className="flex h-16 shrink-0 px-6 items-center">
         <img
@@ -118,17 +120,22 @@ const Navigation = ({ portal_apps, portal }) => {
         <ul className="flex flex-1 flex-col gap-y-1">
           {portal_apps.map((item) => {
             const decodedPath = decodeURIComponent(location.pathname.split('/')[2]);
-            console.log({
-              decodedPath})
             const active = item.name.toLowerCase() === decodedPath.toLowerCase();
             const resolvedIconName = getResolvedIconName(item, clientUser?.id);
 
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => navigate(`/portal/${item.name.toLowerCase()}`)}
+                  onClick={() => {
+                    if (isLessThan1024) {
+                      setOpen(false);
+                    }
+                    navigate(`/portal/${item.name.toLowerCase()}`)
+
+                
+                }}
                   className={classNames(
-                    'group flex gap-x-3 px-6   py-3 text-sm font-semibold leading-6 w-full',
+                    'group flex gap-x-3 px-6 py-3 text-sm font-semibold leading-6 w-full',
                     { 'hover:bg-opacity-20': !active }
                   )}
                   style={{
@@ -159,7 +166,10 @@ const Navigation = ({ portal_apps, portal }) => {
           })}
         </ul>
 
-        <div className="border-t flex flex-col items-center pt-6 pb-4" style={{ borderColor: `${loginButtonColor}44` }}>
+        <div
+          className="border-t flex flex-col items-center pt-6 pb-4"
+          style={{ borderColor: `${loginButtonColor}44` }}
+        >
           {!clientUser ? (
             <div className="flex items-center mb-4 px-6 w-full">
               <div className="animate-pulse rounded-full h-10 w-10" style={{ backgroundColor: loginButtonColor }}></div>
@@ -169,7 +179,7 @@ const Navigation = ({ portal_apps, portal }) => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center mb-4 px-6">
+            <div className="flex items-center mb-4 px-6 w-full">
               <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage
                   src={clientUser?.profilePicture || clientUser?.avatar || ""}
@@ -179,14 +189,20 @@ const Navigation = ({ portal_apps, portal }) => {
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="ml-3 min-w-0 flex-1">
+              <div className="ml-3 flex-1 min-w-0">
                 {clientUser?.name && (
-                  <p className="text-sm font-medium truncate" style={{ color: sidebarTextColor }}>
+                  <p
+                    className="text-sm font-medium overflow-hidden whitespace-nowrap truncate"
+                    style={{ color: sidebarTextColor }}
+                  >
                     {clientUser.name}
                   </p>
                 )}
                 {clientUser?.email && (
-                  <p className="text-xs truncate opacity-75" style={{ color: sidebarTextColor }}>
+                  <p
+                    className="text-xs overflow-hidden whitespace-nowrap truncate opacity-75"
+                    style={{ color: sidebarTextColor }}
+                  >
                     {clientUser.email}
                   </p>
                 )}

@@ -1,10 +1,11 @@
 import { useSelector } from "react-redux";
 import SkeletonLoading from "../SkeletonLoading";
+import PortalLoadingSkeleton from "@/pages/Portal/Client/components/PortalLoadingSkeleton";
 
 export const ProtectedRoutes = ({ children }) => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
+  
 
-  // return <SkeletonLoading />;
  
   // Get current hostname to determine user type
   const hostname = window.location.hostname;

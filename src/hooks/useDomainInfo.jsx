@@ -9,7 +9,7 @@ export const useDomainInfo = (shouldCheckDomain = false) => {
     existsInDb: false, 
     portalData: null 
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const queryClient = useQueryClient();
   const abortControllerRef = useRef(null);

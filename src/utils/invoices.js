@@ -50,8 +50,8 @@ export const formatInvoiceDates = (
 
   const sortedInvoices = invoices.sort((a, b) => {
     return (
-      DateTime.fromISO(b?.created).toMillis() -
-      DateTime.fromISO(a?.created).toMillis()
+      DateTime.fromISO(b?.created_at).toMillis() -
+      DateTime.fromISO(a?.created_at).toMillis()
     );
   });
 
@@ -61,12 +61,12 @@ export const formatInvoiceDates = (
 
   let currentDate = startDate
     ? DateTime.fromISO(startDate).startOf("day")
-    : DateTime.fromISO(sortedInvoices[0].created).startOf("day");
+    : DateTime.fromISO(sortedInvoices[0].created_at).startOf("day");
 
   const lastDate = endDate
     ? DateTime.fromISO(endDate).startOf("day")
     : DateTime.fromISO(
-        sortedInvoices[sortedInvoices.length - 1].created
+        sortedInvoices[sortedInvoices.length - 1].created_at
       ).startOf("day");
 
   while (currentDate >= lastDate) {
@@ -80,7 +80,7 @@ export const formatInvoiceDates = (
     }
 
     const dayInvoices = sortedInvoices.filter((invoice) =>
-      DateTime.fromISO(invoice.created)
+      DateTime.fromISO(invoice.created_at)
         .startOf("day")
         .hasSame(currentDate, "day")
     );

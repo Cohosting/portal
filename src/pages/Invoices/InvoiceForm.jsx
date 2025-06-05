@@ -109,7 +109,7 @@ export const InvoiceForm = () => {
     isSubmitting,
     fetchError,
   } = useInvoice({ settings });
-
+console.log(invoiceState)
   const handleSubmit = async () => {
     try {
       let result;
@@ -309,6 +309,7 @@ export const InvoiceForm = () => {
               </PopoverTrigger>
               <PopoverContent className="w-auto bg-white p-0" align="start">
                 <Calendar
+                  
                   mode="single"
                   selected={invoiceState.due_date}
                   onSelect={(date) => handleInputChange('due_date', date)}

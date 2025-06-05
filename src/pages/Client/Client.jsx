@@ -113,7 +113,7 @@ export const Client = () => {
       description="A list of all the clients in your portal including their name, email and status."
       action={
 
-        stripeStatus === 'verified' && (
+        // stripeStatus === 'verified' && (
 
 
         <Button 
@@ -123,7 +123,7 @@ export const Client = () => {
         >
           Add client
         </Button>
-        )
+        // )
       }
       />
       {canAddClients ? (

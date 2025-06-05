@@ -1,3 +1,5 @@
+// src/hooks/invoice/useInvoice.js
+
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -23,7 +25,7 @@ const defaultInvoiceState = {
   },
   memo: '',
   client: null,
-  due_date: Date.now() + (7 * 24 * 60 * 60 * 1000), // Default to 7 days from now
+  due_date: null
 };
 
 // Utility function for deep comparison
@@ -54,7 +56,7 @@ const validateInvoiceData = (invoiceState) => {
     const dueDate = new Date(invoiceState.due_date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (dueDate < today) {
       errors.due_date = 'Due date cannot be in the past';
     }
@@ -67,24 +69,24 @@ const validateInvoiceData = (invoiceState) => {
     const lineItemErrors = [];
     invoiceState.line_items.forEach((item, index) => {
       const itemErrors = {};
-      
+
       if (!item.description || item.description.trim().length === 0) {
         itemErrors.description = 'Description is required';
       }
-      
+
       if (!item.quantity || item.quantity <= 0) {
         itemErrors.quantity = 'Required';
       }
-      
+
       if (!item.unit_amount || item.unit_amount <= 0) {
         itemErrors.unit_amount = 'Required';
       }
-      
+
       if (Object.keys(itemErrors).length > 0) {
         lineItemErrors[index] = itemErrors;
       }
     });
-    
+
     if (lineItemErrors.length > 0) {
       errors.line_items = lineItemErrors;
     }
@@ -111,7 +113,7 @@ const useInvoice = (defaultValue = {}) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  
+
   const navigate = useNavigate();
   const { mode } = useParams();
   const location = useLocation();
@@ -120,23 +122,29 @@ const useInvoice = (defaultValue = {}) => {
   const prevDefaultValueRef = useRef();
   const isEditMode = mode === 'edit';
 
-  // Validate fields in real-time and update validation errors
+  // Real-time validation effect (fixed to avoid infinite loop)
   useEffect(() => {
     if (Object.keys(validationErrors).length > 0) {
-      // Re-validate the current state to check if errors should be cleared
       const validation = validateInvoiceData(invoiceState);
       const newErrors = { ...validationErrors };
       let hasChanges = false;
 
-      // Only clear errors for fields that are now valid
       Object.keys(validationErrors).forEach(field => {
-        if (!validation.errors[field]) {
+        const oldErr = validationErrors[field];
+        const newErr = validation.errors[field];
+
+        // If the field passed validation, remove its error
+        if (!newErr) {
           delete newErrors[field];
           hasChanges = true;
-        } else if (validation.errors[field] !== validationErrors[field]) {
-          // Update error message if it changed
-          newErrors[field] = validation.errors[field];
-          hasChanges = true;
+        } else {
+          // Compare contents (deep) before updating
+          const oldString = JSON.stringify(oldErr || null);
+          const newString = JSON.stringify(newErr);
+          if (oldString !== newString) {
+            newErrors[field] = newErr;
+            hasChanges = true;
+          }
         }
       });
 
@@ -157,7 +165,7 @@ const useInvoice = (defaultValue = {}) => {
 
       setInvoiceState(prevState => ({ ...prevState, isLoading: true }));
       setFetchError(null);
-      
+
       try {
         const invoices = await fetchInvoiceData(id);
 
@@ -190,7 +198,7 @@ const useInvoice = (defaultValue = {}) => {
     try {
       // Validate the invoice data
       const validation = validateInvoiceData(invoiceState);
-      
+
       if (!validation.isValid) {
         setValidationErrors(validation.errors);
         setIsSubmitting(false);
@@ -203,17 +211,17 @@ const useInvoice = (defaultValue = {}) => {
       setInvoiceState(prevState => ({ ...prevState, isLoading: true }));
 
       await createInvoice(invoiceState, portal);
-      
+
       return {
         success: true,
         message: 'Invoice created successfully!'
       };
     } catch (error) {
       console.error('Error saving invoice:', error);
-      
+
       // Handle different types of errors
       let errorMessage = 'Failed to save invoice. Please try again.';
-      
+
       if (error.response?.status === 400) {
         errorMessage = 'Invalid invoice data. Please check your inputs.';
       } else if (error.response?.status === 403) {
@@ -247,7 +255,7 @@ const useInvoice = (defaultValue = {}) => {
     try {
       // Validate the invoice data
       const validation = validateInvoiceData(invoiceState);
-      
+
       if (!validation.isValid) {
         setValidationErrors(validation.errors);
         setIsSubmitting(false);
@@ -268,9 +276,9 @@ const useInvoice = (defaultValue = {}) => {
       };
     } catch (error) {
       console.error('Error updating invoice:', error);
-      
+
       let errorMessage = 'Failed to update invoice. Please try again.';
-      
+
       if (error.response?.status === 400) {
         errorMessage = 'Invalid invoice data. Please check your inputs.';
       } else if (error.response?.status === 403) {
@@ -303,7 +311,7 @@ const useInvoice = (defaultValue = {}) => {
   const validateField = (fieldName, value) => {
     const tempState = { ...invoiceState, [fieldName]: value };
     const validation = validateInvoiceData(tempState);
-    
+
     return validation.errors[fieldName] || null;
   };
 

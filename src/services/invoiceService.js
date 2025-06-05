@@ -111,8 +111,8 @@ export const fetchInvoices = async (filters) => {
 
     if (formattedStartDate && formattedEndDate) {
       query = query
-        .gte("created", formattedStartDate)
-        .lte("created", formattedEndDate);
+        .gte("created_at", formattedStartDate)
+        .lte("created_at", formattedEndDate);
     }
 
     if (searchInvoiceId) {

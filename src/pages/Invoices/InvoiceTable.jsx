@@ -45,7 +45,8 @@ const InvoiceTable = ({
       settings,
       memo,
       invoice_id: id,
-      stripe_connect_account_id
+      stripe_connect_account_id,
+      due_date: invoice.due_date
     });
 
     const { data } = await toast.promise(invoiceFinalizedPromise, {

@@ -345,7 +345,7 @@ export const CustomizePortal = () => {
  
           <DialogContent className="sm:max-w-[700px] bg-white w-[95vw]">
             <DialogHeader>
-              <DialogTitle>Client Preview</DialogTitle>
+              <DialogTitle>Client Dashboard and login page preview</DialogTitle>
             </DialogHeader>
             <ClientPreview
               brandName={brandName}
@@ -354,6 +354,7 @@ export const CustomizePortal = () => {
               sidebarTextColor={sidebarTextColor}
               sidebarActiveTextColor={sidebarActiveTextColor}
             />
+            <LoginPreview brandSettings={brandSettings} />
           </DialogContent>
         </Dialog>
       </div>
@@ -362,11 +363,11 @@ export const CustomizePortal = () => {
       <div className="flex flex-col xl:flex-row">
         {/* Form content */}
         <div
-          className="w-full px-4 md:px-7 transition-all duration-300 ease-in-out"
+          className="w-full px-6   transition-all duration-300 ease-in-out"
           style={{ 
             paddingTop: `${contentPadding}px`,
             maxWidth: showInlinePreview ? '650px' : '800px',
-            margin: !showInlinePreview ? '0 auto' : '0'
+            margin: !showInlinePreview ? '0 ' : '0'
           }}
         >
           <BrandNameSection
