@@ -15,12 +15,11 @@ const Chat = () => {
     const { conversations, isLoading, refetchConversations, optimisticMarkLastMessageAsSeen } = useChatConversations(currentSelectedPortal,)
 
     const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
-    let showSidebar = !isLessThan1100;
-
+ 
  
     return (
 
-        <Layout hideMobileNav={true} showSidebar={showSidebar} headerName='Messages' containerPaddingStyle={isLessThan1100 ? 'pl-0' : 'lg:pl-[13.5rem]'}  >
+        <Layout hideMobileNav={true}   headerName='Messages' containerPaddingStyle={isLessThan1100 ? 'pl-0' : 'lg:pl-[13.5rem]'}  >
             <div className="flex">
                 <ChatLayout
                     isLoading={isLoading}

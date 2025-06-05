@@ -87,20 +87,27 @@ const MassMessageForm = ({ onClose }) => {
                     </div>
                 </div>
             </div>
-            <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                <Button size="lg" onClick={onClose} variant="outline"  >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleMassMessageSubmit}
-                    size="lg"
-                    type="submit"
-                    data-autofocus
-                    className="bg-black text-white"
-                >
-                    {isCreating ? 'Sending...' : 'Send'}
-                </Button>
-            </div>
+            <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3 space-y-3 sm:space-y-0">
+  <Button
+    className="w-full"
+    size="lg"
+    onClick={onClose}
+    variant="outline"
+  >
+    Cancel
+  </Button>
+
+  <Button
+    className="w-full bg-black text-white"
+    onClick={handleMassMessageSubmit}
+    size="lg"
+    type="submit"
+    data-autofocus
+  >
+    {isCreating ? 'Sending...' : 'Send'}
+  </Button>
+</div>
+
         </div>
     );
 };

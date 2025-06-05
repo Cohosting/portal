@@ -78,16 +78,28 @@ const NewConversationForm = ({ onClose }) => {
                     </div>
                 )}
             </div>
-            <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                <Button size="lg" onClick={onClose} variant="outline">
-                    Cancel
-                </Button>
-                <Button className="bg-gray-900 text-white" size="lg" variant="default" data-autofocus onClick={handleCreateConversation}>
-                    {
-                        isCreating ? 'Creating...' : 'Create'
-                    }
-                </Button>
-            </div>
+            <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3 space-y-3 sm:space-y-0">
+  <Button
+    className="w-full"
+    size="lg"
+    onClick={onClose}
+    variant="outline"
+  >
+    Cancel
+  </Button>
+
+  <Button
+    className="w-full bg-gray-900 text-white"
+    size="lg"
+    variant="default"
+    data-autofocus
+    onClick={handleCreateConversation}
+  >
+    {isCreating ? 'Creating...' : 'Create'}
+  </Button>
+</div>
+
+
         </>
     );
 };

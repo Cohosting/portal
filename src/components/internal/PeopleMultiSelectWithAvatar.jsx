@@ -1,111 +1,135 @@
-import { useState, useEffect } from "react";
-import {
-    Label,
-    Listbox,
-    ListboxButton,
-    ListboxOption,
-    ListboxOptions,
-} from "@headlessui/react";
-import { ChevronDown } from "lucide-react";
-import { Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Checkbox } from "../ui/checkbox";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 
-const PeopleMultiSelectWithAvatar = ({ people, onChange, label = "Assigned to" }) => {
-    const [selected, setSelected] = useState([]);
+const PeopleMultiSelectWithAvatar = ({
+  people,
+  onChange,
+  label = "Assigned to",
+}) => {
+  const [selected, setSelected] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
 
-    useEffect(() => {
-        onChange(selected);
-    }, [selected, onChange]);
+  useEffect(() => {
+    onChange(selected);
+  }, [selected, onChange]);
 
-    const handleSelectAll = () => {
-        if (selected.length === people.length) {
-            setSelected([]);
-        } else {
-            setSelected([...people]);
-        }
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    return (
-        <Listbox value={selected} onChange={setSelected} multiple>
-            <Label className="block text-sm font-medium leading-6 text-black">
-                {label}
-            </Label>
-            <div className="mt-2">
-                <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-black shadow-sm ring-1 ring-inset ring-black focus:outline-none focus:ring-2 focus:ring-black sm:text-sm sm:leading-6">
-                    <span className="flex items-center">
-                        {selected.length === 0 ? (
-                            <span className="block truncate text-gray-500">
-                                Select people...
-                            </span>
-                        ) : (
-                            <>
-                                <span className="block truncate">
-                                    {selected.map((person) => person.name).join(", ")}
-                                </span>
-                                <span className="ml-2 text-gray-500">({selected.length})</span>
-                            </>
-                        )}
-                    </span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
-                        <ChevronDown
-                            aria-hidden="true"
-                            className="h-5 w-5 text-gray-700"
-                        />
-                    </span>
-                </ListboxButton>
+  const isAllSelected = selected.length === people.length;
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelected([]);
+    } else {
+      setSelected([...people]);
+    }
+  };
 
-                <ListboxOptions
-                    transition
-                    className="absolute z-10 mt-1 max-h-56 w-[calc(100%-48px)] overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in sm:text-sm"
-                >
-                    {people.length === 0 && (
-                        <div className="px-4 py-2 text-gray-500">
-                            No people available
-                        </div>
-                    )}
-                    {people.map((person) => (
-                        <ListboxOption
-                            key={person.id}
-                            value={person}
-                            className="group relative cursor-default select-none py-2 pl-3 pr-9 text-black data-[focus]:bg-black data-[focus]:text-white"
-                        >
-                            {({ selected, active }) => (
-                                <>
-                                    <div className="flex items-center">
-                                        <img
-                                            alt=""
-                                            src={person.avatar}
-                                            className="h-5 w-5 flex-shrink-0 rounded-full"
-                                        />
-                                        <span
-                                            className={`ml-3 block truncate ${selected ? "font-semibold" : "font-normal"
-                                                }`}
-                                        >
-                                            {person.name}
-                                        </span>
-                                    </div>
+  const togglePerson = (person) => {
+    if (selected.find((p) => p.id === person.id)) {
+      setSelected(selected.filter((p) => p.id !== person.id));
+    } else {
+      setSelected([...selected, person]);
+    }
+  };
 
-                                    {selected && (
-                                        <span
-                                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${active ? "text-white" : "text-black"
-                                                }`}
-                                        >
-                                            <Check aria-hidden="true" className="h-5 w-5" />
-                                        </span>
-                                    )}
-                                </>
-                            )}
-                        </ListboxOption>
-                    ))}
-                </ListboxOptions>
-                <div className="mt-4 flex justify-end">
-                    <Button className="bg-black text-white" size="sm" variant="soft" onClick={handleSelectAll}>
-                        {selected.length === people.length ? "Deselect All" : "Select All"}
-                    </Button>
-                </div>
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <label className="block text-sm font-medium text-black">{label}</label>
+
+      <Button
+        variant="outline"
+        className="mt-2 w-full justify-between border border-gray-400 bg-white text-black hover:bg-gray-50"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        {selected.length === 0 ? (
+          <span className="text-gray-500">Select people...</span>
+        ) : (
+          <span>
+            {selected.map((p) => p.name).join(", ")}{" "}
+            <span className="text-gray-500">({selected.length})</span>
+          </span>
+        )}
+        <svg
+          className={`h-5 w-5 text-gray-700 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </Button>
+
+      {/* Deselect/Select All button positioned below input, right-aligned */}
+      <div className="mt-2 flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="border border-gray-400 text-black bg-white hover:bg-gray-50"
+          onClick={handleSelectAll}
+        >
+          {isAllSelected ? "Deselect All" : "Select All"}
+        </Button>
+      </div>
+
+      {isOpen && (
+        <div className="absolute top-16 z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border border-gray-400 bg-white p-2 shadow-lg">
+          {people.length === 0 ? (
+            <p className="px-4 text-sm  text-gray-500">No people available</p>
+          ) : (
+            <div className="space-y-1">
+              {people.map((person) => {
+                const checked = !!selected.find((p) => p.id === person.id);
+                return (
+                  <div
+                    key={person.id}
+                    className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => togglePerson(person)}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={person.avatar} alt={person.name} />
+                        <AvatarFallback>{person.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className={checked ? "font-semibold" : "font-normal"}>
+                        {person.name}
+                      </span>
+                    </div>
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={() => togglePerson(person)}
+                    />
+                  </div>
+                );
+              })}
             </div>
-        </Listbox>
-    );
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default PeopleMultiSelectWithAvatar;

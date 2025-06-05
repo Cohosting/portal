@@ -14,10 +14,7 @@ import {
     Cpu,
     Settings,
     Monitor,
-    ChevronRight,
-    ChevronDown,
     LogOut,
-    User,
     Cog,
     UserCircle
 } from "lucide-react";
