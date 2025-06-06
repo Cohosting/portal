@@ -5,11 +5,88 @@ import useRecentActivities from '../hooks/react-query/useRecentActivities'
 import { Clock } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { FileText } from 'lucide-react'
+ 
+
+
+
+
+
+export const getInvoiceTitle = (activity) => {
+  const {  client,invoice } = activity;
+
+  const isDeleted = Boolean(client?.is_deleted);
+  const rawName = client?.name || "Unknown Client";
+
+ 
+  // Determine human-readable status text + color
+  let statusText, statusColor;
+  switch (invoice?.status.toLowerCase()) {
+    case "draft":
+      statusText = "Draft";
+      statusColor = "#F59E0B"; // amber-500
+      break;
+    case "finalized":
+      statusText = "Finalized";
+      statusColor = "#3B82F6"; // blue-500
+      break;
+    case "paid":
+      statusText = "Paid";
+      statusColor = "#10B981"; // green-500
+      break;
+      case 'open':
+        statusText = "Open";
+        statusColor = "#F59E0B"; // amber-500
+        break;
+    default:
+      statusText = invoice?.status
+        ? invoice?.status.charAt(0).toUpperCase() + invoice?.status.slice(1)
+        : "Unknown";
+      statusColor = "#6B7280"; // gray-500
+      break;
+  }
+
+  // If client is deleted, show “(Deleted Client)” in gray italics.
+  // Otherwise, show actual name with a highlight background.
+  const clientElement = isDeleted ? (
+    <span
+      style={{
+        fontStyle: "italic",
+        color: "#6B7280", // gray-500
+      }}
+    >
+      {rawName} - 
+      (Deleted Client)
+    </span>
+  ) : (
+    <span
+      style={{
+
+          padding: "0 0.25rem",
+        fontWeight: 700,
+      }}
+    >
+      {rawName}
+    </span>
+  );
+
+  return (
+<p className="text-sm font-medium text-gray-900 truncate">
+                        Invoice{" "}
+      <span
+        style={{
+          color: statusColor,
+          padding: "0 0.25rem",
+          fontWeight: 600,
+        }}
+      >
+        {statusText}
+      </span>{" "}
+      for {clientElement}
+    </p>
+  );
+};
 
 export default function RecentActivitiesList({ portal_id }) {
-  console.log({
-    portal_id
-  })
 
   // 1. Track current pageIndex (0-based) and a fixed pageSize
   const [pageIndex, setPageIndex] = useState(0)
@@ -53,47 +130,56 @@ export default function RecentActivitiesList({ portal_id }) {
     <>
       <div className='h-[360px]'>
         {/* Render current page of activities */}
-        {
-          recentActivities.length > 0 ? recentActivities.map((activity) => (
-            <div
-              key={activity.id}
-              className="p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-start">
-              <div className="flex-shrink-0 mr-3">
-                <div className="p-2 bg-indigo-50 rounded-full">
-                  <FileText className="h-5 w-5 text-indigo-600" />
+        {recentActivities.length > 0 ? (
+          recentActivities.map((activity) => {
+
+            //
+
+            let title = getInvoiceTitle(activity)
+            return (
+              <div
+                key={activity.id}
+                className="p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mr-3">
+                    <div className="p-2 bg-indigo-50 rounded-full">
+                      <FileText className="h-5 w-5 text-indigo-600" />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      {/* <p className="text-sm font-medium text-gray-900 truncate">
+                        {activity.title}
+                      </p>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Draft
+                      </span> */}
+                      {title}
+                    </div>
+
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Clock className="flex-shrink-0 mr-1.5 h-3.5 w-3.5 text-gray-400" />
+                      <span>
+                        {DateTime.fromISO(activity.created_at).toRelative()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button className="ml-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {activity.title}
-                  </p>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Draft
-                  </span>
-                </div>
-
-                <div className="flex items-center text-xs text-gray-500">
-                  <Clock className="flex-shrink-0 mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                  <span>
-                    {DateTime.fromISO(activity.created_at).toRelative()}
-                  </span>
-                </div>
-              </div>
-
-              <button className="ml-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-              </button>
-            </div>
-          </div>
-        )) : (
+            )
+          })
+        ) : (
           <div className="p-4 text-center">
-          <p className='font-medium text-gray-500 mt-4'>No recent activities found.</p>
+            <p className='font-medium text-gray-500 mt-4'>No recent activities found.</p>
           </div>
         )}
+        
       </div>
 
       {/* Pagination controls (slightly adjusted classes only) */}
@@ -128,8 +214,6 @@ export default function RecentActivitiesList({ portal_id }) {
         >
           Next
         </button>
-
-
       </div>
     </>
   )

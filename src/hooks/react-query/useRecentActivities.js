@@ -12,7 +12,7 @@ export const getRecentActivities = async (portal_id, pageIndex, pageSize) => {
 
   const { data, error } = await supabase
     .from('recent_activities')
-    .select('*')
+    .select('*, client: clients(*), invoice: invoices(*)')
     .eq('portal_id', portal_id)
     .order('created_at', { ascending: false })
     .range(from, to) // ← this replaces your old .limit(10)
