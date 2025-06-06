@@ -118,6 +118,8 @@ const InvoiceTable = ({
             title: `Invoice #${invoiceNumberLast4Digit} from "${clientName}" Voided`,
             additional_data: { stripe_invoice_id },
             portal_id: portal.id,
+            client_id: invoice.client.id,
+            invoice_id: invoice.id,
           },
         ]);
         

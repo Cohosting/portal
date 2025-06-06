@@ -32,7 +32,7 @@ export const SetPasswordPage = () => {
         // First, get the client data associated with the token
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
-          .select('id, name, email, token_expires_at, token_used, portal_id')
+          .select('id, name, email, token_expires_at, is_deleted, token_used, portal_id')
           .eq('invitation_token', token)
           .single();
         
@@ -41,6 +41,12 @@ export const SetPasswordPage = () => {
           setTokenStatus('invalid');
           setIsLoading(false);
           return;
+        }
+
+        if(clientData.is_deleted) {
+            setTokenStatus('invalid');
+            setIsLoading(false);
+            return;
         }
         
         // Check if token is expired

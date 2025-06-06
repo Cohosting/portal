@@ -20,9 +20,10 @@ export const createInvoice = async (invoiceState, portal) => {
         created_at,
         amount: calculateTotal(invoiceState.line_items),
       },
-    ]);
+    ]).select()
 
     if (error) throw error;
+    
 
     const title = `Draft created for Invoice ${invoice_number.slice(-4)} for ${
       client.name
@@ -34,6 +35,8 @@ export const createInvoice = async (invoiceState, portal) => {
           title,
           portal_id: portal.id,
           additional_data: { invoice_number },
+          client_id: client.id,
+          invoice_id: data[0].id,
         },
       ]);
     if (recentError) throw recentError;

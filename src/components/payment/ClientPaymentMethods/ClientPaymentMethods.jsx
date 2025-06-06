@@ -125,8 +125,7 @@ const ClientPaymentMethods = ({
   if (!hasPaymentMethods && !showPaymentError) {
     return (
       <div className="mt-3 px-6">
-        <p>No payment methods available. Please add one.</p>
-        {renderAddPaymentMethod()}
+         {renderAddPaymentMethod()}
       </div>
     );
   }

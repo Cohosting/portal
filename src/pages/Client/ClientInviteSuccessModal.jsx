@@ -12,6 +12,7 @@ export const ClientInviteSuccessModal = ({ isOpen, onClose, client, sendEmail, r
   const [isLoading, setIsLoading] = useState(false)
 
   const handleInvitation = async () => {
+    console.log({client})
     try {
       setIsLoading(true);
       

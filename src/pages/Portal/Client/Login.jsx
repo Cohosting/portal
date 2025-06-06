@@ -46,6 +46,8 @@ export const ClientLogin = ({ portal }) => {
 
   const handleLogin = (e) => {
     e.preventDefault()
+   
+    
     authenticate(email, password, portal.id);
   }
 

@@ -3,9 +3,18 @@ import { useToggle } from "react-use";
 import { supabase } from "../lib/supabase";
 
 const getClientData = async (portal) => {
-    const { data: clients } = await supabase.from('clients').select('*').eq('portal_id', portal.id);
+    const { data: clients, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('portal_id', portal.id)
+      .eq('is_deleted', false)
+      .in('status', ['pending', 'active', 'restricted'])
+      .order('name', { ascending: true });
+  
+    if (error) throw error;
     return clients;
-}
+  };
+  
 
 const usePortalClientData = (portal) => {
     const [clientData, setClientData] = useState([]);

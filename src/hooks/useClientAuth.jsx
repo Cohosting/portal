@@ -3,6 +3,7 @@ import { verifyToken } from '../services/clientAuthService'
 import { useToggle } from 'react-use';
 import axiosInstance from '../api/axiosConfig';
 import { toast } from 'react-toastify';
+import { supabase } from '@/lib/supabase';
 
 export const useClientAuth = (portal_id) => {
     const [clientUser, setClientUser] = useState(null);
@@ -34,6 +35,23 @@ export const useClientAuth = (portal_id) => {
         toggleIsOpen(true);
         try {
 
+            const { data: client, error } = await supabase.from('clients').select('*').eq('portal_id', portalId).eq('email', email).single();
+            if (error) {
+                setAuthenticationError('Email or password incorrect');
+                toast.error('Email or password incorrect');
+                return;
+            }
+            if (!client) {
+                setAuthenticationError('Email or password incorrect');
+                toast.error('Email or password incorrect');
+                return;
+            }
+            if(client.is_deleted) {
+                setAuthenticationError('Email or password incorrect');
+                toast.error('Email or password incorrect');
+                return;
+            }
+
             const { data } = await axiosInstance.post('/auth/sign-in', {
                 email,
                 password,
@@ -52,8 +70,10 @@ export const useClientAuth = (portal_id) => {
             setAuthenticationError('Email or password incorrect');
             toast.error('Email or password incorrect');
             console.error('Authentication error:', error);
+        } finally {
+            toggleIsOpen(false);
         }
-        toggleIsOpen(false);
+      
     };
 
     const setSessionToken = (token) => {

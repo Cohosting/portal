@@ -53,7 +53,10 @@ const ClientTable = ({ clients, refetch }) => {
                 setLoading(true);
                 const { error } = await supabase
                     .from('clients')
-                    .delete()
+                    .update({
+                      status: 'archived',
+                      is_deleted: true
+                    })
                     .eq('id', clientToDelete.id);
 
           if (error) throw error;
@@ -177,15 +180,20 @@ const ClientTable = ({ clients, refetch }) => {
                                           Delete
                                       </button>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
-                                      <button
+                                  {
+                                    (client.status === 'pending' || client.status === 'restricted') && (
+                                      <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
+                                        <button
                                           onClick={() => handleSendEmail(client)}
                                           className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
-                                      >
+                                        >
                                           <Mail className="h-5 w-5 text-green-500 mr-2" />
                                           Invite
-                                      </button>
-                                  </DropdownMenuItem>
+                                        </button>
+                                      </DropdownMenuItem>
+                                    )
+                                  }
+ 
                               </DropdownMenuContent>
                           </DropdownMenu>
                       </td>

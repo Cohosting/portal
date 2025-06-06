@@ -35,9 +35,7 @@ export const InviteForm = ({
 
   const handleChange = e => {
     let value = e.target.value;
-    if (e.target.name === 'email') {
-      value = value.trim();
-    }
+ 
     setInviteState({
       ...inviteState,
       [e.target.name]: value,
@@ -86,6 +84,8 @@ export const InviteForm = ({
   const updateClient = async () => {
     try {
       setIsLoading(true);
+
+    
       const { data, error } = await supabase
         .from('clients')
         .update({ name: inviteState.name })
@@ -108,47 +108,75 @@ export const InviteForm = ({
 
   const addNewClientToPortal = async () => {
     setIsLoading(true);
-
+    let email = inviteState.email.trim();
+  
     try {
       const { data: existingClient, error: checkError } = await supabase
         .from('clients')
         .select('*')
         .eq('portal_id', portal.id)
-        .eq('email', inviteState.email)
+        .eq('email', email)
         .single();
-
+  
+      // PGRST116 means “no rows found.” If we get a different error, bail out.
       if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
       }
-
+  
       if (existingClient) {
-        setIsError('Client already exists');
+        if (!existingClient.is_deleted) {
+          setIsError('Client already exists');
+          return;
+        }
+
+        const { data: restoredClient, error: restoreError } = await supabase
+          .from('clients')
+          .update({
+            is_deleted: false,
+            status: 'pending',
+            name: inviteState.name,
+            activated_at: new Date().toISOString(),
+            invitation_token: null,
+            token_expires_at: null,
+            token_used: false,
+          })
+          .eq('id', existingClient.id)
+          .select()
+          .single();
+  
+        if (restoreError) throw restoreError;
+        console.log({restoredClient})
+
+  
+        setTemporaryClient(restoredClient);
+        onClose();
+        onToggleSuccess(restoredClient);
         return;
       }
-
+ 
       const stripeCustomer = await registerClientWithStripe(
-        inviteState.email,
+        email,
         null,
         portal.stripe_connect_account_id
       );
-
+  
       const { data: insertedClient, error: insertError } = await supabase
         .rpc('register_client_in_portal', {
-          p_email: inviteState.email,
+          p_email: email,
           p_name: inviteState.name,
           p_portal_id: portal.id,
           p_stripe_customer_id: stripeCustomer.id
         });
-
+  
       if (insertError) throw insertError;
-
+  
       setTemporaryClient(insertedClient);
       onClose();
       onToggleSuccess(insertedClient);
     } catch (err) {
       console.error('Error in addNewClientToPortal:', err);
       setIsError(err.message);
-
+  
       if (err.stripeCustomerId) {
         console.error(`Orphaned Stripe customer created: ${err.stripeCustomerId}`);
       }
@@ -156,7 +184,7 @@ export const InviteForm = ({
       setIsLoading(false);
     }
   };
-
+  
   useEffect(() => {
     if (isEditing && clientToEdit) {
       setInviteState({
