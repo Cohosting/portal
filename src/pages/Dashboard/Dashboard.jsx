@@ -20,12 +20,12 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import PageHeader from '@/components/internal/PageHeader';
 import DashboardSkeleton from '@/components/SkeletonLoading';
 import { DateTime } from 'luxon';
+import RecentActivitiesList from '@/components/RecentActivities';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { currentSelectedPortal } = useSelector(state => state.auth);
-  const { data: recentActivities } = useRecentActivities(currentSelectedPortal);
-
+ 
   const { data: portal, isLoading: isPortalLoading } = usePortalData(currentSelectedPortal);
   const [summary, setSummary] = useState({
     total_clients: { value: 0, change: 0 },
@@ -121,42 +121,9 @@ export const Dashboard = () => {
               </div>
 
               {/* Updated section: Scrollable Recent Activities */}
-              <div className="divide-y divide-gray-100 overflow-y-auto max-h-96">
-                {recentActivities?.length > 0 ? (
-                  recentActivities.map((activity) => (
-                    <div key={activity.id} className="p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="p-2 bg-indigo-50 rounded-full">
-                            <FileText className="h-5 w-5 text-indigo-600" />
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {activity.title}
-                            </p>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              Draft
-                            </span>
-                          </div>
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Clock className="flex-shrink-0 mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                            <span>{DateTime.fromISO(activity.created_at).toRelative()}</span>
-                          </div>
-                        </div>
-                        <button className="ml-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                    <AlertCircle className="h-10 w-10 text-gray-300 mb-3" />
-                    <p className="text-sm text-gray-500">No recent activities</p>
-                  </div>
-                )}
+              <div className="divide-y divide-gray-100 overflow-y-auto max-h-100">
+                   <RecentActivitiesList portal_id={currentSelectedPortal} />
+               
               </div>
             </div>
           </div>
