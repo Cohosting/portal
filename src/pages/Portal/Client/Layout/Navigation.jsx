@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { lighten, transparentize } from "polished";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,9 @@ import {
   HelpCircle,
   MessageSquare,
   FileText,
-  CreditCard
+  CreditCard,
+  ChevronDown,
+  MapPin
 } from "lucide-react";
 import { PreloadedIcons } from "@/components/preloaded-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +17,7 @@ import { useClientAuth } from "@/hooks/useClientAuth";
 import { classNames } from "../../../../utils/statusStyles";
 import { useMediaQuery } from 'react-responsive';
 import { useSidebar } from '@/components/ui/sidebar';
+import AddressModal from '@/components/Modal/AddressModal';
 
 // ----------------------------------------------
 // 1. Static fallback icon map
@@ -81,6 +84,11 @@ const Navigation = ({ portal_apps, portal }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpen } = useSidebar();
+  
+  // State for address modal and dropdown
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
@@ -102,6 +110,41 @@ const Navigation = ({ portal_apps, portal }) => {
     const [first, second] = clientUser.name.split(" ");
     return (first?.[0] + (second?.[0] || '')).toUpperCase();
   };
+
+  const handleAddressAction = () => {
+    setIsAddressModalOpen(true);
+    setIsDropdownOpen(false);
+    // Close sidebar on mobile when address action is clicked
+    if (isLessThan1024) {
+      setOpen(false);
+    }
+  };
+
+  const closeAddressModal = () => {
+    setIsAddressModalOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Check if user has an address (you might need to adjust this based on your data structure)
+  const hasAddress = clientUser?.address || clientUser?.street || clientUser?.city;
+  const addressActionText = hasAddress ? "Update Address" : "Set Address";
 
   return (
     <div
@@ -131,9 +174,7 @@ const Navigation = ({ portal_apps, portal }) => {
                       setOpen(false);
                     }
                     navigate(`/portal/${item.name.toLowerCase()}`)
-
-                
-                }}
+                  }}
                   className={classNames(
                     'group flex gap-x-3 px-6 py-3 text-sm font-semibold leading-6 w-full',
                     { 'hover:bg-opacity-20': !active }
@@ -179,34 +220,55 @@ const Navigation = ({ portal_apps, portal }) => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center mb-4 px-6 w-full">
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage
-                  src={clientUser?.profilePicture || clientUser?.avatar || ""}
-                  alt={clientUser?.name || "User"}
-                />
-                <AvatarFallback className="bg-gray-200 text-gray-700">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="ml-3 flex-1 min-w-0">
-                {clientUser?.name && (
-                  <p
-                    className="text-sm font-medium overflow-hidden whitespace-nowrap truncate"
+            <div className="flex items-center mb-4 px-6 w-full relative" ref={dropdownRef}>
+              <button 
+                onClick={toggleDropdown}
+                className="flex items-center w-full hover:opacity-80 transition-opacity"
+                style={{ color: sidebarTextColor }}
+              >
+                <Avatar className="h-10 w-10 shrink-0">
+                  <AvatarImage
+                    src={clientUser?.profilePicture || clientUser?.avatar || ""}
+                    alt={clientUser?.name || "User"}
+                  />
+                  <AvatarFallback className="bg-gray-200 text-gray-700">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="ml-3 flex-1 min-w-0">
+                  {clientUser?.name && (
+                    <p className="text-sm font-medium overflow-hidden whitespace-nowrap truncate">
+                      {clientUser.name}
+                    </p>
+                  )}
+                  {clientUser?.email && (
+                    <p className="text-xs overflow-hidden whitespace-nowrap truncate opacity-75">
+                      {clientUser.email}
+                    </p>
+                  )}
+                </div>
+                <ChevronDown className={`h-4 w-4 ml-2 shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {/* Custom Dropdown */}
+              {isDropdownOpen && (
+                <div 
+                  className="absolute top-full left-0 right-0 mt-2 mx-3 rounded-md shadow-lg border z-50"
+                  style={{ 
+                    backgroundColor: sidebarBgColor || 'white',
+                    borderColor: `${loginButtonColor}44`
+                  }}
+                >
+                  <button
+                    onClick={handleAddressAction}
+                    className="w-full px-4 py-3 text-left text-sm hover:opacity-80 transition-opacity flex items-center"
                     style={{ color: sidebarTextColor }}
                   >
-                    {clientUser.name}
-                  </p>
-                )}
-                {clientUser?.email && (
-                  <p
-                    className="text-xs overflow-hidden whitespace-nowrap truncate opacity-75"
-                    style={{ color: sidebarTextColor }}
-                  >
-                    {clientUser.email}
-                  </p>
-                )}
-              </div>
+                    <MapPin className="mr-2 h-4 w-4" />
+                    {addressActionText}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -230,6 +292,11 @@ const Navigation = ({ portal_apps, portal }) => {
           )}
         </div>
       </nav>
+
+      <AddressModal
+        isOpen={isAddressModalOpen}
+        onClose={closeAddressModal}
+      />  
     </div>
   );
 };

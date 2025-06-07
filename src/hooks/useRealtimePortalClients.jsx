@@ -11,6 +11,8 @@ export const useRealtimePortalClients = (user, portal) => {
             const { data, error } = await supabase
                 .from('clients')
                 .select('*')
+                .eq('is_deleted', false)
+                .eq('status', 'active')
                 .eq('portal_id', portal.id);
 
             if (error) {

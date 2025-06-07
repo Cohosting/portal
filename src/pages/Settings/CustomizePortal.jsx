@@ -345,7 +345,7 @@ export const CustomizePortal = () => {
  
           <DialogContent className="sm:max-w-[700px] bg-white w-[95vw]">
             <DialogHeader>
-              <DialogTitle>Client Dashboard and login page preview</DialogTitle>
+              <DialogTitle>Client Dashboard </DialogTitle>
             </DialogHeader>
             <ClientPreview
               brandName={brandName}
@@ -354,7 +354,7 @@ export const CustomizePortal = () => {
               sidebarTextColor={sidebarTextColor}
               sidebarActiveTextColor={sidebarActiveTextColor}
             />
-            <LoginPreview brandSettings={brandSettings} />
+            {/* <LoginPreview brandSettings={brandSettings}  /> */}
           </DialogContent>
         </Dialog>
       </div>

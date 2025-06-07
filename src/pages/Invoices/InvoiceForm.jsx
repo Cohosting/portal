@@ -109,8 +109,7 @@ export const InvoiceForm = () => {
     isSubmitting,
     fetchError,
   } = useInvoice({ settings });
-console.log(invoiceState)
-  const handleSubmit = async () => {
+   const handleSubmit = async () => {
     try {
       let result;
       if (mode === 'edit') {
@@ -261,7 +260,7 @@ console.log(invoiceState)
               </PopoverTrigger>
               <PopoverContent className="w-full p-0 bg-white">
                 <Command>
-                  <CommandInput placeholder="Search clients..." />
+                  <CommandInput className='focus:outline-none  ' placeholder="Search clients..." />
                   <CommandEmpty>No client found.</CommandEmpty>
                   <ScrollArea className="max-h-72">
                     <CommandGroup>

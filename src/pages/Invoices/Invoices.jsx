@@ -24,29 +24,31 @@ export const Invoices = () => {
   useEffect(() => {
     if (!portal) return;
 
-    const fetchInvoices = async () => {
-      toggleOpen(true);
+const fetchInvoices = async () => {
+  toggleOpen(true);
 
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*, clients(*)')
-        .eq('portal_id', portal.id);
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('*, clients(*)')
+    .eq('portal_id', portal.id)
+    .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching invoices:', error);
-      } else {
-        const mappedInvoices = data.map((invoice) => {
-          const { clients, ...rest } = invoice;
-          return {
-            ...rest,
-            client: clients,
-          };
-        });
-        setInvoices(mappedInvoices);
-      }
+  if (error) {
+    console.error('Error fetching invoices:', error);
+  } else {
+    const mappedInvoices = data.map((invoice) => {
+      const { clients, ...rest } = invoice;
+      return {
+        ...rest,
+        client: clients,
+      };
+    });
+    setInvoices(mappedInvoices);
+  }
 
-      toggleOpen(false);
-    };
+  toggleOpen(false);
+};
+
 
     fetchInvoices();
 
