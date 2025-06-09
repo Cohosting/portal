@@ -208,7 +208,7 @@ const InvoiceTable = ({
                       {calculateTotal(invoice.line_items)}$
                     </td>
                     <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                      #{invoice.invoice_number}
+                     {invoice.invoice_number}
                     </td>
                     <td className="px-3 py-4 text-sm text-gray-500">
                       <StatusBadge status={invoice.status} />
