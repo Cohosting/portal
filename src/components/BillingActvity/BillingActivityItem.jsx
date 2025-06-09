@@ -43,7 +43,7 @@ const capitalized = (word) => {
 };
 
 const BillingActivityItem = ({ invoice, colorSettings }) => {
-    const IconComponent = statusesIcons[invoice.status.toLowerCase()];
+    const IconComponent = statusesIcons[invoice.status.toLowerCase()] || 'clock'
     const navigate = useNavigate();
 
     return (

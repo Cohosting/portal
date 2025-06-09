@@ -19,11 +19,11 @@ const formateDate = (dateString) => {
 
 
 const formatAddress = (address = {}) => {
-    const { addressLine1, addressLine2, city, stateProvince, zipPostalCode } = address || {}
+    const { line1, line2, city, state, postal_code } = address || {}
     const formattedAddress = [
-        addressLine1,
-        addressLine2,
-        `${city}, ${stateProvince} ${zipPostalCode}`
+        line1,
+        line2,
+        `${city}, ${state} ${postal_code}`
     ]
         .filter(Boolean)
         .join(', ');
@@ -88,15 +88,15 @@ const InvoiceDetails = () => {
                             <ContactInfo
                                 label="From"
                                 companyName={invoice?.portal?.brand_settings?.brandName}
-                                address={formatAddress(invoice?.portal?.billing_address)}
+                                address={formatAddress(invoice?.billing_addresses?.from)}
                             />
                         </div>
                         <div className="mt-8 sm:mt-6 sm:border-t sm:border-gray-900/5 max-sm:pl-6 sm:pt-6">
 
                             <ContactInfo
                                 label="To"
-                                companyName="Tuple, Inc"
-                                address="886 Walter Street New York, NY 12345"
+                                companyName={invoice?.client?.name}
+                                address={formatAddress(invoice?.billing_addresses?.to)}
                             />
                         </div>
                     </div>

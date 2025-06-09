@@ -66,7 +66,7 @@ export const fetchInvoiceData = async (invoiceId) => {
     const { data, error } = await supabase
       .from("invoices")
       .select(
-        "*, clients(*), portal: portal_id(billing_address, brand_settings, stripe_connect_account_id)"
+        "*, clients(*), portal: portal_id(support_address, brand_settings, stripe_connect_account_id)"
       )
       .eq("id", invoiceId)
       .single();

@@ -27,4 +27,4 @@ const useAsyncLoading = () => {
     };
 }
 
-export default useAsyncLoading;;
+export default useAsyncLoading;

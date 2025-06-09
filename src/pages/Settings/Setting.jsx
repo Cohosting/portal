@@ -182,10 +182,10 @@ export const Settings = () => {
           />
         </div>
 
-        <SettingsBillingAddress
+        {/* <SettingsBillingAddress
           portalId={portal?.id}
           billingAddress={portal.billing_address}
-        />
+        /> */}
 
         <DefaultPortalSettings />
  

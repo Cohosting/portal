@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Check } from 'lucide-react';
 import { MapPin } from 'lucide-react';
@@ -7,16 +6,14 @@ import { Search } from 'lucide-react';
 import { useRef } from 'react';
 import { useAddressSearch } from '@/hooks/useAddressSearch';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
-
-
-
-
-
-
-
+import axiosInstance from '@/api/axiosConfig';
+import { supabase } from '@/lib/supabase';
+import { useClientAuth } from '@/hooks/useClientAuth';
+import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid';
 
 // Address Input Component
-const AddressInput = ({ onAddressSelect, selectedAddress }) => {
+const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
   const inputRef = useRef(null);
   const {
     query,
@@ -29,6 +26,13 @@ const AddressInput = ({ onAddressSelect, selectedAddress }) => {
     setHighlightedIndex,
     clearSearch
   } = useAddressSearch();
+
+  // Initialize with default address if provided
+  useEffect(() => {
+    if (defaultAddress && !selectedAddress) {
+      setQuery(defaultAddress.fullAddress || '');
+    }
+  }, [defaultAddress, selectedAddress, setQuery]);
 
   const handleAddressSelect = (address) => {
     clearSearch();
@@ -47,8 +51,8 @@ const AddressInput = ({ onAddressSelect, selectedAddress }) => {
     const value = e.target.value;
     setQuery(value);
     
-    // Clear selected address if user starts typing again
-    if (selectedAddress && value !== '') {
+    // Clear selected address if user starts typing something different
+    if (selectedAddress && value !== selectedAddress.place_name) {
       onAddressSelect(null);
     }
   };
@@ -59,6 +63,14 @@ const AddressInput = ({ onAddressSelect, selectedAddress }) => {
     inputRef.current?.focus();
   };
 
+  // Get the display value for the input
+  const getInputValue = () => {
+    if (selectedAddress) {
+      return selectedAddress.place_name;
+    }
+    return query;
+  };
+
   return (
     <div className="relative">
       <div className="relative">
@@ -66,26 +78,27 @@ const AddressInput = ({ onAddressSelect, selectedAddress }) => {
         <input
           ref={inputRef}
           type="text"
-          value={selectedAddress ? selectedAddress.place_name : query}
+          value={getInputValue()}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            if (query.length >= 2) setShowSuggestions(true);
+            const currentValue = getInputValue();
+            if (currentValue.length >= 2) setShowSuggestions(true);
           }}
           placeholder="Start typing your address..."
           className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           autoComplete="off"
-          readOnly={!!selectedAddress}
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
           </div>
         )}
-        {selectedAddress && (
+        {(selectedAddress || (defaultAddress && query)) && (
           <button
             onClick={handleClearSelection}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Clear address"
           >
             <X className="h-4 w-4" />
           </button>
@@ -128,35 +141,85 @@ const AddressInput = ({ onAddressSelect, selectedAddress }) => {
 };
 
 // Address Modal Component
-const AddressModal = ({ isOpen, onClose, onSave }) => {
+const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddress }) => {
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
+  console.log({
+    clientUser,
+    defaultAddress
+  });
+
+  // Convert default address to the expected format if it exists
+  useEffect(() => {
+    if (defaultAddress && isOpen) {
+      // If we have a default address, we can either:
+      // 1. Set it as selected (if it has the right format)
+      // 2. Or just let it show in the input for editing
+      
+      // For now, we'll let users see and edit the default address
+      // If you want to pre-select it, you'd need to convert defaultAddress 
+      // to the same format that comes from the address search API
+    }
+  }, [defaultAddress, isOpen]);
+
+  const handleSave = async () => {
     if (!selectedAddress) return;
-
-    // Format address data for Stripe Customer object (US only)
+  
     const addressData = {
-      id: Date.now().toString(),
-      // Stripe customer address format
+      id: uuidv4(),
       address: {
-        line1: selectedAddress.properties.address, // Required: Street address
-        line2: null, // Optional: Apartment, suite, etc.
-        city: selectedAddress.properties.locality, // Required: City
-        state: selectedAddress.properties.region, // Required: State
-        postal_code: selectedAddress.properties.postcode, // Required: ZIP code
-        country: 'US' // Fixed to US only
+        line1: selectedAddress.properties.address,
+        city: selectedAddress.properties.locality,
+        state: selectedAddress.properties.region,
+        postal_code: selectedAddress.properties.postcode,
+        country: 'US',
       },
-      // Additional metadata for display
       fullAddress: selectedAddress.place_name,
       coordinates: selectedAddress.geometry.coordinates,
-      // For internal use
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-
-    onSave(addressData);
-    handleClose();
+  
+    setLoading(true);
+  
+    try {
+      // 1️⃣ Update Stripe
+      const stripeRes = await axiosInstance.post(
+        '/stripe/connect/client/update',
+        {
+          address: addressData.address,
+          stripe_connect_account_id: portal.stripe_connect_account_id,
+          customer_id: clientUser.customer_id,
+        }
+      );
+  
+      if (stripeRes.status !== 200) {
+        throw new Error(`Stripe API returned ${stripeRes.status}`);
+      }
+  
+      // 2️⃣ Update Supabase
+      const { error } = await supabase
+        .from('clients')
+        .update({ billing_address: addressData })
+        .eq('id', clientUser.id);
+  
+      if (error) {
+        throw error;
+      }
+  
+      // ✅ Only on complete success:
+      toast.success('Address updated successfully');
+      onSave && onSave(addressData);
+      handleClose();
+  
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update address. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
-
+  
   const handleClose = () => {
     setSelectedAddress(null);
     onClose();
@@ -165,14 +228,16 @@ const AddressModal = ({ isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={handleClose} />
       
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Setup Your Address</h2>
-            <p className="text-sm text-gray-500 mt-1">The address will be appear in invoices</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {defaultAddress ? 'Update Address' : 'Setup Your Address'}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">The address will appear in invoices</p>
           </div>
           <button
             onClick={handleClose}
@@ -188,18 +253,34 @@ const AddressModal = ({ isOpen, onClose, onSave }) => {
             <AddressInput 
               onAddressSelect={setSelectedAddress}
               selectedAddress={selectedAddress}
+              defaultAddress={defaultAddress}
             />
+            
+            {/* Show current/default address info */}
+            {defaultAddress && !selectedAddress && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Current Address</span>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">{defaultAddress.fullAddress}</p>
+                <p className="text-xs text-blue-500 mt-1">Edit above to change your address</p>
+              </div>
+            )}
+
+            {/* Show newly selected address */}
             {selectedAddress && (
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">Address Selected</span>
+                  <span className="text-sm font-medium text-green-800">New Address Selected</span>
                 </div>
                 <p className="text-xs text-green-600 mt-1">{selectedAddress.place_name}</p>
               </div>
             )}
             
-            {!selectedAddress && (
+            {/* Empty state - only show when no default and no selection */}
+            {!defaultAddress && !selectedAddress && (
               <div className="mt-4 p-6 text-center text-gray-500">
                 <MapPin className="h-8 w-8 text-gray-300 mx-auto mb-3" />
                 <p className="text-sm">Start typing to search for your address</p>
@@ -218,10 +299,10 @@ const AddressModal = ({ isOpen, onClose, onSave }) => {
           </button>
           <button
             onClick={handleSave}
-            disabled={!selectedAddress}
+            disabled={!selectedAddress || loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            Save Address
+            {loading ? 'Saving...' : (defaultAddress ? 'Update Address' : 'Save Address')}
           </button>
         </div>
       </div>

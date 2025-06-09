@@ -235,7 +235,7 @@ const Navigation = ({ portal_apps, portal }) => {
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="ml-3 flex-1 min-w-0">
+                <div className="ml-3 flex-1 text-left min-w-0">
                   {clientUser?.name && (
                     <p className="text-sm font-medium overflow-hidden whitespace-nowrap truncate">
                       {clientUser.name}
@@ -296,6 +296,9 @@ const Navigation = ({ portal_apps, portal }) => {
       <AddressModal
         isOpen={isAddressModalOpen}
         onClose={closeAddressModal}
+        clientUser={clientUser}
+        portal={portal}
+        defaultAddress={clientUser?.billing_address?.address}
       />  
     </div>
   );

@@ -1,7 +1,41 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 
-export function InvoicePreview({ invoiceData, billingAddress }) {
+
+function formatClientAddress(invoiceData) {
+  const client = invoiceData.client;
+  if (!client) {
+    return "No client selected!";
+  }
+
+  const billing = client.billing_address.address;
+  // if there's no billing object or no line1, treat as "no address"
+  if (!billing?.line1) {
+    return "No address";
+  }
+
+  // build up the street lines
+  const line1 = billing.line1;
+  const line2 = billing.line2 ? `, ${billing.line2}` : "";
+  const street = `${line1}${line2}`;
+
+  // city/state/zip with sensible defaults
+  const city  = billing.city        || "Unknown";
+  const state = billing.state       || "Unknown";
+  const zip   = billing.postal_code || "Unknown";
+  const cityStateZip = `${city}, ${state} ${zip}`;
+
+  // final multi‐line block (you can join with '\n' or '<br>' as needed)
+  return {
+    street,
+    cityStateZip
+  }
+}
+export function InvoicePreview({ invoiceData, billingAddress }
+
+) {
+
+  console.log({invoiceData})
   // Format currency
   const formatCurrency = (amount) => {
     if (amount === undefined || amount === null) return "$0";
@@ -79,20 +113,18 @@ export function InvoicePreview({ invoiceData, billingAddress }) {
   const lineItems = getLineItems();
 
   // Get client details
-  const clientName = invoiceData.client?.name || "Client Name";
+  const clientName = invoiceData.client?.name || "No client selected!";
   const clientEmail = invoiceData.client?.email || "";
-  const clientAddress = invoiceData.client?.address?.street || invoiceData.client?.address || "Client Address";
-  const clientCity = invoiceData.client?.address?.city || invoiceData.client?.city || "Client City, State, ZIP";
-
+ const { street, cityStateZip } = formatClientAddress(invoiceData)
   // Get company details from settings or fallback to defaults
   const companyName =  billingAddress?.company_name  || 'No Company Name';
-  const companyAddress = billingAddress?.addressLine1 || "123 Company St, Suite 100";
-  const companyAddress2 = billingAddress?.addressLine2 ? `, ${billingAddress.addressLine2}` : "";
-  const city = billingAddress?.city ||  'Anytown';
-  const state = billingAddress?.stateProvince || "Anytown";
-  const zip = billingAddress?.zipPostalCode || "12345";
+  const companyAddress = billingAddress?.line1 || "No address";
+  const companyAddress2 = billingAddress?.line2 ? `, ${billingAddress.line2}` : companyAddress;
+  const city = billingAddress?.city ||  'Unknown';
+  const state = billingAddress?.state || "Unknown";
+  const zip = billingAddress?.postal_code || "Unknown";
   const companyCity =  `${city}, ${state} ${zip}`;
-  const companyPhone = invoiceData.settings?.company_phone || "(123) 456-7890";
+  const companyPhone = invoiceData.settings?.company_phone || "No phone";
 
   // Get invoice number, using prefix if available
   const invoiceNumber = 
@@ -154,10 +186,8 @@ export function InvoicePreview({ invoiceData, billingAddress }) {
               <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Billed By:</h3>
               <p className="text-sm sm:text-base font-medium">{companyName}</p>
               
-              <p className="text-xs sm:text-sm text-gray-600">{companyAddress} 
-                {
-                  companyAddress2 ? companyAddress2 : ""
-                }
+              <p className="text-xs sm:text-sm text-gray-600">{companyAddress2} 
+            
                  </p>
                <p className="text-xs sm:text-sm text-gray-600">{companyCity}</p>
             </div>
@@ -165,8 +195,8 @@ export function InvoicePreview({ invoiceData, billingAddress }) {
               <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Billed To:</h3>
               <p className="text-sm sm:text-base font-medium">{clientName}</p>
               <p className="text-xs sm:text-sm text-gray-600">{clientEmail}</p>
-              <p className="text-xs sm:text-sm text-gray-600">{clientAddress}</p>
-              <p className="text-xs sm:text-sm text-gray-600">{clientCity}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{street}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{cityStateZip}</p>
             </div>
           </div>
 

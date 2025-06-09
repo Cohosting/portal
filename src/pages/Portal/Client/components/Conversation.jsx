@@ -112,7 +112,7 @@ const Conversation = ({ conversationId, user, conversations, isClientExperience,
             </div>
 
 
-            <div className="sticky px-6 bottom-0 w-full bg-white z-[100]">
+            <div className="sticky px-6 bottom-0 w-full bg-white ">
                 {
                     isFloatingAlertVisible && (
                         <FloatingNewMessageAlert

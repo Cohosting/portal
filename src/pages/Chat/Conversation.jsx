@@ -162,7 +162,7 @@ const Conversation = () => {
               <div ref={messagesEndRef} />
           </div>
 
-          <div className="sticky bottom-0 w-full bg-transparent z-[100]">
+          <div className="sticky bottom-0 w-full bg-transparent ">
               <FloatingNewMessageAlert
                   onClick={() => {
                       setIsFloatingAlertVisible(false);

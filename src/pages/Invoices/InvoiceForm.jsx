@@ -360,7 +360,7 @@ export const InvoiceForm = () => {
             <h3 className="text-lg font-medium p-4 border-b border-gray-100">Preview</h3>
             <div className="p-4">
               <InvoicePreview billingAddress={{
-                ...portal?.billing_address,
+                ...portal?.support_address,
                 company_name: portal?.brand_settings?.brandName,
               }} invoiceData={invoiceState} />
             </div>
@@ -375,7 +375,7 @@ export const InvoiceForm = () => {
           </DialogHeader>
           <div className="overflow-y-auto h-full px-6 py-4 pb-16">
             <InvoicePreview billingAddress={{
-              ...portal?.billing_address,
+              ...portal?.support_address,
               company_name: portal?.brand_settings?.brandName,
             }} invoiceData={invoiceState} />
           </div>
