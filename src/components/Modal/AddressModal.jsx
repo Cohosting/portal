@@ -15,6 +15,8 @@ import { v4 as uuidv4 } from 'uuid';
 // Address Input Component
 const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
   const inputRef = useRef(null);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
+  
   const {
     query,
     setQuery,
@@ -29,15 +31,17 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
 
   // Initialize with default address if provided
   useEffect(() => {
-    if (defaultAddress && !selectedAddress) {
+    if (defaultAddress && !selectedAddress && !userHasInteracted) {
       setQuery(defaultAddress.fullAddress || '');
+      setShowSuggestions(false); // Explicitly hide suggestions
     }
-  }, [defaultAddress, selectedAddress, setQuery]);
+  }, [defaultAddress, selectedAddress, userHasInteracted, setQuery, setShowSuggestions]);
 
   const handleAddressSelect = (address) => {
     clearSearch();
     onAddressSelect(address);
     inputRef.current?.blur();
+    setUserHasInteracted(true);
   };
 
   const { handleKeyDown } = useKeyboardNavigation(
@@ -49,6 +53,7 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
+    setUserHasInteracted(true); // User has started interacting
     setQuery(value);
     
     // Clear selected address if user starts typing something different
@@ -60,7 +65,19 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
   const handleClearSelection = () => {
     onAddressSelect(null);
     setQuery('');
+    setShowSuggestions(false);
+    setUserHasInteracted(true);
     inputRef.current?.focus();
+  };
+
+  const handleInputFocus = () => {
+    // Only show suggestions if user has interacted or if there's no default address
+    if (!defaultAddress || userHasInteracted) {
+      const currentValue = getInputValue();
+      if (currentValue.length >= 2) {
+        setShowSuggestions(true);
+      }
+    }
   };
 
   // Get the display value for the input
@@ -69,6 +86,11 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
       return selectedAddress.place_name;
     }
     return query;
+  };
+
+  // Check if we're showing the default address (not a new selection)
+  const isShowingDefaultAddress = () => {
+    return defaultAddress && !selectedAddress && !userHasInteracted && query === defaultAddress.fullAddress;
   };
 
   return (
@@ -81,10 +103,7 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
           value={getInputValue()}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            const currentValue = getInputValue();
-            if (currentValue.length >= 2) setShowSuggestions(true);
-          }}
+          onFocus={handleInputFocus}
           placeholder="Start typing your address..."
           className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           autoComplete="off"
@@ -105,7 +124,8 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
         )}
       </div>
 
-      {showSuggestions && suggestions.length > 0 && (
+      {/* Only show suggestions if user has interacted or no default address */}
+      {showSuggestions && suggestions.length > 0 && (userHasInteracted || !defaultAddress) && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
           {suggestions.map((address, index) => (
             <button
@@ -131,7 +151,7 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
         </div>
       )}
 
-      {showSuggestions && suggestions.length === 0 && !isLoading && query.length >= 2 && (
+      {showSuggestions && suggestions.length === 0 && !isLoading && query.length >= 2 && userHasInteracted && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500 text-sm">
           No addresses found. Try a different search term.
         </div>
@@ -227,6 +247,8 @@ const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddr
 
   if (!isOpen) return null;
 
+ 
+
   return (
     <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={handleClose} />
@@ -302,7 +324,7 @@ const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddr
             disabled={!selectedAddress || loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Saving...' : (defaultAddress ? 'Update Address' : 'Save Address')}
+            {loading ?  (defaultAddress ? 'Updating...' : 'Saving...') : (defaultAddress ? 'Update Address' : 'Save Address')}
           </button>
         </div>
       </div>

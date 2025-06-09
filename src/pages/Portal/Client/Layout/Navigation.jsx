@@ -298,7 +298,7 @@ const Navigation = ({ portal_apps, portal }) => {
         onClose={closeAddressModal}
         clientUser={clientUser}
         portal={portal}
-        defaultAddress={clientUser?.billing_address?.address}
+        defaultAddress={clientUser?.billing_address}
       />  
     </div>
   );
