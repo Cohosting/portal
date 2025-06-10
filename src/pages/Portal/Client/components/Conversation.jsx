@@ -12,7 +12,7 @@ import FloatingNewMessageAlert from '../../../../components/internal/FloatingNew
 import { markAsSeen } from '../../../../services/chat'
 import { Loader2 } from 'lucide-react'
 
-const Conversation = ({ conversationId, user, conversations, isClientExperience, colorSettings }) => {
+const Conversation = ({ conversationId, user, conversations, isClientExperience, length, colorSettings }) => {
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
     const lastElementVisible = useRef(null);
     const onMount = useRef(true);
@@ -83,6 +83,7 @@ const Conversation = ({ conversationId, user, conversations, isClientExperience,
             <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
 
                 <ConversationHeader
+                length={length}
                     name={conversation?.name}
                     handleDeleteConversation={handleDeleteConversation}
                 />

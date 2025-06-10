@@ -7,6 +7,7 @@ import { useMediaQuery } from 'react-responsive';
 import PageHeader from '@/components/internal/PageHeader';
 import EmptyStateFeedback from '@/components/EmptyStateFeedback';
 import { Share2 } from 'lucide-react'; // Lucide replacement
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 
 const ClientChatLayout = ({
   conversations,
@@ -16,6 +17,8 @@ const ClientChatLayout = ({
 }) => {
   const navigate = useNavigate();
   const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
+  const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
+  const {setOpen } = useSidebar();
 
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -59,6 +62,7 @@ const ClientChatLayout = ({
       <div className="flex h-screen">
         <div className="flex-grow">
           <Conversation
+          length={conversations.length}
             hasManyConversation={false}
             user={user}
             conversationId={conversationId}
@@ -80,8 +84,16 @@ const ClientChatLayout = ({
       >
         {(!isLessThan768 || !conversationId) && (
           <div className="flex grow flex-col overflow-y-auto border-r border-gray-200 bg-white px-0">
-            <div className='border-b pb-5'>
-              <p className="px-4 pt-5 text-sm">Conversations</p>
+            <div className='border-b pb-4'>
+             
+              <p className="px-4 pt-4 text-sm flex items-center gap-x-2"> 
+                {
+                  isLessThan1024 && (
+                    <SidebarTrigger onClick={() => setOpen(true)} />
+                  )
+                }
+                  Conversations
+              </p>
             </div>
             <nav className="flex flex-1 flex-col">
               <ConversationList
@@ -101,6 +113,8 @@ const ClientChatLayout = ({
       {conversationId && (
         <div className={`flex-grow ${isLessThan768 ? 'ml-0' : 'ml-72'}`}>
           <Conversation
+                    length={conversations.length}
+
             hasManyConversation={true}
             conversations={conversations}
             isClientExperience={true}
