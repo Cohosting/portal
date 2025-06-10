@@ -1,7 +1,12 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import BillingActivityItem from './BillingActivityItem'
 
-const BillingActivityList = ({ groupedInvoices, colorSettings }) => {
+const BillingActivityList = ({ 
+  invoices, 
+  colorSettings, 
+  lastInvoiceElementRef, 
+  isLoadingMore 
+}) => {
     return (
         <table className="w-full text-left">
             <thead className="sr-only">
@@ -12,20 +17,19 @@ const BillingActivityList = ({ groupedInvoices, colorSettings }) => {
                 </tr>
             </thead>
             <tbody>
-                {groupedInvoices.map((groupInvoice) => (
-                    <Fragment key={groupInvoice.date}>
-                        <tr className="text-sm leading-6 text-gray-900">
-                            <th scope="colgroup" colSpan={3} className="relative isolate py-2 font-semibold">
-                                <time dateTime={groupInvoice.date}>{groupInvoice.date}</time>
-                                <div className="absolute inset-y-0 right-full -z-10 w-screen border-b border-gray-200 bg-gray-50" />
-                                <div className="absolute inset-y-0 left-0 -z-10 w-screen border-b border-gray-200 bg-gray-50" />
-                            </th>
-                        </tr>
-                        {groupInvoice.invoices.map((invoice) => (
-                            <BillingActivityItem colorSettings={colorSettings} key={invoice.id} invoice={invoice} />
-                        ))}
-                    </Fragment>
-                ))}
+                {invoices.map((invoice, index) => {
+                    const isLastInvoice = index === invoices.length - 1;
+                    
+                    return (
+                        <BillingActivityItem 
+                            key={invoice.id} 
+                            invoice={invoice} 
+                            colorSettings={colorSettings}
+                            ref={isLastInvoice ? lastInvoiceElementRef : null}
+                            isLastItem={isLastInvoice}
+                        />
+                    );
+                })}
             </tbody>
         </table>
     )

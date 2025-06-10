@@ -122,7 +122,12 @@ export const fetchInvoices = async (filters) => {
       query = query.ilike("invoice_number", `%${searchInvoiceId}%`);
     }
 
-    query = query.eq("portal_id", portalId).eq("client_id", clientId);
+    // Exclude draft invoices and add sorting
+    query = query
+      .eq("portal_id", portalId)
+      .eq("client_id", clientId)
+      .neq("status", "Draft")
+      .order("created_at", { ascending: false });
 
     const { data, error } = await query;
 
@@ -137,7 +142,6 @@ export const fetchInvoices = async (filters) => {
     return { success: false, message: "Unexpected error occurred", error: err };
   }
 };
-
 export const fetchInvoiceCounts = async (portal_id, client_id) => {
   const { data, error } = await supabase.rpc("get_invoice_counts", {
     portal_id,
