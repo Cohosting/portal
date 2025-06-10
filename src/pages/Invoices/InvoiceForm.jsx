@@ -181,7 +181,7 @@ export const InvoiceForm = () => {
         action={
           <div className="flex space-x-2">
             <Button
-              className="lg:hidden bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+              className="lg:hidden max-sm:hidden bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded-md text-sm font-medium flex items-center"
               onClick={() => setPreviewDialogOpen(true)}
             >
               <Eye className="h-4 w-4 mr-2" />
@@ -214,7 +214,17 @@ export const InvoiceForm = () => {
 
       <div className="flex flex-col lg:flex-row gap-6 py-4 px-5">
         <div className="w-full lg:w-1/2 lg:max-w-[700px]">
+        <div className='flex items-center justify-end'>
+            <Button
+  className="sm:hidden bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 rounded-md text-sm font-medium flex items-center"
+  onClick={() => setPreviewDialogOpen(true)}
+>
+  <Eye className="h-4 w-4 mr-2" />
+  Preview
+</Button>
+            </div>
           <div className="space-y-4 mb-4">
+
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input

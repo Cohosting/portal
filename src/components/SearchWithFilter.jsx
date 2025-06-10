@@ -156,7 +156,7 @@ export default function SearchWithFilter({
 
   return (
     <div className="bg-background">
-      <div className="max-w-4xl p-6 pb-0">
+      <div className="max-w-4xl p-6 max-sm:px-4 pb-0">
         
         {/* Search and Filter Container */}
         <div className="relative">

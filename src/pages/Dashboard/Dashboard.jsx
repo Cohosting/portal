@@ -76,7 +76,7 @@ export const Dashboard = () => {
   const summaryItems = [
     { title: 'Total Clients', value: summary.total_clients.value, icon: Users, change: formatChange(summary.total_clients.change), rawChange: summary.total_clients.change },
     { title: 'Total Invoices', value: summary.total_invoices.value, icon: FileText, change: formatChange(summary.total_invoices.change), rawChange: summary.total_invoices.change },
-    { title: 'Total Revenue', value: `${summary.total_revenue.value}`, icon: DollarSign, change: formatChange(summary.total_revenue.change, true), rawChange: summary.total_revenue.change },
+    { title: 'Total Revenue', value: `${summary.total_revenue.value}$`, icon: DollarSign, change: formatChange(summary.total_revenue.change, true), rawChange: summary.total_revenue.change },
     { title: 'Open Invoices', value: summary.open_invoices.value, icon: AlertCircle, change: formatChange(summary.open_invoices.change), rawChange: summary.open_invoices.change },
   ];
 
