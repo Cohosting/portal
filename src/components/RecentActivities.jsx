@@ -5,6 +5,7 @@ import useRecentActivities from '../hooks/react-query/useRecentActivities'
 import { Clock } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { FileText } from 'lucide-react'
+import { Loader } from 'lucide-react'
  
 
 
@@ -120,7 +121,11 @@ export default function RecentActivitiesList({ portal_id }) {
   }
 
   if (isLoading) {
-    return <div>Loading…</div>
+    return  (
+      <div className="flex items-center justify-center  ">
+        <Loader className="h-5 w-5 mt-2 animate-spin" />
+      </div>
+    )
   }
   if (isError) {
     return <div>Error loading recent activities.</div>
