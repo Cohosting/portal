@@ -32,8 +32,12 @@ const ClientChatLayout = ({
   }, [conversations, conversationId, navigate]);
 
   useEffect(() => {
-    if (conversations.length && !conversationId && !isLessThan768) {
-      navigate(`/portal/messages?conversation-id=${conversations[0].id}`, { replace: true });
+    if (conversations.length && !conversationId ) {
+      if (!isLessThan768) {
+        navigate(`/portal/messages?conversation-id=${conversations[0].id}`, { replace: true });
+      } else if (conversations.length === 1) {
+        navigate(`/portal/messages?conversation-id=${conversations[0].id}`, { replace: true });
+      }
     }
   }, [conversations, conversationId, navigate]);
 
@@ -43,7 +47,7 @@ const ClientChatLayout = ({
         <PageHeader
           title="Messages"
           description="Your chat history will appear here once portal owner start or join a conversation."
-          showSidebar={false}
+          showSidebar={true}
         />
         <div className="mt-16">
           <EmptyStateFeedback
@@ -87,7 +91,7 @@ const ClientChatLayout = ({
             <div className='border-b pb-4'>
              
               <p className="px-4 pt-4 text-sm flex items-center gap-x-2"> 
-                {
+                 {
                   isLessThan1024 && (
                     <SidebarTrigger onClick={() => setOpen(true)} />
                   )

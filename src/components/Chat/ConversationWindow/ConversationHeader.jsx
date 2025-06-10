@@ -9,9 +9,9 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 const ConversationHeader = ({
     name,
     handleDeleteConversation,
-    refetchConversations,
     participants,
     length,
+    conversationId,
 
 }) => {
     const isLessThan768 = useMediaQuery({ query: '(max-width: 768px)' });
@@ -19,19 +19,28 @@ const ConversationHeader = ({
     const navigate = useNavigate();
     const { open, setOpen } = useSidebar()
 
-    const onDeleteConversation = async () => {
-        await handleDeleteConversation();
-
-        refetchConversations && await refetchConversations();
-        if (window.location.pathname.includes('portal')) {
-            navigate('/portal/messages');
-        } else {
-            navigate('/messages');
-        }
-    }
-
+ 
     return (
         <div className="flex flex-1 items-center gap-x-4 justify-between lg:gap-x-6 ">
+
+            {
+                conversationId && isLessThan768 && (
+                    <IconButton
+                        className={'cursor-pointer'}
+                        onClick={() => window.location.hostname.includes('dashboard.') ? navigate('/messages') : navigate('/portal/messages')}
+                        variant="neutral"
+                        icon={
+                            <ChevronLeft
+                                color="#525866"
+                                aria-hidden="true"
+                                size={20}
+                                weight="bold"
+                            />
+                        }
+                        tooltip="Back"
+                    />
+                )
+            }
 
             {/* Render the back button only when hasManyConversation is true */}
             {isLessThan768 && length > 1 && (
@@ -91,7 +100,7 @@ const ConversationHeader = ({
                     options={[
                         {
                             name: "Delete Conversation",
-                            onClick: handleDeleteConversation && onDeleteConversation,
+                            onClick: handleDeleteConversation,
                         },
                     ]}
                 />

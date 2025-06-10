@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SidebarTrigger } from '../ui/sidebar';
+import { SidebarTrigger, useSidebar } from '../ui/sidebar';
 
 const PageHeader = ({
   title,
@@ -10,6 +10,7 @@ const PageHeader = ({
   titleFontSize = 'text-lg sm:text-2xl',
   descriptionFontSize = 'text-sm'
 }) => {
+  const { setOpen } = useSidebar();
   return (
     <div className="border-b border-gray-200 px-3 sm:px-6 py-3">
       <div className="flex flex-row items-center justify-between gap-4">
@@ -19,7 +20,7 @@ const PageHeader = ({
               className="lg:hidden sm:mt-[4px]"
               aria-label="Open Sidebar"
             >
-              <SidebarTrigger />
+              <SidebarTrigger onClick={() => setOpen(true)}/>
             </button>
           )}
 

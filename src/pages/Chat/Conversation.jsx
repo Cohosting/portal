@@ -15,49 +15,61 @@ import { useHandleNewMessage } from '../../hooks/conversations/useHandleNewMessa
 import { useMarkConversationAsSeen } from '../../hooks/conversations/useMarkConversationAsSeen';
 import { useScrollToEndOnMessageChange } from '../../hooks/conversations/useScrollToEndOnMessageChange';
 import { supabase } from '../../lib/supabase';
+import AlertDialog from '@/components/Modal/AlertDialog';
+import { toast } from 'react-toastify';
+import { MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const NoConversation = () => {
     const navigation = useNavigate();
 
     const handleGoBack = () => {
-      if (window.location.pathname.includes('portal')) {
-          navigation('/portal/messages');
-    } else {
-        navigation('/messages');
-    }
+        if (window.location.pathname.includes('portal')) {
+            navigation('/portal/messages');
+        } else {
+            navigation('/messages');
+        }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-md">
-                <div className="p-8 text-center">
-                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-red-50 rounded-full">
-                      <XCircle className="w-8 h-8 text-red-500" aria-hidden="true" />
-                  </div>
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                      Conversation Not Found
-                  </h2>
-                  <p className="text-gray-600">
-                      The conversation you are looking for might have been deleted or does not exist.
-                  </p>
-              </div>
-              <div className="px-8 py-4 bg-gray-50 rounded-b-lg">
-                  <Link href="/conversations">
-                      <button
-                          onClick={handleGoBack}
-                          className="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-                      >
-                          Go Back to Conversations
-                      </button>
-                  </Link>
-              </div>
-          </div>
-      </div>
+        <div className="flex flex-col items-center justify-center h-full  mt-24 p-8">
+            <div className="text-center max-w-md">
+                {/* Icon */}
+                <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full">
+                    <MessageCircle className="w-10 h-10 text-gray-400" />
+                </div>
+                
+                {/* Title */}
+                <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+                    No Conversation Selected
+                </h2>
+                
+                {/* Description */}
+                <p className="text-gray-500 mb-8 leading-relaxed">
+                    The conversation you're looking for might have been deleted or doesn't exist. 
+                    Please select a conversation from the sidebar or start a new one.
+                </p>
+                
+                {/* Action Button */}
+                <Button
+                    onClick={handleGoBack}
+                    variant="outline"
+                    
+                >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Messages
+                </Button>
+            </div>
+        </div>
     );
 };
-
 const Conversation = () => {
     const { conversationId } = useParams();
+    const [isOpen, setIsOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const navigate = useNavigate();
+
     const lastElementVisible = useRef(null);
     const containerRef = useRef(null);
     const [isFloatingAlertVisible, setIsFloatingAlertVisible] = useState(false);
@@ -128,18 +140,39 @@ const Conversation = () => {
       return <NoConversation />;
   }
 
+
+            const handleConfirmDelete = async () => {
+
+                try {
+                    setIsDeleting(true);
+                    await handleDeleteConversation();
+                    refetchConversations && await refetchConversations();
+                    if (window.location.pathname.includes('portal')) {
+                        navigate('/portal/messages');
+                    } else {
+                        navigate('/messages');
+                    }
+                } catch (error) {
+                    console.error('Error deleting conversation:', error);
+                    toast.error('Failed to delete conversation');
+                } finally {
+                    setIsDeleting(false);
+                }
+          
+            }
     return (
         <div ref={containerRef} className="p-6 px-4 pl-0 pt-0 pb-0 min-h-screen flex flex-col">
           {!messages && <div className="text-center mt-4">No messages</div>}
 
           <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
               <ConversationHeader
+              conversationId={conversationId}
                   name={
                       conversation?.participants === 1
                           ? conversation?.participants.map(participant => participant.name).join(', ')
                           : conversation?.name
                   }
-                  handleDeleteConversation={handleDeleteConversation}
+                  handleDeleteConversation={() => setIsOpen(true)}
                   refetchConversations={refetchConversations}
                   participants={conversation.participants}
               />
@@ -185,6 +218,16 @@ const Conversation = () => {
                   />
               </div>
           </div>
+        <AlertDialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Conversation"
+        message="Are you sure you want to delete this conversation?"
+        confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+        confirmButtonColor="bg-red-500"
+      />
+
       </div>
   );
 };
