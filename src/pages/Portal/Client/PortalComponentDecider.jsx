@@ -3,6 +3,7 @@ import { PortalAppRender } from './AppRenderer';
 import { useParams } from 'react-router-dom';
 import ClientBillingActivity from './ClientBillingActivity';
 import Chat from './ClientChat';
+import ClientFiles from './ClientFiles';
 
 export const PortalComponentDecider = ({ portalData }) => {
   const { portalName } = useParams();
@@ -10,11 +11,7 @@ export const PortalComponentDecider = ({ portalData }) => {
     case 'messages':
       return <Chat portalData={portalData} />;
     case 'files':
-      return (
-        <div>
-          <h1>Files</h1>
-        </div>
-      );
+      return  <ClientFiles />
     case 'billings':
       return <ClientBillingActivity />;
 

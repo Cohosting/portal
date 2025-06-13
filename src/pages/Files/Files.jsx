@@ -14,7 +14,7 @@ import ShareModal from './ShareModal'; // Import the ShareModal component
 
 const STORAGE_BUCKET = 'file-storage';
 
-const FileManager = () => {
+const Files = () => {
   const [items, setItems] = useState([]);
   const [allFolders, setAllFolders] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -1186,4 +1186,4 @@ const FileManager = () => {
   );
 };
 
-export default FileManager;
+export default Files;

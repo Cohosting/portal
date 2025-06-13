@@ -238,14 +238,7 @@ deserunt mollit anim id est laborum.`}
               </div>
             )}
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="ml-4"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+     
           </div>
         </DialogHeader>
         
