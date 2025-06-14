@@ -48,6 +48,10 @@ export const initializeOrganizationSetup = async (
   createCustomer
 ) => {
   try {
+    if (!navigator.onLine) {
+      throw new Error("You appear to be offline. Please connect to the internet to continue.");
+    }
+
     validateInput(user, personalInfoStep, businessDetailsStep);
 
     const { data: portalData, error: portalError } = await supabase
@@ -56,14 +60,17 @@ export const initializeOrganizationSetup = async (
       .eq('created_by', user.id)
       .single();
 
+    if (portalError || !portalData) {
+      throw new Error("Failed to load portal data. Please check your connection.");
+    }
+
     const customer_id = await createCustomer(
       portalData,
       { uid: user.id, email: user.email },
       portalData.id
     );
 
-    // update portal existing data
-    const { data: updatedPortal } = await supabase
+    const { data: updatedPortal, error: updateError } = await supabase
       .from('portals')
       .update({
         portal_url: personalInfoStep.portal_url,
@@ -86,6 +93,10 @@ export const initializeOrganizationSetup = async (
       .eq('id', portalData.id)
       .select('*');
 
+    if (updateError || !updatedPortal) {
+      throw new Error("Failed to update portal data.");
+    }
+
     await supabase
       .from('users')
       .update({
@@ -99,10 +110,10 @@ export const initializeOrganizationSetup = async (
       .eq('id', user.id);
   } catch (error) {
     console.error('Error during organization setup:', error);
-
     throw error;
   }
 };
+
 export const initializeUser = async user => {
   return await getOrCreateUser(user, {
     is_profile_completed: false,

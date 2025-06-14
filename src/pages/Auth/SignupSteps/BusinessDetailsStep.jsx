@@ -1,4 +1,3 @@
-// BusinessDetailsStep with shadcn UI
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clients, industries, sizes, types } from "../../../utils/constant";
@@ -8,7 +7,6 @@ import { initializeOrganizationSetup } from "../../../utils/signupUtils";
 import useCustomerOnDemand from "../../../hooks/useCustomerOnDemand";
 import { Briefcase, Users, Building } from 'lucide-react';
 
-// Import shadcn components
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,19 +20,21 @@ import {
 const BusinessDetailsStep = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { personalInfoStep, businessDetailsStep, user, step, currentSelectedPortal } = useSelector((state) => state.auth);
+  const { personalInfoStep, businessDetailsStep, user, step } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const createCustomer = useCustomerOnDemand();
 
   const setupOrganizationAndNavigate = async () => {
     try {
       setIsLoading(true);
+      setError('');
+
       await initializeOrganizationSetup(user, personalInfoStep, businessDetailsStep, createCustomer);
-      dispatch(setStep(step + 1)); // Move to success page instead of redirecting
-      // window.location.href = '/';
+      dispatch(setStep(step + 1)); // Go to success page or next step
+
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong.");
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,7 @@ const BusinessDetailsStep = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-5">
-        {/* Industry Field */}
+        {/* Industry */}
         <div className="space-y-2">
           <Label htmlFor="industry">Which industry are you in?</Label>
           <div className="relative">
@@ -77,7 +77,7 @@ const BusinessDetailsStep = () => {
           </div>
         </div>
 
-        {/* Company Size Field */}
+        {/* Company Size */}
         <div className="space-y-2">
           <Label htmlFor="company-size">How large is your company?</Label>
           <div className="relative">
@@ -100,7 +100,7 @@ const BusinessDetailsStep = () => {
           </div>
         </div>
 
-        {/* Number of Clients Field */}
+        {/* Clients */}
         <div className="space-y-2">
           <Label htmlFor="clients">How many clients do you have?</Label>
           <div className="relative">
@@ -123,7 +123,7 @@ const BusinessDetailsStep = () => {
           </div>
         </div>
 
-        {/* Type of Service Field */}
+        {/* Type of Service */}
         <div className="space-y-2">
           <Label htmlFor="type-of-service">Do you serve companies, individuals, or a mix of both?</Label>
           <div className="relative">
@@ -146,8 +146,12 @@ const BusinessDetailsStep = () => {
           </div>
         </div>
 
-        {error && <p className="text-red-500">{error}</p>}
+        {/* Error Message */}
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
 
+        {/* Navigation Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button 
             variant="outline"
