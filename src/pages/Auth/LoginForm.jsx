@@ -40,33 +40,37 @@ export function LoginForm({ className, ...props }) {
   const handleEmailPasswordLogin = async (e) => {
     e.preventDefault();
     const { email, password } = userCredentials;
+  
     if (!email || !password) {
       setError("Email and password are required.");
       return;
     }
-
+  
+    if (!navigator.onLine) {
+      setError("You appear to be offline. Please check your internet connection.");
+      return;
+    }
+  
     setIsLoading(true);
     try {
       const {
         data: { user },
         error,
-      } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      } = await supabase.auth.signInWithPassword({ email, password });
+  
       if (error) {
         throw error;
       }
-
+  
       dispatch(setIsAuthenticated(true));
-      navigate("/"); // Redirect to home page
+      navigate("/");
     } catch (error) {
       handleSupabaseError(error, setError);
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <Layout>
@@ -79,7 +83,7 @@ export function LoginForm({ className, ...props }) {
           <CardContent>
             <form onSubmit={handleEmailPasswordLogin}>
               <div className="grid gap-6">
-                <div className="grid gap-6">
+                <div className="grid gap-3">
                   {/* Email Field */}
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
@@ -96,7 +100,7 @@ export function LoginForm({ className, ...props }) {
                   </div>
 
                   {/* Password Field with Visibility Toggle */}
-                  <div className="grid gap-2">
+                  <div className="grid gap-0">
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
                       <Button

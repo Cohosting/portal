@@ -162,15 +162,20 @@ const ClientTable = ({ clients, refetch }) => {
                                   <MoreVertical className="h-5 w-5" />
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-32 bg-white p-0">
-                                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
-                                      <button
-                                          onClick={() => handleEditClick(client)}
-                                          className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
-                                      >
-                                          <Pencil className="h-5 w-5 mr-2" />
-                                          Edit
-                                      </button>
-                                  </DropdownMenuItem>
+                                 {
+                                    client.status !== 'active' && (
+                                        <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
+                                        <button
+                                            onClick={() => handleEditClick(client)}
+                                            className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                        >
+                                            <Pencil className="h-5 w-5 mr-2" />
+                                            Edit
+                                        </button>
+                                    </DropdownMenuItem>
+                                    )
+                                 }
+   
                                   <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
                                       <button
                                           onClick={() => handleDeleteClick(client)}
@@ -181,7 +186,7 @@ const ClientTable = ({ clients, refetch }) => {
                                       </button>
                                   </DropdownMenuItem>
                                   {
-                                    (client.status === 'pending' || client.status === 'restricted') && (
+                                    (client.status === 'pending' || client.status === 'restricted')  && (
                                       <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
                                         <button
                                           onClick={() => handleSendEmail(client)}
@@ -207,7 +212,7 @@ const ClientTable = ({ clients, refetch }) => {
           <AlertDialog
               title={'Are you sure you want to delete this client?'}
               message={'This action cannot be undone.'}
-              confirmButtonText={loading ? 'Deleting...' : 'Delete'}
+              confirmButtonText={loading ? 'Deleting...' : 'Yes, delete'}
               cancelButtonText={'Cancel'}
               isOpen={isDeleteModalOpen}
               onClose={() => setIsDeleteModalOpen(false)}
