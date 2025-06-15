@@ -25,6 +25,9 @@ import { AlertCircle } from 'lucide-react';
 
 const ConnectStripeAccount = ({ portal, isLoading, createStripeAccount }) => {
   if (portal && !portal.stripe_connect_account_id) {
+    console.log({
+      portal
+    })
     return (
       <>
         <SectionHeader
@@ -116,6 +119,11 @@ export const Settings = () => {
   );
 
   const createStripeAccount = async () => {
+    if (!navigator.onLine) {
+      toast.error("You appear to be offline. Please connect to the internet and try again.");
+      return;
+    }
+  
     try {
       await createStripeConnectAccount(
         portal.created_by,
@@ -125,10 +133,16 @@ export const Settings = () => {
       );
     } catch (err) {
       console.error('Error connecting to Stripe:', err);
-      toast.error('Failed to connect to Stripe. Please try again later.');
+  
+      const message =
+        err instanceof TypeError && err.message.toLowerCase().includes("fetch")
+          ? "Network error. Please check your internet connection."
+          : "Failed to connect to Stripe. Please try again later.";
+  
+      toast.error(message);
     }
   };
-
+  
   useEffect(() => {
     if (portal?.settings) {
       setSettings(portal.settings);
@@ -152,6 +166,8 @@ export const Settings = () => {
       </Layout>
     )
   }
+
+  console.log({stripeUser})
  
   return (
     <Layout hideMobileNav headerName="Settings">
@@ -182,11 +198,7 @@ export const Settings = () => {
           />
         </div>
 
-        {/* <SettingsBillingAddress
-          portalId={portal?.id}
-          billingAddress={portal.billing_address}
-        /> */}
-
+ 
         <DefaultPortalSettings />
  
         <CustomDomainForm 

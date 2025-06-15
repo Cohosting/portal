@@ -112,7 +112,6 @@ export default function RecentActivitiesList({ portal_id }) {
                   </div>
                 </div>
 
-                {/* Always show chevron */}
                 <button className="ml-4 p-1.5 rounded-full hover:bg-blue-50 transition-colors">
                   <ChevronRight className="h-4 w-4 text-blue-600" />
                 </button>
@@ -127,42 +126,44 @@ export default function RecentActivitiesList({ portal_id }) {
         )}
       </div>
 
-      {/* Neutral ghost pagination */}
-      <div className="mt-4 px-4 py-3 flex items-center justify-end space-x-6 text-gray-600">
-        <button
-          onClick={goPrev}
-          disabled={pageIndex === 0 || isFetching}
-          className={`flex items-center space-x-1 text-sm font-medium ${
-            pageIndex === 0 || isFetching
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'hover:text-gray-800'
-          }`}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span>Previous</span>
-        </button>
+      {/* Render pagination only if there are more pages or previous pages */}
+      {recentActivities.length > 0 && (pageIndex > 0 || hasMore) && (
+        <div className="mt-4 px-4 py-3 flex items-center justify-end space-x-6 text-gray-600">
+          <button
+            onClick={goPrev}
+            disabled={pageIndex === 0 || isFetching}
+            className={`flex items-center space-x-1 text-sm font-medium ${
+              pageIndex === 0 || isFetching
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'hover:text-gray-800'
+            }`}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Previous</span>
+          </button>
 
-        <span className="text-sm text-gray-700">
-          Page {pageIndex + 1}
-        </span>
+          <span className="text-sm text-gray-700">
+            Page {pageIndex + 1}
+          </span>
 
-        <button
-          onClick={goNext}
-          disabled={!hasMore || isFetching}
-          className={`flex items-center space-x-1 text-sm font-medium ${
-            !hasMore || isFetching
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'hover:text-gray-800'
-          }`}
-        >
-          <span>Next</span>
-          {isFetching ? (
-            <Loader className="h-4 w-4 animate-spin text-gray-600" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </button>
-      </div>
+          <button
+            onClick={goNext}
+            disabled={!hasMore || isFetching}
+            className={`flex items-center space-x-1 text-sm font-medium ${
+              !hasMore || isFetching
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'hover:text-gray-800'
+            }`}
+          >
+            <span>Next</span>
+            {isFetching ? (
+              <Loader className="h-4 w-4 animate-spin text-gray-600" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      )}
     </>
   )
 }
