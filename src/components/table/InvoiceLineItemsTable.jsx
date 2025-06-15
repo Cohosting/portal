@@ -128,7 +128,7 @@ const InvoiceLineItemsTable = ({
 
                             return (
                                 <tr key={item.id} className="border-b last:border-0 border-gray-200">
-                                    <td className="max-w-0 py-5 pr-3 text-sm sm:pl-0">
+                                    <td className="max-w-0 py-5 pb-0 pr-3 text-sm sm:pl-0">
                                         <div className="sm:hidden font-semibold mb-2">#{index + 1}</div>
                                         <MobileLabel>Description</MobileLabel>
                                         <div className="space-y-2">
@@ -184,7 +184,7 @@ const InvoiceLineItemsTable = ({
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">
+                                    <td className="hidden px-3 py-5 pb-0 text-right text-sm text-gray-500 sm:table-cell">
                                         <div className="space-y-2">
                                             <Input
                                                 type="number"
@@ -202,7 +202,7 @@ const InvoiceLineItemsTable = ({
                                             <ErrorMessage error={unitAmountError} />
                                         </div>
                                     </td>
-                                    <td className="hidden px-3 py-5 text-right text-xs text-gray-500 sm:table-cell">
+                                    <td className="hidden px-3 py-5 pb-0 text-right text-xs text-gray-500 sm:table-cell">
                                         <div className="space-y-2">
                                             <Input
                                                 type="number"
@@ -220,10 +220,10 @@ const InvoiceLineItemsTable = ({
                                             <ErrorMessage error={quantityError} />
                                         </div>
                                     </td>
-                                    <td className="py-5 pl-3 pr-4 text-right text-xs text-gray-500 sm:pr-0">
+                                    <td className="py-5 pt-0 pb-0 pl-3 pr-4 text-right text-xs text-gray-500 sm:pr-0">
                                         <p>${calculateTotal([item])}</p>
                                     </td>
-                                    <td className="py-5 pl-3 pr-4 text-right text-xs text-gray-500 sm:pr-0">
+                                    <td className="py-5 pt-0 pb-0 pl-3 pr-4 text-right text-xs text-gray-500 sm:pr-0">
                                         {lineItems.length > 1 && (
                                             <Button
                                                 type="button"

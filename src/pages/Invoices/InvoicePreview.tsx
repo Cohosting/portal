@@ -8,7 +8,7 @@ function formatClientAddress(invoiceData) {
     return "No client selected!";
   }
 
-  const billing = client.billing_address.address;
+  const billing = client?.billing_address?.address;
   // if there's no billing object or no line1, treat as "no address"
   if (!billing?.line1) {
     return "No address";
@@ -81,7 +81,7 @@ export function InvoicePreview({ invoiceData, billingAddress }
   // Calculate total
   const calculateTotal = () => {
     if (invoiceData.total) return invoiceData.total;
-    return subtotal + tax - discount;
+    return subtotal  
   };
   
   const total = calculateTotal();
@@ -127,9 +127,7 @@ export function InvoicePreview({ invoiceData, billingAddress }
   const companyPhone = invoiceData.settings?.company_phone || "No phone";
 
   // Get invoice number, using prefix if available
-  const invoiceNumber = 
-    (invoiceData.settings?.invoice_prefix || "INV-") + 
-    (invoiceData.invoice_number || "12345");
+  const invoiceNumber =  invoiceData.invoice_number
 
   // Format dates or use placeholders
   const formatDate = (dateString) => {
@@ -155,7 +153,7 @@ export function InvoicePreview({ invoiceData, billingAddress }
       return formatDate(dueDate);
     }
     
-    return "May 21, 2025"; // Default fallback
+    return  'Not specified'
   };
   
   const dueDate = calculateDueDate();
@@ -242,22 +240,17 @@ export function InvoicePreview({ invoiceData, billingAddress }
           {/* Totals section */}
           <div className="flex justify-end mb-4 sm:mb-6 md:mb-8">
             <div className="w-full sm:w-1/2 md:w-1/3">
-              <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
+              {/* <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
                 <span className="text-gray-600">Subtotal</span>
                 <span>{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
+              </div> */}
+              {/* <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
                 <span className="text-gray-600">Tax ({invoiceData.settings?.tax_percent || 10}%)</span>
                 <span>{formatCurrency(tax)}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
-                  <span className="text-gray-600">Discount</span>
-                  <span>-{formatCurrency(discount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between py-1 sm:py-2 text-sm sm:text-base font-medium border-t mt-1 sm:mt-2 pt-1 sm:pt-2">
-                <span>Grand Total</span>
+              </div> */}
+ 
+              <div className="flex justify-between py-1 sm:py-2 text-xs sm:text-sm">
+                <span className="text-gray-600">Total:</span>
                 <span>{formatCurrency(total)}</span>
               </div>
             </div>

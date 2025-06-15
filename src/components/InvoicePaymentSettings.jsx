@@ -8,7 +8,7 @@ export default function InvoicePaymentSettings({
 }) {
     return (
         <>
-            <fieldset className="border-b border-t border-gray-200 mt-5">
+            <fieldset className="border-b border-t border-gray-200 mt-3">
                 <legend className="sr-only">Notifications</legend>
 
                 <div className="divide-y divide-gray-200">

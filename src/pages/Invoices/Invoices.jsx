@@ -336,16 +336,7 @@ export const Invoices = () => {
       />
    
       <div className="p-0">
-        {/* Search and Filter Component */}
-        <SearchWithFilter
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          appliedFilters={appliedFilters}
-          onApplyFilters={handleApplyFilters}
-          onResetFilters={handleResetFilters}
-          currentPortal={currentSelectedPortal}
-          isFilterLoading={isFilterLoading}
-        />
+
 
         {/* Loading state for initial load */}
         {isOpen && !invoices.length && !hasActiveFilters(appliedFilters) && !debouncedSearchTerm && (
@@ -382,6 +373,16 @@ export const Invoices = () => {
         {/* Invoices table */}
         {invoices.length > 0 && (
           <div className={`transition-opacity duration-200 ${isLoadingMore ? 'opacity-75' : 'opacity-100'}`}>
+                   {/* Search and Filter Component */}
+        <SearchWithFilter
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          appliedFilters={appliedFilters}
+          onApplyFilters={handleApplyFilters}
+          onResetFilters={handleResetFilters}
+          currentPortal={currentSelectedPortal}
+          isFilterLoading={isFilterLoading}
+        />
             <BillingTable
               portal={portal}
               invoices={invoices}
@@ -393,7 +394,7 @@ export const Invoices = () => {
         )}
             
         {/* End of results indicator */}
-        {!hasMore && invoices.length > 0 && (
+        { !hasMore && invoices.length > 0 && page > 0 && (
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 py-6 px-6">
             <div className="flex justify-center items-center">
               <div className="text-center">

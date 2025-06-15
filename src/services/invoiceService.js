@@ -49,24 +49,37 @@ export const createInvoice = async (invoiceState, portal) => {
 };
 
 export const updateClientInvoice = async (invoiceId, invoiceData) => {
-  try {
-    const { error } = await supabase
-      .from("invoices")
-      .update(invoiceData)
-      .match({ id: invoiceId });
+  // Build the payload exactly as you want it in the DB
+  const payload = {
+    ...invoiceData,
+  };
 
-    if (error) throw error;
-  } catch (err) {
-    console.error(err);
+  // Ask Supabase to do the update AND return the updated row(s)
+  const { data: updatedRows, error } = await supabase
+    .from('invoices')
+    .update(payload)
+    .eq('id', invoiceId)
+    .select();    // ← without .select(), you don't get updatedRows back
+
+  if (error) {
+    console.error('Supabase update error:', error);
+    throw error;
   }
-};
 
+  // If nothing changed (or invoiceId not found), treat that as an error
+  if (!Array.isArray(updatedRows) || updatedRows.length === 0) {
+    throw new Error('Invoice not found or no changes were saved.');
+  }
+
+  // Return the single updated row
+  return updatedRows[0];
+}
 export const fetchInvoiceData = async (invoiceId) => {
   try {
     const { data, error } = await supabase
       .from("invoices")
       .select(
-        "*, clients(*), portal: portal_id(support_address, brand_settings, stripe_connect_account_id)"
+        "*, clients(*), settings, attachments, portal: portal_id(support_address, brand_settings, stripe_connect_account_id), attachments"
       )
       .eq("id", invoiceId)
       .single();

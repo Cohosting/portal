@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/alert";
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from 'react-toastify';
-
+ 
 // Error display component
 const ErrorMessage = ({ error, className = "" }) => {
   if (!error) return null;
@@ -66,9 +66,9 @@ const ErrorMessage = ({ error, className = "" }) => {
 // Loading state component
 const LoadingState = () => (
   <div className="flex items-center justify-center min-h-[400px]">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading invoice...</p>
+    <div className="text-center flex items-center">
+        <Loader className='animate-spin'  />
+      <p className="text-gray-600 ml-2">Loading invoice...</p>
     </div>
   </div>
 );
@@ -348,11 +348,12 @@ export const InvoiceForm = () => {
           </div>
 
           <UploadAttachmentComponent
+            attachments={invoiceState.attachments}
             setAttachments={val => handleInputChange('attachments', val)}
           />
 
-          <Disclosure>
-            <DisclosureButton className="py-2 group flex items-center space-x-2">
+          <Disclosure defaultOpen={true}>
+            <DisclosureButton className="py-2 mt-6 group flex items-center space-x-2">
               <p className="font-semibold">Advanced Settings</p>
               <ChevronDown className="w-5 group-data-[open]:rotate-180" />
             </DisclosureButton>
