@@ -5,11 +5,7 @@ const registerClientWithStripe = async (
   id,
   stripe_connect_account_id
 ) => {
-  const nodeUrl = import.meta.env.VITE_BASE_URL;
-  if (!nodeUrl) {
-    console.error('REACT_APP_BASE_URL is not defined.');
-    return;
-  }
+ 
   try {
     // Adds a client as a connected customer in Stripe
     const { data } = await axiosInstance.post(`stripe/connect/client`, {
