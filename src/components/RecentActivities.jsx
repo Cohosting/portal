@@ -36,7 +36,7 @@ export const getInvoiceTitle = ({ client, invoice }) => {
   return (
     <p className="text-sm font-medium text-gray-900 flex items-center space-x-2 truncate">
       <span>Invoice</span>
-      <StatusBadge status={invoice?.status || 'unknown'} />
+      <StatusBadge status={invoice?.additional_data?.status || 'unknown'} />
       <span className="text-gray-700">for</span>
       {deleted
         ? <span className="italic text-gray-500">{name} – (Deleted)</span>

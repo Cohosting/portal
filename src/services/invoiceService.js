@@ -34,7 +34,7 @@ export const createInvoice = async (invoiceState, portal) => {
         {
           title,
           portal_id: portal.id,
-          additional_data: { invoice_number },
+          additional_data: { invoice_number, status: "draft" },
           client_id: client.id,
           invoice_id: data[0].id,
         },

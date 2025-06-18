@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Folder, File, Plus, Upload, Trash2, MoreHorizontal, ChevronRight, Home, Download, Edit3, Star, Share, Eye, Loader2, AlertCircle } from 'lucide-react';
+import { Folder, File, Plus, Upload, Trash2, MoreHorizontal, ChevronRight, Home, Download, Edit3, Star, Share, Eye, Loader2, AlertCircle, Loader } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Layout } from '../Dashboard/Layout';
 import { sanitizeFileName } from '@/utils/file-upload';
 import FileViewer from './FileViewer';
 import ShareModal from './ShareModal'; // Import the ShareModal component
+import { useSelector } from 'react-redux';
+import { CustomSkeleton } from '@/components/SkeletonLoading';
 
 const STORAGE_BUCKET = 'file-storage';
 
@@ -20,8 +22,7 @@ const Files = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [lastSelectedItem, setLastSelectedItem] = useState(null);
   const [currentFolder, setCurrentFolder] = useState(null);
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
+   const [error, setError] = useState(null);
 
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
@@ -54,13 +55,11 @@ const Files = () => {
   const [pendingItems, setPendingItems] = useState([]);
   // New state to track if we should skip loading spinner
   const [skipNextLoading, setSkipNextLoading] = useState(false);
+  const { user} = useSelector((state) => state.auth);
 
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    initializeUser();
-  }, []);
-
+ 
   useEffect(() => {
     if (user) {
       const shouldShowLoading = !skipNextLoading;
@@ -69,19 +68,7 @@ const Files = () => {
       loadAllFolders();
     }
   }, [currentFolder, user]);
-
-  const initializeUser = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      
-      setUser(user);
-    } catch (err) {
-      setError('Failed to authenticate user');
-      console.error('Auth error:', err);
-    }
-  };
-
+ 
   const loadItems = async (showLoading = true) => {
     try {
       if (showLoading) {
@@ -593,14 +580,24 @@ const Files = () => {
   const currentPath = buildFolderPath(currentFolder);
   const currentItems = getCurrentItems();
 
-  if (!user || loadingStates.loading) {
+  if (loadingStates.loading) {
     return (
-      <div className="w-full max-w-7xl mx-auto bg-white min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading your files...</p>
-        </div>
-      </div>
+      <Layout>
+        <header className="bg-white border-b px-3 sm:px-6 border-gray-200 py-4 sm:py-5 lg:py-6">
+          <div className="flex flex-col">
+            {/* icon skeleton  */}
+            <div className="flex items-center mb-0 lg:mb-2  ">
+              <div className="animate-pulse rounded-sm block lg:hidden h-6 w-6 bg-gray-200 mr-4" />
+              <CustomSkeleton className="h-6 w-32" />
+            </div>
+            <CustomSkeleton className="h-4 w-80 hidden lg:block" />
+          </div>
+        </header>
+         <div className="flex mt-6 items-center justify-center">
+            <Loader className="animate-spin" />
+            <p className="ml-2">Loading...</p>
+          </div>
+      </Layout>
     );
   }
 

@@ -112,7 +112,7 @@ const InvoiceTable = ({
         const { data, error } = await supabase.from("recent_activities").insert([
           {
             title: `Invoice #${invoiceNumberLast4Digit} from "${clientName}" Voided`,
-            additional_data: { stripe_invoice_id },
+            additional_data: { stripe_invoice_id, status: "void" },
             portal_id: portal.id,
             client_id: invoice.client.id,
             invoice_id: invoice.id,
