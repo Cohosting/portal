@@ -6,12 +6,12 @@ import { useMediaQuery } from 'react-responsive';
  
 // Import Lucide icons
 import {
-    Calendar,
-    FileText,
+    Inbox,
+    File,
     Home,
     Users,
-    Banknote,
-    Cpu,
+    HandCoins,
+    Sliders,
     Settings,
     Monitor,
     LogOut,
@@ -88,13 +88,13 @@ const preference = [
     const navigation = [
         { name: 'Dashboard', href: '/', icon: Home, current: false },
         { name: 'Clients', href: '/clients', icon: Users, current: false },
-        { name: 'Files', href: '/files', icon: FileText, current: false },
-        { name: 'Messages', href: '/messages', icon: Calendar, current: false },
-        { name: 'Billing', href: '/billing', icon: Banknote, current: false },
+        { name: 'Billing', href: '/billing', icon: HandCoins, current: false },
+        { name: 'Messages', href: '/messages', icon: Inbox, current: false },
+        { name: 'Files', href: '/files', icon: File, current: false },
         {
             name: 'App Configurations', 
             href: `${portal_apps.length ? `/apps/${portal_apps[0]?.id}/app-configurations/` : '/apps/no-apps/app-configurations'}`, 
-            icon: Cpu, 
+            icon: Sliders, 
             current: false, 
             children: portal_apps
         },
