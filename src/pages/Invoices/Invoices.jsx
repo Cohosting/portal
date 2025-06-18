@@ -8,7 +8,7 @@ import { usePortalData } from '../../hooks/react-query/usePortalData';
 import { supabase } from '../../lib/supabase';
 
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
-import { Banknote, Loader } from 'lucide-react';
+import { Banknote, Loader, Search, FileX } from 'lucide-react';
 
  import BillingTable from './InvoiceTable';
 import { Button } from '@/components/ui/button';
@@ -320,6 +320,10 @@ export const Invoices = () => {
     };
   }, [portal]);
 
+  // Check if we have any data loaded (not initial loading)
+  const hasLoadedData = !isOpen || invoices.length > 0 || isFilterLoading;
+  const isFiltered = hasActiveFilters(appliedFilters) || debouncedSearchTerm;
+
   return (
     <Layout hideMobileNav headerName="Invoices">
       <PageHeader
@@ -336,10 +340,21 @@ export const Invoices = () => {
       />
    
       <div className="p-0">
-
+        {/* Search and Filter Component - Show when data is loaded or when filtering */}
+        {hasLoadedData && (
+          <SearchWithFilter
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            appliedFilters={appliedFilters}
+            onApplyFilters={handleApplyFilters}
+            onResetFilters={handleResetFilters}
+            currentPortal={currentSelectedPortal}
+            isFilterLoading={isFilterLoading}
+          />
+        )}
 
         {/* Loading state for initial load */}
-        {isOpen && !invoices.length && !hasActiveFilters(appliedFilters) && !debouncedSearchTerm && (
+        {isOpen && !invoices.length && !isFiltered && (
           <div className="flex justify-center items-center mt-8">
             <Loader className='animate-spin' />
             <p className="ml-2">Loading...</p>
@@ -358,10 +373,10 @@ export const Invoices = () => {
         {!invoices.length && !isOpen && !isFilterLoading && (
           <div className="mt-16">
             <EmptyStateFeedback
-              IconComponent={Banknote}
-              title={hasActiveFilters(appliedFilters) || debouncedSearchTerm ? "No invoices found" : "Create Your First Invoice"}
+              IconComponent={isFiltered ? FileX : Banknote}
+              title={isFiltered ? "No invoices found" : "Create Your First Invoice"}
               message={
-                hasActiveFilters(appliedFilters) || debouncedSearchTerm 
+                isFiltered 
                   ? "No invoices match your current filters. Try adjusting your search criteria." 
                   : "It looks like you haven't created any invoices yet. Click the button below to create your first invoice."
               }
@@ -373,16 +388,6 @@ export const Invoices = () => {
         {/* Invoices table */}
         {invoices.length > 0 && (
           <div className={`transition-opacity duration-200 ${isLoadingMore ? 'opacity-75' : 'opacity-100'}`}>
-                   {/* Search and Filter Component */}
-        <SearchWithFilter
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          appliedFilters={appliedFilters}
-          onApplyFilters={handleApplyFilters}
-          onResetFilters={handleResetFilters}
-          currentPortal={currentSelectedPortal}
-          isFilterLoading={isFilterLoading}
-        />
             <BillingTable
               portal={portal}
               invoices={invoices}
@@ -404,7 +409,7 @@ export const Invoices = () => {
                   </svg>
                 </div>
                 <p className="text-sm font-medium text-gray-600">
-                  {hasActiveFilters(appliedFilters) || debouncedSearchTerm 
+                  {isFiltered 
                     ? "All matching invoices loaded" 
                     : "All invoices loaded"
                   }
