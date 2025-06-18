@@ -24,7 +24,7 @@ export const Layout =
 
         <div className={`${containerPaddingStyle} w-full` }>
  
-          <main ref={listRef} className={`flex unique column-reverse overflow-auto relative flex-col h-screen  }`}>
+          <main ref={listRef} className={`flex unique column-reverse overflow-auto relative flex-col h-screen  `}>
              {children}
            </main>
         </div>

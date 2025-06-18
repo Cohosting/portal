@@ -10,13 +10,13 @@ import { supabase } from '../lib/supabase';
  * @returns {Promise<Object>} The created conversation data.
  * @throws Will throw an error if the conversation creation fails.
  */
-export const createConversation = async (conversationData, participantIds) => {
+export const createConversation = async (conversationData, participants) => {
   const { data, error } = await supabase.rpc(
     'create_conversation_with_participants',
     {
       conversation_name: conversationData.name,
       portal_id: conversationData.portal_id,
-      participant_ids: participantIds,
+      participants,
     }
   );
 
@@ -27,6 +27,7 @@ export const createConversation = async (conversationData, participantIds) => {
 
   return data;
 };
+
 
 /**
  * Fetches conversations for a given portal ID.
@@ -164,97 +165,62 @@ export const markAsSeen = async (conversation, userId) => {
  * @returns {Promise<void>}
  */
 // Function to create and send a mass message to multiple participants
+
 export const createMassMessage = async (
   messageData,
   participantIds,
-  portal_id
+  portal_id,
+  currentUserId
 ) => {
-  // Create a function to handle message sending per participant
-  const handleParticipant = async participantId => {
-    // Fetch all conversations for this participant in the specified portal
-    const { data, error } = await supabase
-      .from('conversation_participants')
-      .select(
-        `
-        conversation_id,
-        conversations (
-          id,
-          portal_id,
-          status
-        )
-      `
-      )
-      .eq('user_id', participantId)
-      .eq('conversations.portal_id', portal_id);
+  // 1. Fetch all conversations + participants via RPC
+  const { data: convs = [], error: convErr } = await supabase.rpc(
+    "fetch_conversations_with_participants",
+    { _portal_id: portal_id }
+  );
+  if (convErr) throw convErr;
 
-    if (error) {
-      console.error('Error fetching conversation participants:', error);
-      return; // Skip to the next participant
-    }
-    console.log({
-      data,
+  // 2. Process each client
+  for (const clientId of participantIds) {
+    // Find an existing one-on-one conversation between user and this client
+    const existing = convs.find(c => {
+      const pts = c.participants || [];
+      return (
+        pts.length === 2 &&
+        pts.some(p => p.participant_id === clientId && p.type === "clients") &&
+        pts.some(p => p.participant_id === currentUserId && p.type === "users")
+      );
     });
 
-    if (data && data.length > 0) {
-      // User is part of existing conversations in this portal
-      const messagePromises = data.map(async item => {
-        if (item.conversations) {
-          // Check if this is a one-on-one conversation
-          const { count, error: countError } = await supabase
-            .from('conversation_participants')
-            .select('id', { count: 'exact' })
-            .eq('conversation_id', item.conversations.id);
-
-          if (countError) {
-            console.error(
-              'Error counting conversation participants:',
-              countError
-            );
-            return;
-          }
-
-          if (count === 1) {
-            // One-on-one conversation (2 participants)
-            await sendMessage({
-              ...messageData,
-              conversation_id: item.conversations.id,
-            });
-          }
-        }
-      });
-
-      await Promise.all(messagePromises); // Send messages concurrently
+    let conversationId;
+    if (existing) {
+      conversationId = existing.id;
     } else {
-      // User is not part of any active conversation in this portal, create a new one
-      console.log(
-        `Creating new conversation for participant: ${participantId}`
-      );
-      const new_conversation_id = await createConversation(
+      // Create a new conversation with both client and user
+      const participants = [
+        { type: "clients", id: clientId },
+        { type: "users",   id: currentUserId }
+      ];
+      const { data: newId, error: newErr } = await supabase.rpc(
+        "create_conversation_with_participants",
         {
-          name: `Mass Message - ${new Date().toISOString()}`,
-          portal_id: portal_id,
-        },
-        [participantId]
+          conversation_name: `Mass Message - ${new Date().toISOString()}`,
+          portal_id,
+          participants
+        }
       );
-
-      if (new_conversation_id) {
-        await sendMessage({
-          ...messageData,
-          conversation_id: new_conversation_id,
-        });
-      } else {
-        console.error(
-          'Failed to create new conversation for participant:',
-          participantId
-        );
-      }
+      if (newErr) throw newErr;
+      conversationId = newId;
     }
-  };
 
-  // Use Promise.all to handle all participants in parallel
-  const participantPromises = participantIds.map(handleParticipant);
-  await Promise.all(participantPromises); // Wait for all participants to be processed
+    // 3. Send the message into that conversation using existing helper
+    await sendMessage({
+      conversation_id: conversationId,
+      ...messageData,
+      sender_id: currentUserId
+    });
+  }
 };
+
 export const updateMessage = async (messageId, content) => {
   const { data, error } = await supabase
     .from('messages')
@@ -270,35 +236,48 @@ export const updateMessage = async (messageId, content) => {
   return data;
 };
 
+// need to update this to be polyphormic
+
 export const fetchInitialMessages = async (conversationId, initialLimit) => {
   try {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*, sender:sender_id (id, name, avatar_url)')
-      .eq('conversation_id', conversationId)
-      .limit(initialLimit)
-      .order('created_at', { ascending: false });
+    const { data, error } = await supabase.rpc('fetch_initial_messages', {
+      conversation_id_param: conversationId,
+      initial_limit_param: initialLimit,
+    });
 
     if (error) throw error;
 
-    return { data: data.reverse(), hasMore: data.length === initialLimit };
+    // Transform the data to match your expected format
+    const transformedData = data.map(message => ({
+      ...message,
+      sender: {
+        id: message.sender_id,
+        name: message.sender_name,
+        avatar_url: message.sender_avatar_url,
+        sender_type: message.sender_type, // Include sender_type in the sender object
+      }
+    })).reverse(); // Reverse since we ordered DESC in SQL
+
+    return { 
+      data: transformedData, 
+      hasMore: data.length === initialLimit 
+    };
   } catch (error) {
     console.error('Error fetching initial messages:', error);
     throw error;
   }
 };
 
-export const fetchSender = async senderId => {
+export const fetchSender = async (senderType, senderId) => {
   try {
-    const { data: sender, error } = await supabase
-      .from('users')
-      .select('id, name, avatar_url')
-      .eq('id', senderId)
-      .single();
+    const { data, error } = await supabase.rpc('fetch_sender', {
+      sender_type_param: senderType,
+      sender_id_param: senderId,
+    });
 
     if (error) throw error;
 
-    return sender;
+    return data?.[0] || null; // Return first result or null
   } catch (error) {
     console.error('Error fetching sender information:', error);
     throw error;
@@ -314,10 +293,11 @@ export const handleRealtimePayload = async (
   const { new: newMessage, old: oldMessage } = payload;
 
   console.log({ newMessage, oldMessage });
+  
   if (newMessage && !Object.keys(oldMessage).length) {
     console.log('New message:', newMessage);
     // Handle INSERT
-    const sender = await fetchSender(newMessage.sender_id);
+    const sender = await fetchSender(newMessage.sender_type, newMessage.sender_id); // ✅ CHANGED: Added sender_type parameter
     if (sender) {
       newMessage.sender = sender;
     }
@@ -329,7 +309,7 @@ export const handleRealtimePayload = async (
   } else if (newMessage && oldMessage) {
     console.log(`Updating message ${newMessage.id}`);
     // Handle UPDATE
-    const sender = await fetchSender(newMessage.sender_id);
+    const sender = await fetchSender(newMessage.sender_type, newMessage.sender_id); // ✅ CHANGED: Added sender_type parameter
     if (sender) {
       newMessage.sender = sender;
     }
@@ -345,7 +325,6 @@ export const handleRealtimePayload = async (
     );
   }
 };
-
 export const fetchMoreMessages = async (
   conversationId,
   initialLimit,
@@ -356,55 +335,76 @@ export const fetchMoreMessages = async (
   setError,
   fetchedWay
 ) => {
-  const currentScrollPosition = listRef.current.scrollTop;
-  const currentScrollHeight = listRef.current.scrollHeight;
+  if (!listRef.current) return;
+  
+  const scrollContainer = listRef.current;
+  const oldScrollHeight = scrollContainer.scrollHeight;
+  const oldScrollTop = scrollContainer.scrollTop;
+
+  console.log('🔍 BEFORE FETCH:', {
+    oldScrollHeight,
+    oldScrollTop,
+    messagesLength: messages.length
+  });
 
   try {
     const { data, error } = await supabase
-      .from('messages')
-      .select('*, sender:sender_id (id, name, avatar_url)')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: false })
-      .range(messages.length, messages.length + initialLimit - 1);
+      .rpc('fetch_more_messages', {
+        conversation_id_param: conversationId,
+        offset_param: messages.length,
+        limit_param: initialLimit
+      });
 
     if (error) throw error;
 
-    setMessages(prevMessages => [...data.reverse(), ...prevMessages]);
-    setHasMore(data.length === initialLimit);
-    fetchedWay.current = 'LOAD_MORE';
+    console.log('📦 FETCHED DATA:', {
+      newMessagesCount: data.length,
+      hasMore: data.length === initialLimit
+    });
 
-    setTimeout(() => {
-      const newScrollHeight = listRef.current.scrollHeight;
-      const heightDifference = newScrollHeight - currentScrollHeight;
-      listRef.current.scrollTop = currentScrollPosition + heightDifference;
-    }, 0);
+    const transformedData = data.map(message => ({
+      ...message,
+      sender: {
+        id: message.sender_id,
+        name: message.sender_name,
+        avatar_url: message.sender_avatar_url
+      }
+    }));
+
+    // Store scroll info for the useEffect to use
+    fetchedWay.current = {
+      type: 'LOAD_MORE',
+      oldScrollHeight,
+      oldScrollTop
+    };
+
+    setMessages(prevMessages => [...transformedData.reverse(), ...prevMessages]);
+    setHasMore(data.length === initialLimit);
+    
   } catch (error) {
     console.error('Error fetching more messages:', error);
     setError(error);
   }
 };
 
-export const fetchConversationById = async (conversationId, clientId) => {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select(
-      `
-      * ,
-      participants:users!inner(id, name, avatar_url),
-      last_message:last_message_id(id, content, seen, created_at)
-          conversation_participants!inner(user_id)
+export const fetchConversationById = async (conversationId) => {
+  try {
+    const { data, error } = await supabase
+      .rpc('fetch_conversation_by_id', {
+        _conversation_id: conversationId
+      });
 
-    `
-    )
-    .eq('id', conversationId)
-    .single();
+    if (error) {
+      console.error('Error fetching conversation:', error);
+      return null;
+    }
 
-  if (error) {
+    // The RPC returns an array, but we want a single conversation
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
     console.error('Error fetching conversation:', error);
     return null;
   }
-
-  return data;
 };
 
 export const deleteMessage = async messageId => {

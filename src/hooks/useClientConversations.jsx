@@ -2,22 +2,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { fetchConversationById } from "../services/chat";
 
-
 const fetchConversations = async (portal_id, client_id) => {
     try {
-        const { data } = await supabase
-            .from('conversations')
-            .select(`
-    *,
-    participants:users!inner(id, name, avatar_url),
-    last_message:last_message_id(id, content, seen, created_at),
-    conversation_participants!inner(user_id)
-  `)
-            .eq('conversation_participants.user_id', client_id)
-            .eq('portal_id', portal_id)
-            .order('updated_at', { ascending: false });
+        const { data, error } = await supabase
+            .rpc('fetch_conversations_by_client', {
+                _portal_id: portal_id,
+                _client_id: client_id
+            });
 
-        return data 
+        if (error) {
+            throw error;
+        }
+
+        return data;
     } catch (error) {
         throw error;
     }
@@ -29,8 +26,6 @@ export const useClientConversations = (portal_id, client_id) => {
     const [fetchedWay, setFetchedWay] = useState('initial');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
-
 
     const optimisticMarkLastMessageAsSeen = (conversation, userId) => {
         const updatedConversation = {
@@ -49,22 +44,21 @@ export const useClientConversations = (portal_id, client_id) => {
             );
         });
     };
+
     useEffect(() => {
         if (!portal_id || !client_id) return;
-        console.log({
-            portal_id,
-            client_id
-        })
+        
         setIsLoading(true);
 
-        fetchConversations(portal_id, client_id).then(data => {
-            setConversations(data);
-            setIsLoading(false);
-        }).catch(error => {
-            setError(error);
-            setIsLoading(false);
-        });
-
+        fetchConversations(portal_id, client_id)
+            .then(data => {
+                setConversations(data || []);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                setError(error);
+                setIsLoading(false);
+            });
 
         const conversationSubscription = supabase
             .channel(`conversations:${portal_id}`)
@@ -77,21 +71,20 @@ export const useClientConversations = (portal_id, client_id) => {
                     filter: `portal_id=eq.${portal_id}`,
                 },
                 async payload => {
-                    // setData(prev => ({
-                    //     conversations: [payload.new, ...prev.conversations],
-                    //     fetchedWay: 'INSERT',
-                    // }));
-                    // need to fetch data cause payload dont have embed data
-                    console.log(`Conversation ${payload.new.id} inserted`);
                     let newConversation = payload.new;
-                    const conv = await fetchConversationById(newConversation.id, client_id)
-                    console.log({
-                        conv
-                    })
-                    setConversations(prev => [conv, ...prev]);
-
-
-
+                    
+                    try {
+                        const conv = await fetchConversationById(newConversation.id);
+                        
+                        if (conv && conv.participants && 
+                            conv.participants.some(participant => 
+                                participant && participant.participant_id === client_id
+                            )) {
+                            setConversations(prev => [conv, ...prev]);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching new conversation:', error);
+                    }
                 }
             )
             .on(
@@ -103,12 +96,18 @@ export const useClientConversations = (portal_id, client_id) => {
                     filter: `portal_id=eq.${portal_id}`,
                 },
                 async payload => {
-                    console.log(`Conversation ${payload.new.id} updated`);
                     let updatedConversation = payload.new;
-                    fetchConversationById(updatedConversation.id, client_id).then(data => {
-                        setConversations(prev => prev.map(conversation => conversation.id === payload.new.id ? data : conversation));
+                    
+                    try {
+                        const data = await fetchConversationById(updatedConversation.id);
+                        setConversations(prev => 
+                            prev.map(conversation => 
+                                conversation.id === payload.new.id ? data : conversation
+                            )
+                        );
+                    } catch (error) {
+                        console.error('Error fetching updated conversation:', error);
                     }
-                    );
                 }
             )
             .on(
@@ -120,19 +119,18 @@ export const useClientConversations = (portal_id, client_id) => {
                     filter: `portal_id=eq.${portal_id}`,
                 },
                 async payload => {
-
-                    setConversations(prev => prev.filter(conversation => conversation.id !== payload.old.id));
+                    setConversations(prev => 
+                        prev.filter(conversation => conversation.id !== payload.old.id)
+                    );
                     setFetchedWay('DELETE');
                 }
             )
             .subscribe();
 
-        return () => { conversationSubscription.unsubscribe() }
+        return () => { 
+            conversationSubscription.unsubscribe();
+        }
     }, [portal_id, client_id])
-
-    console.log({
-        beforeDelete: conversations
-    })
 
     return {
         conversations: conversations.filter((conv) =>
@@ -140,8 +138,15 @@ export const useClientConversations = (portal_id, client_id) => {
             conv.status !== 'deleted' &&
             conv.participants &&
             Array.isArray(conv.participants) &&
-            conv.participants.some(participant => participant && participant.id === client_id)
-        ), optimisticMarkLastMessageAsSeen, fetchedWay, isLoading, error
+            conv.participants.some(participant => 
+                participant && 
+                participant.participant_type === 'clients' && 
+                participant.participant_id === client_id
+            )
+        ), 
+        optimisticMarkLastMessageAsSeen, 
+        fetchedWay, 
+        isLoading, 
+        error
     }
-
 }

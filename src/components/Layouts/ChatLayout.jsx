@@ -34,7 +34,7 @@ const ChatLayout = ({ setIsConversationsListLoading, isLoading, conversations, o
             const basePath = window.location.pathname.includes('portal') ? '/portal/messages' : '/messages';
             navigate(`${basePath}/${firstConversationId}`, { replace: true });
         }
-    }, [conversationId, conversations, isLoading, navigate]);
+    }, [conversationId, conversations, isLoading]);
 
     useEffect(() => {
         setIsConversationsListLoading(isLoading);

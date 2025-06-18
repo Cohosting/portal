@@ -1,33 +1,27 @@
+// src/hooks/react-query/useChat.js
 import {
   fetchInitialMessages,
-  fetchMoreMessages,
+  fetchMoreMessages, // Import from your services
   fetchSender,
   handleRealtimePayload,
   markAsSeen,
 } from '../../services/chat';
 import { supabase } from '../../lib/supabase';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-const fetchConversationById = async conversationId => {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select(
-      `
-    *,
-      participants:users!inner(id, name, avatar_url),
-      last_message:last_message_id(id, content, seen, created_at)
-    `
-    )
-    .eq('id', conversationId)
-    .single();
-
+// ——— Helper to fetch one convo by ID via RPC ———
+const fetchConversationById = async (conversationId, portalId) => {
+  const { data, error } = await supabase.rpc(
+    'fetch_conversations_with_participants',
+    { _portal_id: portalId }
+  );
   if (error) {
-    console.error('Error fetching conversation:', error);
+    console.error('Error fetching conversation by ID:', error);
     return null;
   }
-
-  return data;
+  // data is an array → pick the one with matching ID
+  return (data || []).find(c => c.id === conversationId) || null;
 };
 
 export const useChatConversations = portal_id => {
@@ -42,44 +36,31 @@ export const useChatConversations = portal_id => {
       last_message: {
         ...conversation?.last_message,
         seen: conversation?.last_message?.seen
-          ? [...conversation?.last_message?.seen, userId]
+          ? [...conversation.last_message.seen, userId]
           : [userId],
       },
     };
-
-    setConversations(prev => {
-      return prev.map(conv =>
-        conv.id === updatedConversation.id ? updatedConversation : conv
-      );
-    });
+    setConversations(prev =>
+      prev.map(conv => (conv.id === updatedConversation.id ? updatedConversation : conv))
+    );
   };
+
   useEffect(() => {
     if (!portal_id) return;
-
-    console.log(portal_id);
 
     const fetchInitialConversations = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('conversations')
-          .select(
-            `
-            * ,
-            participants:users!inner(id, name, avatar_url),
-            last_message:last_message_id(id, content, seen, created_at )
-             
-          `
-          )
-          .eq('portal_id', portal_id)
-          .order('updated_at', { ascending: false });
-
+        const { data, error } = await supabase.rpc(
+          'fetch_conversations_with_participants',
+          { _portal_id: portal_id }
+        );
         if (error) throw error;
-
-        setConversations(data);
+        const cleaned = (data || []).filter(c => c != null);
+        setConversations(cleaned);
         setFetchedWay('initial');
-      } catch (error) {
-        setError(error);
+      } catch (err) {
+        setError(err);
       } finally {
         setLoading(false);
       }
@@ -98,13 +79,11 @@ export const useChatConversations = portal_id => {
           filter: `portal_id=eq.${portal_id}`,
         },
         async payload => {
-          console.log('it is inserted');
-          let newConversation = await fetchConversationById(payload.new.id);
-          console.log(newConversation);
-          setConversations(prev => {
-            return [newConversation, ...prev];
-          });
-          setFetchedWay('INSERT');
+          const newConv = await fetchConversationById(payload.new.id, portal_id);
+          if (newConv) {
+            setConversations(prev => [newConv, ...prev]);
+            setFetchedWay('INSERT');
+          }
         }
       )
       .on(
@@ -116,17 +95,11 @@ export const useChatConversations = portal_id => {
           filter: `portal_id=eq.${portal_id}`,
         },
         async payload => {
-          console.log('it is updated');
-          const updatedConversation = await fetchConversationById(
-            payload.new.id
-          );
-          console.log(`Updated conversation:`, updatedConversation);
-          if (updatedConversation) {
-            setConversations(prev => {
-              return prev.map(conv =>
-                conv.id === updatedConversation.id ? updatedConversation : conv
-              );
-            });
+          const updatedConv = await fetchConversationById(payload.new.id, portal_id);
+          if (updatedConv) {
+            setConversations(prev =>
+              prev.map(conv => (conv.id === updatedConv.id ? updatedConv : conv))
+            );
             setFetchedWay('UPDATE');
           }
         }
@@ -140,10 +113,7 @@ export const useChatConversations = portal_id => {
           filter: `portal_id=eq.${portal_id}`,
         },
         payload => {
-          console.log(payload);
-          setConversations(prev => {
-            return prev.filter(conv => conv.id !== payload.old.id);
-          });
+          setConversations(prev => prev.filter(conv => conv.id !== payload.old.id));
           setFetchedWay('DELETE');
         }
       )
@@ -155,90 +125,78 @@ export const useChatConversations = portal_id => {
   }, [portal_id]);
 
   const refetchConversations = async () => {
-    const { data, error } = await supabase
-      .from('conversations')
-      .select(
-        `
-          * ,
-            participants:users!inner(id, name, avatar_url),
-            last_message:last_message_id(id, content, seen, created_at )
-          `
-      )
-      .eq('portal_id', portal_id)
-      .order('updated_at', { ascending: false });
-
-    if (error) {
-      setError(error);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc(
+        'fetch_conversations_with_participants',
+        { _portal_id: portal_id }
+      );
+      if (error) throw error;
+      setConversations((data || []).filter(c => c != null));
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
     }
-    setConversations(data);
   };
 
   return {
     error,
     isLoading: loading,
-    conversations: conversations.filter(conv => conv.status !== 'deleted'),
+    conversations: conversations.filter(c => c?.status !== 'deleted'),
     fetchedWay,
     optimisticMarkLastMessageAsSeen,
     updatedConversation: setConversations,
     refetchConversations,
   };
 };
+
 export const useRealtimeMessages = (
   conversationId,
   initialLimit = 15,
   conversations,
-  user
+  user,
+  listRef
 ) => {
   const [messages, setMessages] = useState([]);
-  const fetchedWay = useRef('INITIAL');
-
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [moreLoading, setMoreLoading] = useState(false);
-  let [updatedMessage, setUpdatedMessage] = useState(null);
+  const [error, setError] = useState(null);
+
+  // tracks how the last update came in
+  const fetchedWay = useRef('INITIAL');
+  // ensure we only fetch initial page once per conversation
+  const initRef = useRef(false);
+  // we only care if the user ID changes
+  const userId = user?.id;
 
   const initializeMessages = async () => {
+    if (initRef.current) return;
     setLoading(true);
     try {
-      const { data, hasMore } = await fetchInitialMessages(
+      const { data, hasMore: moreFlag } = await fetchInitialMessages(
         conversationId,
         initialLimit
       );
       fetchedWay.current = 'INITIAL';
       setMessages(data);
-
-      setHasMore(hasMore);
-    } catch (error) {
-      setError(error);
+      setHasMore(moreFlag);
+    } catch (err) {
+      setError(err);
     } finally {
       setLoading(false);
+      initRef.current = true;
     }
   };
 
   useEffect(() => {
-    if (!conversationId || !user) return;
+    if (!conversationId || !userId) return;
 
-    console.log('first-fetched');
     initializeMessages();
 
     const subscription = supabase
       .channel(`messages:${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        payload => {
-          console.log('it is updated');
-          handleRealtimePayload(payload, setMessages, fetchSender, messages);
-
-          fetchedWay.current = 'UPDATE';
-        }
-      )
       .on(
         'postgres_changes',
         {
@@ -248,18 +206,26 @@ export const useRealtimeMessages = (
           filter: `conversation_id=eq.${conversationId}`,
         },
         payload => {
-          console.log(
-            `New message in conversation ${conversationId} user id: ${user.id}`
-          );
-          let conversation = {
-            last_message: {
-              id: payload.new.id,
-            },
-          };
-
           handleRealtimePayload(payload, setMessages, fetchSender);
           fetchedWay.current = 'INSERT';
-          // markAsSeen(conversation, user.id);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        payload => {
+          handleRealtimePayload(
+            payload,
+            setMessages,
+            fetchSender,
+            messages
+          );
+          fetchedWay.current = 'UPDATE';
         }
       )
       .on(
@@ -271,25 +237,22 @@ export const useRealtimeMessages = (
           filter: `conversation_id=eq.${conversationId}`,
         },
         payload => {
-          console.log(
-            `Message ${payload.old.id} deleted in conversation ${conversationId}`
-          );
-          setMessages(prev => {
-            return prev.filter(msg => msg.id !== payload.old.id);
-          });
+          setMessages(prev => prev.filter(m => m.id !== payload.old.id));
           fetchedWay.current = 'DELETE';
         }
       )
-      .subscribe(status => {
-        console.log('Subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
       subscription.unsubscribe();
+      // reset so if the conversationId changes we re-init
+      initRef.current = false;
+      setMessages([]);
+      setHasMore(false);
     };
-  }, [conversationId, initialLimit, user]);
+  }, [conversationId, initialLimit, userId]);
 
-  const loadMoreMessages = (listRef, fetchedWay) => {
+  const loadMoreMessages = (listRef) => {
     setMoreLoading(true);
     fetchMoreMessages(
       conversationId,
@@ -299,20 +262,61 @@ export const useRealtimeMessages = (
       setMessages,
       setHasMore,
       setError,
-      fetchedWay
-    ).finally(() => {
-      setMoreLoading(false);
-    });
+      fetchedWay // Pass the ref here
+    ).finally(() => setMoreLoading(false));
   };
 
+  // Handle scroll position restoration after messages are updated
+  useEffect(() => {
+    console.log('🔄 Messages changed, checking fetchedWay:', fetchedWay.current);
+    
+    if (fetchedWay.current?.type === 'LOAD_MORE' && listRef?.current) {
+      const scrollContainer = listRef.current;
+      const { oldScrollHeight, oldScrollTop } = fetchedWay.current;
+      
+      const adjustScroll = () => {
+        const newScrollHeight = scrollContainer.scrollHeight;
+        const heightDifference = newScrollHeight - oldScrollHeight;
+        const calculatedScrollTop = oldScrollTop + heightDifference;
+        
+        console.log('📏 SCROLL ADJUSTMENT (useEffect):', {
+          newScrollHeight,
+          oldScrollHeight,
+          heightDifference,
+          calculatedScrollTop,
+          beforeAdjustment: scrollContainer.scrollTop
+        });
+        
+        if (heightDifference > 0) {
+          scrollContainer.scrollTop = calculatedScrollTop;
+          
+          console.log('✅ AFTER ADJUSTMENT (useEffect):', {
+            finalScrollTop: scrollContainer.scrollTop
+          });
+        } else {
+          console.log('⚠️ No height difference in useEffect');
+        }
+      };
+  
+      // Try multiple timings to catch when DOM is updated
+      adjustScroll(); // Immediate
+      requestAnimationFrame(adjustScroll);
+      setTimeout(adjustScroll, 0);
+      setTimeout(adjustScroll, 10);
+      
+      // Reset the fetchedWay flag
+      fetchedWay.current = null;
+    }
+  }, [messages, listRef]);
+
   return {
-    error,
-    moreLoading,
     messages,
-    setMessages,
-    fetchMoreMessages: loadMoreMessages,
     isLoading: loading,
     hasMore,
-    fetchedWay,
+    moreLoading,
+    fetchedWay: fetchedWay,
+    error,
+    fetchMoreMessages: loadMoreMessages,
+    setMessages,
   };
 };

@@ -9,7 +9,8 @@ import {
   FileText,
   CreditCard,
   ChevronDown,
-  MapPin
+  MapPin,
+  Camera
 } from "lucide-react";
 import { PreloadedIcons } from "@/components/preloaded-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +19,8 @@ import { classNames } from "../../../../utils/statusStyles";
 import { useMediaQuery } from 'react-responsive';
 import { useSidebar } from '@/components/ui/sidebar';
 import AddressModal from '@/components/Modal/AddressModal';
+import { toast } from 'react-toastify';
+import { supabase } from '@/lib/supabase'; // Assuming you have supabase client setup
 
 // ----------------------------------------------
 // 1. Static fallback icon map
@@ -80,15 +83,17 @@ const RenderIcon = ({ iconName, className }) => {
 // 5. Main Navigation
 // ----------------------------------------------
 const Navigation = ({ portal_apps, portal }) => {
-  const { clientUser } = useClientAuth(portal?.id);
+  const { clientUser, updateClientUser } = useClientAuth(portal?.id); // Assuming updateClientUser exists
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpen } = useSidebar();
   
-  // State for address modal and dropdown
+  // State for address modal, dropdown, and file input
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const dropdownRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
 
@@ -126,6 +131,85 @@ const Navigation = ({ portal_apps, portal }) => {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Handle avatar click to open file manager
+  const handleAvatarClick = (e) => {
+    e.stopPropagation(); // Prevent dropdown from opening
+    fileInputRef.current?.click();
+  };
+
+  // Handle file selection and upload
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Please select an image smaller than 5MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${clientUser.id}-${Date.now()}.${fileExt}`;
+      const filePath = `clients/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL for the uploaded file
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = urlData.publicUrl;
+
+      // Update client record in database
+      const { error: updateError } = await supabase
+        .from('clients') // Assuming your table is called 'clients'
+        .update({ avatar_url: avatarUrl })
+        .eq('id', clientUser.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update the client user data locally
+      if (updateClientUser) {
+        updateClientUser({ ...clientUser, avatar_url: avatarUrl });
+      }
+
+      toast.success("Profile picture updated successfully!");
+
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error("Failed to update profile picture. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   // Close dropdown when clicking outside
@@ -221,21 +305,50 @@ const Navigation = ({ portal_apps, portal }) => {
             </div>
           ) : (
             <div className="flex items-center mb-4 px-6 w-full relative" ref={dropdownRef}>
+              {/* Avatar with click handler for file upload */}
+              <div className="relative">
+                <button 
+                  onClick={handleAvatarClick}
+                  className="relative group"
+                  disabled={isUploadingImage}
+                >
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage
+                      src={clientUser?.avatar_url || ""}
+                      alt={clientUser?.name || "User"}
+                    />
+                    <AvatarFallback className="bg-gray-200 text-gray-700">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  {/* Camera overlay on hover */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    {isUploadingImage ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    ) : (
+                      <Camera className="h-4 w-4 text-white" />
+                    )}
+                  </div>
+                </button>
+                
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Name/Email area with dropdown */}
               <button 
                 onClick={toggleDropdown}
-                className="flex items-center w-full hover:opacity-80 transition-opacity"
+                className="flex items-center ml-3 hover:opacity-80 transition-opacity min-w-0 flex-1"
                 style={{ color: sidebarTextColor }}
               >
-                <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarImage
-                    src={clientUser?.profilePicture || clientUser?.avatar || ""}
-                    alt={clientUser?.name || "User"}
-                  />
-                  <AvatarFallback className="bg-gray-200 text-gray-700">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="ml-3 flex-1 text-left min-w-0">
+                <div className="text-left min-w-0 flex-1">
                   {clientUser?.name && (
                     <p className="text-sm font-medium overflow-hidden whitespace-nowrap truncate">
                       {clientUser.name}

@@ -79,7 +79,7 @@ if (!loginButtonTextColor) {
                     </div>
                 </div>
             ) : (
-                <p className="text-sm leading-6 text-gray-500">{editedContent}</p>
+                <p className="text-sm leading-6  ">{editedContent}</p>
             )}
 
         </>

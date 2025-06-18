@@ -19,6 +19,7 @@ const Chat = ({ portalData }) => {
 
         )
     }
+    console.log({ conversations })
  
     return (
 

@@ -1,5 +1,5 @@
-// components/Conversation.js
-import React, { useEffect, useRef, useState } from 'react';
+// components/owner/Conversation.js
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import ConversationHeader from '../../components/Chat/ConversationWindow/ConversationHeader';
 import MessageInput from '../../components/Chat/ConversationWindow/MessageInput';
@@ -68,6 +68,7 @@ const Conversation = () => {
     const { conversationId } = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const onMount = useRef(true);
     const navigate = useNavigate();
 
     const lastElementVisible = useRef(null);
@@ -76,7 +77,8 @@ const Conversation = () => {
     const { isConversationsListLoading, conversations, refetchConversations } = useOutletContext();
     const [isConversationsDeleted, setIsConversationsDeleted] = useState(false);
     const { user } = useSelector(state => state.auth);
-
+    const { listRef } = useConversationContext();
+ 
     const {
         isLoading,
         messages,
@@ -90,10 +92,9 @@ const Conversation = () => {
         handleDeleteConversation,
         fetchedWay,
         error,
-    } = useConversation(conversationId, user, conversations);
+    } = useConversation(conversationId, user, conversations, listRef);
 
-    const { listRef } = useConversationContext();
-    useScrollToEndOnMessageChange(messages, messagesEndRef, lastElementVisible);
+    // useScrollToEndOnMessageChange(messages, messagesEndRef, lastElementVisible);
     useMarkConversationAsSeen(messages, conversations, conversationId, user.id);
     useHandleNewMessage(messages, conversationId, conversations, fetchedWay, lastElementVisible, setIsFloatingAlertVisible, user.id);
 
@@ -112,11 +113,38 @@ const Conversation = () => {
           lastElementVisible.current = false;
       }
   };
+      const observerOptions = useMemo(() => ({
+          root: null,
+          threshold: 1
+      }), []); // Empty dependency array - options never change
+  
 
-    const observeLastElement = useLastElementObserver(handleVisibilityChange, {
-        root: listRef.current,
-        threshold: 1
-    });
+    const {observeLastElement, isVisible} = useLastElementObserver(handleVisibilityChange,observerOptions);
+
+    
+        useEffect(() => {
+            if (!messages.length) return;
+            setTimeout(function () {
+
+                if(onMount.current){
+                    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+                    onMount.current = false;
+                }
+                if(isVisible  ){
+                    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+            },100);
+    
+            if (messagesEndRef.current) {
+    
+                if (lastElementVisible.current) {
+                    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+                } else if (onMount.current) {
+                    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+                    onMount.current = false;
+                }
+            }
+        }, [messages, messagesEndRef, lastElementVisible, onMount]);
 
     if (isConversationsListLoading) {
         return (
@@ -160,25 +188,25 @@ const Conversation = () => {
                 }
           
             }
+            console.log({
+                messages
+            })
     return (
-        <div ref={containerRef} className="p-6 px-4 pl-0 pt-0 pb-0 min-h-screen flex flex-col">
+        <div ref={containerRef} className="p-6 px-0 pl-0 pt-0 pb-0 min-h-screen flex flex-col">
           {!messages && <div className="text-center mt-4">No messages</div>}
 
           <div className="sticky px-6 shadow-sm top-0 bg-white z-10 py-3">
               <ConversationHeader
+               currentUserId={user.id}
               conversationId={conversationId}
-                  name={
-                      conversation?.participants === 1
-                          ? conversation?.participants.map(participant => participant.name).join(', ')
-                          : conversation?.name
-                  }
-                  handleDeleteConversation={() => setIsOpen(true)}
-                  refetchConversations={refetchConversations}
-                  participants={conversation.participants}
+              name={conversation.name}
+              handleDeleteConversation={() => setIsOpen(true)}
+              refetchConversations={refetchConversations}
+              participants={conversation.participants}
               />
           </div>
 
-          <div className="flex-grow overflow-y-auto px-3">
+          <div className="flex-grow overflow-y-auto px-6">
               {hasMore && (
                   <div className="text-center flex items-center justify-center py-4">
                       <button
@@ -190,9 +218,12 @@ const Conversation = () => {
                       </button>
                   </div>
               )}
+              <div>
+                <MessageList observeLastElement={observeLastElement} messages={messages} user={user} />
+                <div ref={messagesEndRef} />
+              </div>
 
-              <MessageList observeLastElement={observeLastElement} messages={messages} user={user} />
-              <div ref={messagesEndRef} />
+        
           </div>
 
           <div className="sticky bottom-0 w-full bg-transparent ">

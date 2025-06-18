@@ -1,5 +1,5 @@
-import React, { useState, memo } from "react";
-import { MoreVertical } from "lucide-react";
+import React, { memo, useState } from "react";
+import { MoreVertical, Play } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,191 +9,223 @@ import {
 import IconButton from "../../IconButton";
 import Avatar from "../../Avatar";
 import FileItem from "../../internal/FileItem";
-import MediaModal from "./MediaModal";
 import { deleteMessage, updateMessage } from "../../../services/chat";
 import MessageContent from "./MessageContent";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
 const MessageItem = ({
-    isOwn,
-    avatarSrc,
-    avatarInitial,
-    name,
-    timestamp,
-    content,
-    status,
-    attachments,
-    id,
-    observeLastElement,
-    colorSettings
+  isOwn,
+  avatarSrc,
+  avatarInitial,
+  name,
+  timestamp,
+  content,
+  status,
+  attachments,
+  id,
+  observeLastElement,
+  colorSettings,
+  onDelete,
+  onOpenGallery,
 }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [mediaType, setMediaType] = useState('');
-    const [mediaUrl, setMediaUrl] = useState('');
-    const [isHovered, setIsHovered] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [isHovered, setIsHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-    const openModal = (url, type) => {
-        setMediaType(type);
-        setMediaUrl(url);
-        setIsModalOpen(true);
-    };
+  const handleEdit = () => setIsEditing(true);
+  const handleCancelEdit = () => setIsEditing(false);
+  const media = attachments?.filter(a => a.type === "image" || a.type === "video") || [];
+  const otherFiles = attachments?.filter(a => a.type !== "image" && a.type !== "video") || [];
+  const handleImageLoad = idx => setLoadedImages(prev => new Set(prev).add(idx));
 
-    const handleEdit = () => {
-        setIsEditing(true);
-    };
-
-    const handleCancelEdit = () => {
-        setIsEditing(false);
-    };
-
-    const renderMediaGrid = (media) => {
-        const mediaCount = media?.length;
-
-        if (mediaCount === 0) return null;
-
-        const gridClassName =
-            mediaCount === 1 ? "grid-cols-1" :
-                mediaCount === 2 ? "grid-cols-2" :
-                    mediaCount === 3 ? "grid-cols-2" :
-                        "grid-cols-2 sm:grid-cols-3";
-        return (
-            <div className=""> {/* Fixed width container */}
-                <div className={`grid ${gridClassName} gap-2 mb-2`}>
-                    {media?.map((item, index) => {
-                        const isLarge = mediaCount === 3 && index === 0;
-                        const showOverlay = mediaCount > 4 && index === 3;
-
-                        return (
-                            <div
-                                key={index}
-                                className={`relative overflow-hidden rounded-md ${isLarge ? 'col-span-2 row-span-2' : ''}`}
-                                style={{
-                                    aspectRatio: isLarge ? '16 / 9' : '1 / 1',
-                                }}
-                            >
-                                {item.type === 'image' ? (
-                                    <LazyLoadImage
-                                        src={item.url}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover cursor-pointer"
-                                        onClick={() => { openModal(item.url, 'image') }}
-                                    />
-                                ) : (
-                                    <div
-                                        className="relative w-full h-full bg-black cursor-pointer"
-                                        onClick={() => { openModal(item.url, 'video') }}
-                                    >
-                                        <button className="absolute inset-0 flex items-center justify-center text-white text-2xl">
-                                            ▶
-                                        </button>
-                                        <video
-                                            className="opacity-0 w-full h-full object-cover"
-                                            src={item.url}
-                                        />
-                                    </div>
-                                )}
-                                {showOverlay && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl">
-                                        +{mediaCount - 4} more
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    }).slice(0, 4)}
-                </div>
-            </div>
-        );
-    };
-
-    const renderOtherFiles = (files) => (
-        <div className="flex flex-col gap-2 mb-2">
-            {files?.map((file, index) => <FileItem key={file?.name} fileName={file?.name} fileType={file?.type} fileSize={'1.4MB'} />)}
-        </div>
-    );
-
-    const media = attachments?.filter((attachment) => attachment?.type === 'image' || attachment?.type === 'video');
-    const otherFiles = attachments?.filter((attachment) => attachment?.type !== 'image' && attachment?.type !== 'video');
-
-    const messageDelete = async () => {
-        await deleteMessage(id);
+  const getGridLayout = count => {
+    switch (count) {
+      case 1:
+        return "grid-cols-1";
+      case 2:
+        return "grid-cols-1 sm:grid-cols-2";
+      case 3:
+      case 4:
+        return "grid-cols-2";
+      default:
+        return "grid-cols-2";
     }
+  };
+
+  const renderMediaItem = (item, index) => {
+    const isLarge = media.length === 3 && index === 2;
+    const showOverlay = media.length > 4 && index === 3;
+    const isLoaded = loadedImages.has(index);
 
     return (
-        <div
-            ref={observeLastElement}
-            className={`relative flex gap-x-4 group ${isOwn ? "flex-row-reverse self-end" : "flex-row self-start"}`}
-        >
-            <Avatar size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
-            <div onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)} className="flex flex-col max-w-[400px] w-full gap-2 cursor-pointer">
-                <div className={`flex justify-between items-center gap-2 ${isOwn ? "flex-row-reverse self-end" : "flex-row self-start"}`}>
-                    <div className="flex items-center gap-2">
-                        <div className="py-0.5 px-2 text-xs leading-5 font-medium text-gray-900">
-                            {name}
-                        </div>
-                        <time dateTime={timestamp} className="py-0.5 text-xs leading-5 text-gray-500">
-                            {timestamp}
-                        </time>
-                    </div>
-                </div>
-                <div className="flex items-center">
-                    {
-                        isOwn && (   
-                            <div className={`opacity-0 ${isHovered && 'opacity-100'}  m-2`}> 
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <IconButton
-                                            variant="ghost"
-                                            icon={<MoreVertical color="#525866" aria-hidden="true" size={16} weight="bold" />}
-                                            size="small"
-                                            tooltip="Settings"
-                                        />
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="bg-white" align="end">
-                                        <DropdownMenuItem className=" cursor-pointer hover:text-white hover:bg-gray-800" onClick={handleEdit}>
-                                            Edit
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className=" cursor-pointer hover:text-white hover:bg-gray-800" onClick={messageDelete}>
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        )
-                    }
+      <div
+        key={index}
+        className={`
+          relative overflow-hidden rounded-xl group cursor-pointer
+          transition-all duration-200 hover:shadow-lg
+          ${isLarge ? "col-span-2 sm:col-span-2 aspect-[4/3]" : ""}
+          ${media.length === 1 ? "aspect-[4/3] max-h-80" : "aspect-square"}
+          ${media.length === 2 ? "aspect-square sm:aspect-square" : ""}
+        `}
+        onClick={() => onOpenGallery?.(media, index)}
+      >
+        {!isLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />}
 
-                    <div className="w-full">
-                        <div className="flex items-center">
-                            <div className={`relative w-full mb-3 flex flex-col rounded-md p-3 ring-1 ring-inset ring-gray-200 ${isOwn ? '  text-gray-900' : 'bg-white text-gray-900'}`}>
-                                <MessageContent
-                                    isEditing={isEditing}
-                                    content={content}
-                                    isOwn={isOwn}
-                                    handleCancelEdit={handleCancelEdit}
-                                    handleUpdateEdit={updateMessage}
-                                    status={status}
-                                    id={id}
-                                    colorSettings={colorSettings}
-                                />
-                            </div>
-                        </div>
-                        <div className="w-full">
-                            {renderMediaGrid(media)}
-                            {renderOtherFiles(otherFiles)}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <MediaModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                mediaType={mediaType}
-                mediaUrl={mediaUrl}
+        {item.type === "image" ? (
+          <LazyLoadImage
+            src={item.url}
+            alt={item.name || "Image attachment"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+            onLoad={() => handleImageLoad(index)}
+            placeholderSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E"
+          />
+        ) : (
+          <div className="relative w-full h-full bg-gray-900 group overflow-hidden rounded-xl">
+            <video
+              className="absolute inset-0 w-full h-full object-cover"
+              src={item.url}
+              preload="metadata"
+              muted
+              onLoadedData={() => handleImageLoad(index)}
             />
-        </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-40 transition-all duration-200 z-10">
+              <div className="bg-white bg-opacity-95 rounded-full p-3 shadow-lg group-hover:scale-105 transition-transform duration-200">
+                <Play className="w-5 h-5 text-gray-800 ml-0.5" fill="currentColor" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showOverlay && (
+          <div
+            className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center text-white text-sm font-medium backdrop-blur-sm cursor-pointer hover:bg-opacity-80 transition-all duration-200 z-20"
+            onClick={() => onOpenGallery?.(media, index)}
+          >
+            <span className="bg-black bg-opacity-60 px-4 py-2 rounded-full">
+              +{media.length - 4} more
+            </span>
+          </div>
+        )}
+      </div>
     );
+  };
+
+  const renderMediaGrid = items =>
+    items.length ? (
+      <div className="mb-3 relative isolate overflow-hidden">
+        {items.length === 3 ? (
+          <div className="grid grid-cols-2 gap-1 sm:gap-2">
+            {items.slice(0, 2).map(renderMediaItem)}
+            <div className="col-span-2">{items[2] && renderMediaItem(items[2], 2)}</div>
+          </div>
+        ) : (
+          <div className={`grid ${getGridLayout(items.length)} gap-1 sm:gap-2`}>
+            {items.slice(0, 4).map(renderMediaItem)}
+          </div>
+        )}
+      </div>
+    ) : null;
+
+  const renderOtherFiles = files =>
+    files.length > 0 && (
+      <div className="space-y-2 mb-3">
+        {files.map((file, idx) => (
+          <FileItem
+            key={`${file.name}-${idx}`}
+            fileName={file.name}
+            fileType={file.type}
+            fileSize={file.sizeReadable}
+            filePath={file.filePath}
+          />
+        ))}
+      </div>
+    );
+
+  const handleDelete = async () => onDelete();
+
+  return (
+    <div
+      ref={observeLastElement}
+      className={`relative isolate flex gap-x-4 group/message ${
+        isOwn ? "flex-row-reverse self-end" : "flex-row self-start"
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Avatar className="max-sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+
+      <div className="flex flex-col max-w-[400px] sm:max-w-[450px] w-full gap-2">
+        <div className={`flex justify-between items-center gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+          <div className="flex items-center gap-2">
+            {/* Avatar before name for non-own messages, after for own messages on small screens */}
+            {!isOwn && (
+              <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+            )}
+            <div className="py-0.5 text-xs font-medium text-gray-900">
+              {name}
+            </div>
+            {isOwn && (
+              <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+            )}
+            <time dateTime={timestamp} className="py-0.5 text-xs text-gray-500">
+              {timestamp}
+            </time>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2">
+          {isOwn && (
+            <div
+              className={`transition-opacity duration-200 flex-shrink-0 mt-2 ${
+                isHovered ? "opacity-100" : "opacity-0 group-hover/message:opacity-100"
+              }`}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton
+                    variant="ghost"
+                    icon={<MoreVertical size={16} className="text-gray-500" />}
+                    size="small"
+                    tooltip="Message options"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white shadow-lg border">
+                  <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          <div className="w-full min-w-0">
+            {content && (
+              <div
+                className={`relative w-full mb-3 flex flex-col px-4 py-3   rounded-2xl ${
+                  isOwn ? "bg-[#202a37] text-white rounded-br-md " : " ring-1 ring-gray-200 text-gray-900 rounded-bl-md"
+                }`}
+              >
+                <MessageContent
+                  isEditing={isEditing}
+                  content={content}
+                  isOwn={isOwn}
+                  handleCancelEdit={handleCancelEdit}
+                  handleUpdateEdit={updateMessage}
+                  status={status}
+                  id={id}
+                  colorSettings={colorSettings}
+                />
+              </div>
+            )}
+
+            {renderMediaGrid(media)}
+            {renderOtherFiles(otherFiles)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-// Memoize the component to avoid unnecessary re-renders
-export default MessageItem;
+export default memo(MessageItem);

@@ -75,7 +75,7 @@ export default function PortalSwitcher() {
                 </div>
 
                 {/* Chevron */}
-                <ChevronsUpDown className="ml-auto shrink-0" />
+                <ChevronsUpDown size={16} className="ml-auto shrink-0" />
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>

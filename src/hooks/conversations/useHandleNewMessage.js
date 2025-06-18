@@ -10,10 +10,11 @@ export const useHandleNewMessage = (
   setIsFloatingAlertVisible,
   userId
 ) => {
+  console.log(fetchedWay?.current)
   useEffect(() => {
-    if (messages.length > 0 && fetchedWay.current === 'INSERT') {
-      if (lastElementVisible.current) {
-        const currentConversation = conversations.find(
+    if (messages.length > 0 && fetchedWay?.current === 'INSERT') {
+      if (lastElementVisible?.current) {
+        const currentConversation = conversations?.find(
           conv => conv.id === conversationId
         );
 

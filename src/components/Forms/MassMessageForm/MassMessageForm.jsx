@@ -1,6 +1,5 @@
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { DialogTitle } from "@headlessui/react";
-
 import PeopleMultiSelectWithAvatar from "../../internal/PeopleMultiSelectWithAvatar";
 import { usePortalClients } from "../../../hooks/react-query/usePortalData";
 import { useSelector } from "react-redux";
@@ -8,108 +7,106 @@ import { createMassMessage } from "../../../services/chat";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { supabase } from "../../../lib/supabase";
 
 const MassMessageForm = ({ onClose }) => {
-    const [selectedPeople, setSelectedPeople] = useState([]);
-    const [comment, setComment] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
+  const [selectedPeople, setSelectedPeople] = useState([]);
+  const [comment, setComment] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
-    const { user, currentSelectedPortal } = useSelector(state => state.auth);
-    const { data: clients, isLoading } = usePortalClients(currentSelectedPortal);
+  const { user, currentSelectedPortal } = useSelector(state => state.auth);
+  const { data: clients, isLoading } = usePortalClients(currentSelectedPortal);
 
-    const handleChange = (selected) => {
-        setSelectedPeople(selected);
-        console.log("Selected people:", selected);
-    };
+  // Simplified handler that just sets the new value
+  const handleChange = useCallback((selected) => {
+    setSelectedPeople(selected);
+  }, []);
 
-    const handleCommentChange = (e) => {
-        setComment(e.target.value);
-    };
+  const handleCommentChange = useCallback((e) => {
+    setComment(e.target.value);
+  }, []);
 
-    const handleMassMessageSubmit = async (e) => {
-        e.preventDefault();
-        console.log(`this is the selected people: `, selectedPeople);
+  const handleMassMessageSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedPeople.length || !comment.trim()) return;
 
-        try {
-            setIsCreating(true);
-            const participants = selectedPeople.map((person) => person.id);
+    setIsCreating(true);
+    try {
+      const messageData = {
+        content: comment,
+        status: "sent",
+      };
+      const participantIds = selectedPeople.map(p => p.id);
 
-            let newMessage = {
-                content: comment,
-                status: "sent",
-                sender_id: user.id,
-                sender: {
-                    id: user.id,
-                    name: user.name,
-                    avatar_url: user?.avatar_url,
-                },
-            };
+      await createMassMessage(
+        messageData,
+        participantIds,
+        currentSelectedPortal,
+        user.id
+      );
 
-            await createMassMessage(newMessage, participants, currentSelectedPortal);
-            setIsCreating(false);
-            onClose();
-        } catch (error) {
-            console.log(`Error creating mass message: `, error);
-        }
-    };
+      onClose();
+    } catch (err) {
+      console.error("Error sending mass messages:", err);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
-    if (isLoading) return <div className="flex items-center justify-center py-2 text-black">Loading...</div>;
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-2 text-black">Loading...</div>;
+  }
 
-    return (
+  return (
+    <form onSubmit={handleMassMessageSubmit}>
+      <div className="mb-6">
+        <DialogTitle className="text-base font-semibold leading-6 text-black mb-2">
+          Mass Message
+        </DialogTitle>
+        <p className="text-sm text-black">
+          Send a direct message to multiple clients. Recipients cannot see each others' replies.
+        </p>
+      </div>
+
+      <div className="space-y-4">
         <div>
-            <div>
-                <div className="mb-6">
-                    <DialogTitle as="h3" className="text-base font-semibold leading-6 text-black mb-2">
-                        Mass Message
-                    </DialogTitle>
-                    <p className="text-sm text-black">
-                        Send a direct message to multiple clients. Recipients cannot see each others’ replies.
-                    </p>
-                </div>
-                <div className="flex flex-col gap-4">
-                    <Label>
-                        Add your comment
-                    </Label>
-                    <Textarea
-                        label="Add your comment"
-                        id="comment"
-                        name="comment"
-                        rows={4}
-                        value={comment}
-                        onChange={handleCommentChange}
-                    />
-                    <div>
-                        <PeopleMultiSelectWithAvatar
-                            people={clients}
-                            onChange={handleChange}
-                            label="Select client(s)"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3 space-y-3 sm:space-y-0">
-  <Button
-    className="w-full"
-    size="lg"
-    onClick={onClose}
-    variant="outline"
-  >
-    Cancel
-  </Button>
-
-  <Button
-    className="w-full bg-black text-white"
-    onClick={handleMassMessageSubmit}
-    size="lg"
-    type="submit"
-    data-autofocus
-  >
-    {isCreating ? 'Sending...' : 'Send'}
-  </Button>
-</div>
-
+          <Label htmlFor="comment">Message</Label>
+          <Textarea
+            id="comment"
+            rows={4}
+            value={comment}
+            onChange={handleCommentChange}
+            placeholder="Enter your message here..."
+          />
         </div>
-    );
+
+        <PeopleMultiSelectWithAvatar
+          people={clients || []}
+          onChange={handleChange}
+          value={selectedPeople}
+          label="Select client(s)"
+        />
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <Button 
+          variant="outline" 
+          onClick={onClose} 
+          disabled={isCreating}
+          type="button"
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isCreating || !selectedPeople.length || !comment.trim()} 
+          className="bg-black text-white"
+        >
+          {isCreating ? "Sending..." : "Send"}
+        </Button>
+      </div>
+    </form>
+  );
 };
 
-export default MassMessageForm;
+export default MassMessageForm

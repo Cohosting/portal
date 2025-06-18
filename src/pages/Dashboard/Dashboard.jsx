@@ -65,25 +65,29 @@ export const Dashboard = () => {
       title: 'Total Clients',
       value: summary.total_clients.value,
       icon: Users,
-      change: formatChange(summary.total_clients.change),
+      delta: summary.total_clients.change,
+      label: formatChange(summary.total_clients.change),
     },
     {
       title: 'Total Invoices',
       value: summary.total_invoices.value,
       icon: ClipboardList,
-      change: formatChange(summary.total_invoices.change),
+      delta: summary.total_invoices.change,
+      label: formatChange(summary.total_invoices.change),
     },
     {
       title: 'Total Revenue',
       value: `${summary.total_revenue.value}$`,
       icon: TrendingUp,
-      change: formatChange(summary.total_revenue.change, true),
+      delta: summary.total_revenue.change,
+      label: formatChange(summary.total_revenue.change, true),
     },
     {
       title: 'Open Invoices',
       value: summary.open_invoices.value,
       icon: Inbox,
-      change: formatChange(summary.open_invoices.change),
+      delta: summary.open_invoices.change,
+      label: formatChange(summary.open_invoices.change),
     },
   ];
 
@@ -95,13 +99,14 @@ export const Dashboard = () => {
         title="Dashboard"
         description="Overview of your portal's performance and recent activities."
       />
-<div className="px-6 max-sm:px-4 mt-4 py-1">
-  <p className="text-xl text-gray-600">
-    Hey, <span className="font-semibold text-gray-800">{user?.name}</span>! 👋 Welcome back.
-  </p>
-</div>
 
-      <div className="space-y-6 max-sm:px-4  p-6 pt-3">
+      <div className="px-6 max-sm:px-4 mt-4 py-1">
+        <p className="text-xl text-gray-600">
+          Hey, <span className="font-semibold text-gray-800">{user?.name}</span>! 👋 Welcome back.
+        </p>
+      </div>
+
+      <div className="space-y-6 max-sm:px-4 p-6 pt-3">
         {/* Metrics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item, i) => (
@@ -117,8 +122,14 @@ export const Dashboard = () => {
               </div>
               <div className="flex items-baseline">
                 <span className="text-2xl font-bold text-gray-900">{item.value}</span>
-                <span className={`ml-2 text-xs px-2 py-1 rounded-full font-medium ${badgeStyle}`}>
-                  {item.change}
+                <span
+                  className={`ml-2 text-xs px-2 py-1 rounded-full font-medium ${
+                    item.delta > 0
+                      ? 'bg-green-100 text-green-800'
+                      : badgeStyle
+                  }`}
+                >
+                  {item.label}
                 </span>
               </div>
             </div>
@@ -133,7 +144,6 @@ export const Dashboard = () => {
               <div className="p-5 border-b border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-800">Recent Activities</h2>
               </div>
-              {/* Reverted to original: no scroll wrapper */}
               <div className="divide-y divide-gray-100">
                 <RecentActivitiesList portal_id={currentSelectedPortal} />
               </div>

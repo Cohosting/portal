@@ -94,6 +94,10 @@ const ClientTable = ({ clients, refetch }) => {
                 bgColor = 'bg-green-100';
                 textColor = 'text-green-800';
                 break;
+            case 'restricted':
+                bgColor = 'bg-red-100';
+                textColor = 'text-red-800';
+                break;
             default:
                 bgColor = 'bg-gray-100';
                 textColor = 'text-gray-800';

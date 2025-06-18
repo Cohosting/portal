@@ -5,7 +5,7 @@ import { useRealtimeMessages } from './react-query/useChat';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
 
-export const useConversation = (conversationId, user, conversations) => {
+export const useConversation = (conversationId, user, conversations, listRef) => {
   const {
     isLoading,
     messages,
@@ -15,7 +15,7 @@ export const useConversation = (conversationId, user, conversations) => {
     moreLoading,
     fetchedWay,
     error,
-  } = useRealtimeMessages(conversationId, 15, conversations, user);
+  } = useRealtimeMessages(conversationId, 15, conversations, user, listRef);
 
   const [isFileUploading, setIsFileUploading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -31,6 +31,8 @@ export const useConversation = (conversationId, user, conversations) => {
 
   const handleSendMessage = useCallback(
     async (content, selectedMood, selectedFiles, selectedFilePublicUrls) => {
+      let isClients = user?.customer_id
+  
       console.log('handleSendMessage called with:', {
         content,
         selectedMood,
@@ -38,7 +40,7 @@ export const useConversation = (conversationId, user, conversations) => {
         selectedFilePublicUrls,
       });
       if (!content) return;
-
+       
       const tempId = uuidv4();
       const newMessage = {
         id: tempId,
@@ -46,28 +48,31 @@ export const useConversation = (conversationId, user, conversations) => {
         content,
         status: 'sending',
         conversation_id: conversationId,
+        sender_type:  isClients ? 'clients' : 'users',
         sender_id: user.id,
-        sender: {
+        sender:{
           id: user.id,
           name: user.name,
-          avatar_url: user?.avatar_url,
+          avatar_url: user.avatar_url,
+          sender_type: isClients ? 'clients' : 'users',
         },
-        attachments: selectedFilePublicUrls,
+
+        attachments: selectedFiles,
         seen: [user.id],
       };
-
+  
       console.log('New message created:', newMessage);
-
+  
       // Add the temporary message to the state
       setMessages((prevMessages) => [...prevMessages, newMessage]);
-
+  
       try {
         const response = await sendMessage({
           ...newMessage,
           status: 'sent',
         });
         console.log('Message sent successfully:', response);
-
+  
         // Update the temporary message with the response from the server
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
@@ -76,7 +81,7 @@ export const useConversation = (conversationId, user, conversations) => {
         );
       } catch (error) {
         console.error('Error sending message:', error);
-
+  
         // Update the message status to 'failed' if there's an error
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
@@ -84,7 +89,7 @@ export const useConversation = (conversationId, user, conversations) => {
           )
         );
       }
-
+  
       console.log('handleSendMessage execution completed');
     },
     [conversationId, user, messages, setMessages]
