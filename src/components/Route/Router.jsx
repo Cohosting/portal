@@ -14,7 +14,7 @@ import { Invoices } from '../../pages/Invoices/Invoices';
 import { InvoiceForm } from '../../pages/Invoices/InvoiceForm';
 import { AppForm } from '../../pages/App/AppForm';
 import { AppsList } from '../../pages/App/AppsList';
-import { CustomizePortal } from '../../pages/Settings/CustomizePortal';
+import { CustomizePortal } from '../../pages/Settings/CustomizePortal/CustomizePortal';
 import { Team } from '../../pages/Team/Team';
 import { AccountSettings } from '../../pages/Settings/Profile/AccountSettings.jsx';
 import SubdomainWrapper from '../internal/SubdomainWrapper';

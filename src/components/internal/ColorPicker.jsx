@@ -1,12 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { HexColorPicker } from 'react-colorful';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { ColorPicker, useColor } from 'react-color-palette';
+import 'react-color-palette/css';
 
 export const BrandColorPicker = ({
   onCompletePick, field, defaultColor, title
 }) => {
-  const [color, setColor] = useState(defaultColor);
+  const [color, setColor] = useColor(defaultColor || '#000000');
   const [showPicker, setShowPicker] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const ref = useRef();
+  const debounceTimer = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -21,33 +24,63 @@ export const BrandColorPicker = ({
     };
   }, [ref]);
 
-  // Handle live color changes (just visual feedback, no parent update)
-  const handleChange = (hexColor) => {
-    setColor(hexColor);
+  useEffect(() => {
+    // Cleanup debounce timer on unmount
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
+
+  // Debounced function to update parent
+  const debouncedUpdate = useCallback((hexColor) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    debounceTimer.current = setTimeout(() => {
+      onCompletePick(field, hexColor);
+    }, 100); // 100ms debounce
+  }, [field, onCompletePick]);
+
+  // Handle live color changes with debounced parent updates
+  const handleChange = (newColor) => {
+    setColor(newColor);
+    // Only update parent if not actively dragging or use debounced update
+    if (!isDragging) {
+      debouncedUpdate(newColor.hex);
+    }
   };
 
-  // Handle when user finishes changing color (mouseup/click)
-  const handleChangeComplete = (hexColor) => {
-    setColor(hexColor);
-    onCompletePick(field, hexColor);
+  // Handle mouse down (start dragging)
+  const handleMouseDown = () => {
+    setIsDragging(true);
   };
 
-  // Add mouse up handler to detect when user stops dragging
+  // Handle mouse up (stop dragging)
   const handleMouseUp = () => {
-    onCompletePick(field, color);
+    setIsDragging(false);
+    // Immediately update parent when dragging stops
+    onCompletePick(field, color.hex);
+  };
+
+  // Handle when user finishes changing color (for click events)
+  const handleChangeComplete = (newColor) => {
+    setColor(newColor);
+    onCompletePick(field, newColor.hex);
   };
 
   const handleInputChange = (event) => {
-    const newColor = event.target.value;
-    setColor(newColor);
-    if (/^#([0-9A-F]{3}){1,2}$/i.test(newColor)) {
-      onCompletePick(field, newColor);
+    const newColorHex = event.target.value;
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(newColorHex)) {
+      setColor({ ...color, hex: newColorHex });
+      onCompletePick(field, newColorHex);
     }
   };
 
   useEffect(() => {
     if (!defaultColor) return;
-    setColor(defaultColor);
+    setColor({ ...color, hex: defaultColor });
   }, [defaultColor]);
 
   return (
@@ -57,20 +90,21 @@ export const BrandColorPicker = ({
         <div
           onClick={() => setShowPicker(!showPicker)}
           className="w-9 h-9 border border-gray-300 rounded-lg cursor-pointer"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: color.hex }}
         ></div>
         <input
           type="text"
-          value={color}
+          value={color.hex}
           onChange={handleInputChange}
           className="ml-2.5 h-9 bg-white w-[105px] border border-gray-300 rounded px-2"
         />
         {showPicker && (
           <div ref={ref} className="absolute top-full left-0 mt-2 z-10">
             <div onMouseUp={handleMouseUp}>
-              <HexColorPicker
+              <ColorPicker
                 color={color}
                 onChange={handleChange}
+                hideInput={['rgb', 'hsv']}
               />
             </div>
           </div>

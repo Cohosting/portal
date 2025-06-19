@@ -22,6 +22,7 @@ const ClientPaymentMethods = ({
     stripe_connect_account_id,
     invoice?.settings
   );
+  const {primaryButtonColor, primaryButtonTextColor, primaryButtonHoverColor } = colorSettings
 
   useEffect(() => {
     if (invoice?.last_payment_error) {
@@ -29,13 +30,6 @@ const ClientPaymentMethods = ({
     }
   }, [invoice?.last_payment_error]);
 
-  console.log({
-    customer_id,
-    stripe_connect_account_id,
-    invoice,
-    colorSettings,
-    paymentMethods
-  });
 
   const handleRetryPayment = () => {
     setShowPaymentError(false);
@@ -94,8 +88,8 @@ const ClientPaymentMethods = ({
           onClick={() => setShowAddPaymentMethod(true)}
           hideButton={showAddPaymentMethod}
           styles={{
-            backgroundColor: colorSettings?.sidebarBgColor || '#000',
-            color: colorSettings?.sidebarActiveTextColor || '#fff'
+            backgroundColor: primaryButtonColor || '#000',
+            color: primaryButtonTextColor || '#fff'
           }}
         />
         {showAddPaymentMethod && (

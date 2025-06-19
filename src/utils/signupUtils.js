@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { getOrCreateUser } from '../lib/auth';
+import { brandPresets, createBrandSettings } from './brandSettingsHelper';
 // Standardizing date handling
 
 const validateInput = (user, personalInfoStep, businessDetailsStep) => {
@@ -71,28 +72,17 @@ export const initializeOrganizationSetup = async (
     );
 
     const { data: updatedPortal, error: updateError } = await supabase
-      .from('portals')
-      .update({
-        portal_url: personalInfoStep.portal_url,
-        brand_settings: {
-          brandName: personalInfoStep.company_name,
-          poweredByCopilot: false,
-          sidebarBgColor: '#1E293B',
-          sidebarTextColor: '#CBD5E1',
-          sidebarActiveTextColor: '#38BDF8',
-          accentColor: '#5b749a',
-          loginFormTextColor: '#eeeff1',
-          loginButtonColor: '#49628a',
-          loginButtonTextColor: '#fff5f5',
-          squareIcon: '',
-          fullLogo: '',
-          squareLoginImage: ''
-        },
-        customer_id
-      })
-      .eq('id', portalData.id)
-      .select('*');
-
+    .from('portals')
+    .update({
+      portal_url: personalInfoStep.portal_url,
+      brand_settings: createBrandSettings({
+        brandName: personalInfoStep.company_name,
+        ...brandPresets.professional  // Uses the professional theme
+      }),
+      customer_id
+    })
+    .eq('id', portalData.id)
+    .select('*');
     if (updateError || !updatedPortal) {
       throw new Error("Failed to update portal data.");
     }

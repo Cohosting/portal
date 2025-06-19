@@ -7,11 +7,18 @@ const ConversationListItem = (props) => {
     const { chat, lastMessage, lastMessageTime, current, handleClick, isUnread, colorSettings } = props;
     const isGroup = chat.type === "group";
 
-    let { loginButtonColor, loginButtonTextColor } = colorSettings || {};
-
+    // Destructure color settings with proper variable names
+    const { 
+        messageActiveItemBg, 
+        messageActiveItemText, 
+        messageHoverBg 
+    } = colorSettings || {};
+    console.log(colorSettings)
+    
     // Fallback colors if colorSettings are not provided
-    const fallbackAccentColor = loginButtonColor || '#1f2937'; // gray-800 as fallback
-    const fallbackActiveTextColor = loginButtonTextColor || '#ffffff'; // white as fallback
+    const activeBackgroundColor = messageActiveItemBg || '#1f2937'; // gray-800 as fallback
+    const activeTextColor = messageActiveItemText || '#ffffff'; // white as fallback
+    const hoverBackgroundColor = messageHoverBg || '#f9fafb'; // gray-50 as fallback
 
     const renderAvatar = () => {
         if (isGroup) {
@@ -103,80 +110,104 @@ const ConversationListItem = (props) => {
         }
     };
 
-    // Dynamic styles for current item
-    const currentItemStyles = current ? {
-        backgroundColor: fallbackAccentColor,
-        color: fallbackActiveTextColor
-    } : {};
+    // Dynamic styles using CSS variables
+    const itemStyles = {
+        '--hover-bg': hoverBackgroundColor,
+        '--hover-text-color': current ? activeTextColor : '#111827', // gray-900
+        '--hover-time-color': current ? activeTextColor : '#374151', // gray-700
+        '--hover-message-color': current ? activeTextColor : '#1f2937', // gray-800
+        ...(current ? {
+            backgroundColor: activeBackgroundColor,
+            color: activeTextColor
+        } : {
+            backgroundColor: 'white'
+        })
+    };
 
     return (
-        <div
-            className={`flex items-center w-full gap-3 py-3 px-4 cursor-pointer  
-                ${current 
-                    ? "shadow-sm" 
-                    : "bg-white hover:bg-gray-50"
-                } 
-                ${isUnread && lastMessage && !current ? "border-l-4 border-blue-600" : ""}
-                ${isUnread && lastMessage && current ? "border-l-4 border-blue-600 font-bold" : ""}`}
-            style={currentItemStyles}
-            onClick={handleClick}
-        >
-            <div className="select-none flex-shrink-0">{renderAvatar()}</div>
-            <div className="flex w-full flex-col min-w-0">
-                <div className="flex flex-1 items-center justify-between gap-2">
-                    <p 
-                        className={`text-sm select-none truncate ${
-                            isUnread ? "font-bold" : "font-medium"
-                        }`}
-                        style={{
-                            color: current 
-                                ? fallbackActiveTextColor 
-                                : (isUnread ? '#111827' : '#374151') // gray-900 : gray-700
-                        }}
-                    >
-                        {chat.name}
-                    </p>
-                    <p 
-                        className="text-xs select-none flex-shrink-0"
-                        style={{
-                            color: current 
-                                ? fallbackActiveTextColor 
-                                : '#6b7280' // gray-500
-                        }}
-                    >
-                        {lastMessageTime && formateLastMessageTime(lastMessageTime)}
-                    </p>
+        <>
+            <style>{`
+                .conversation-list-item:not(.active):hover {
+                    background-color: var(--hover-bg) !important;
+                }
+                
+                .conversation-list-item:not(.active):hover .chat-name {
+                    color: var(--hover-text-color) !important;
+                }
+                
+                .conversation-list-item:not(.active):hover .chat-time {
+                    color: var(--hover-time-color) !important;
+                }
+                
+                .conversation-list-item:not(.active):hover .chat-message {
+                    color: var(--hover-message-color) !important;
+                }
+            `}</style>
+            <div
+                className={`conversation-list-item flex items-center w-full gap-3 py-3 px-4 cursor-pointer transition-colors duration-150
+                    ${current ? "active shadow-sm" : ""} 
+                    ${isUnread && lastMessage && !current ? "border-l-4 border-blue-600" : ""}
+                    ${isUnread && lastMessage && current ? "border-l-4 border-blue-600 font-bold" : ""}`}
+                style={itemStyles}
+                onClick={handleClick}
+            >
+                <div className="select-none flex-shrink-0">{renderAvatar()}</div>
+                <div className="flex w-full flex-col min-w-0">
+                    <div className="flex flex-1 items-center justify-between gap-2">
+                        <p 
+                            className={`chat-name text-sm select-none truncate ${
+                                isUnread ? "font-bold" : "font-medium"
+                            }`}
+                            style={{
+                                color: current 
+                                    ? activeTextColor 
+                                    : (isUnread ? '#111827' : '#374151') // gray-900 : gray-700
+                            }}
+                        >
+                            {chat.name}
+                        </p>
+                        <p 
+                            className="chat-time text-xs select-none flex-shrink-0"
+                            style={{
+                                color: current 
+                                    ? activeTextColor 
+                                    : '#6b7280' // gray-500
+                            }}
+                        >
+                            {lastMessageTime && formateLastMessageTime(lastMessageTime)}
+                        </p>
+                    </div>
+                    {lastMessage ? (
+                        <p 
+                            className={`chat-message text-xs select-none truncate ${
+                                isUnread ? "font-medium" : ""
+                            }`}
+                            style={{
+                                color: current 
+                                    ? activeTextColor 
+                                    : (isUnread ? '#1f2937' : '#4b5563') // gray-800 : gray-600
+                            }}
+                        >
+                            {lastMessage}
+                        </p>
+                    ) : (
+                        <p 
+                            className="chat-message text-xs italic"
+                            style={{
+                                color: current 
+                                    ? activeTextColor 
+                                    : '#9ca3af' // gray-400
+                            }}
+                        >
+                            No conversation yet
+                        </p>
+                    )}
                 </div>
-                {lastMessage ? (
-                    <p 
-                        className={`text-xs select-none truncate ${
-                            isUnread ? "font-medium" : ""
-                        }`}
-                        style={{
-                            color: current 
-                                ? fallbackActiveTextColor 
-                                : (isUnread ? '#1f2937' : '#4b5563') // gray-800 : gray-600
-                        }}
-                    >
-                        {lastMessage}
-                    </p>
-                ) : (
-                    <p 
-                        className="text-xs italic"
-                        style={{
-                            color: current 
-                                ? fallbackActiveTextColor 
-                                : '#9ca3af' // gray-400
-                        }}
-                    >
-                        No conversation yet
-                    </p>
+                {isUnread && lastMessage && (
+                    <div className="w-2 h-2 bg-blue-600 rounded-full ml-2 flex-shrink-0"></div>
                 )}
             </div>
-            {isUnread && lastMessage && (
-                <div className="w-2 h-2 bg-blue-600 rounded-full ml-2 flex-shrink-0"></div>
-            )}
-        </div>
+        </>
     );
 };
 
@@ -192,6 +223,11 @@ ConversationListItem.defaultProps = {
     time: "",
     current: false,
     handleClick: () => { },
+    colorSettings: {
+        messageActiveItemBg: '#1f2937',
+        messageActiveItemText: '#ffffff',
+        messageHoverBg: '#f9fafb'
+    }
 };
 
 export default ConversationListItem;

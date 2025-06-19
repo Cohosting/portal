@@ -31,6 +31,13 @@ const MessageItem = ({
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const {
+    myMessageBgColor,
+    myMessageTextColor,
+    oppositeMessageBgColor,
+    oppositeMessageTextColor,
+  } = colorSettings || {};
 
   const handleEdit = () => setIsEditing(true);
   const handleCancelEdit = () => setIsEditing(false);
@@ -56,7 +63,6 @@ const MessageItem = ({
     const isLarge = media.length === 3 && index === 2;
     const showOverlay = media.length > 4 && index === 3;
     const isLoaded = loadedImages.has(index);
-
     return (
       <div
         key={index}
@@ -70,7 +76,6 @@ const MessageItem = ({
         onClick={() => onOpenGallery?.(media, index)}
       >
         {!isLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />}
-
         {item.type === "image" ? (
           <LazyLoadImage
             src={item.url}
@@ -95,7 +100,6 @@ const MessageItem = ({
             </div>
           </div>
         )}
-
         {showOverlay && (
           <div
             className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center text-white text-sm font-medium backdrop-blur-sm cursor-pointer hover:bg-opacity-80 transition-all duration-200 z-20"
@@ -143,88 +147,100 @@ const MessageItem = ({
 
   const handleDelete = async () => onDelete();
 
+  // Static styles for messages (no hover states)
+  const messageStyles = isOwn ? {
+    // Own message styles
+    backgroundColor: myMessageBgColor || '#202a37',
+    color: myMessageTextColor || 'white',
+  } : {
+    // Opposite message styles
+    backgroundColor: oppositeMessageBgColor || 'white',
+    color: oppositeMessageTextColor || '#111827',
+  };
+
   return (
-    <div
-      ref={observeLastElement}
-      className={`relative isolate flex gap-x-4 group/message ${
-        isOwn ? "flex-row-reverse self-end" : "flex-row self-start"
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <Avatar className="max-sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
-
-      <div className="flex flex-col max-w-[400px] sm:max-w-[450px] w-full gap-2">
-        <div className={`flex justify-between items-center gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-          <div className="flex items-center gap-2">
-            {/* Avatar before name for non-own messages, after for own messages on small screens */}
-            {!isOwn && (
-              <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
-            )}
-            <div className="py-0.5 text-xs font-medium text-gray-900">
-              {name}
+    <>
+      <div
+        ref={observeLastElement}
+        className={`relative isolate flex gap-x-4 group/message ${
+          isOwn ? "flex-row-reverse self-end" : "flex-row self-start"
+        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Avatar className="max-sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+        <div className="flex flex-col max-w-[400px] sm:max-w-[450px] w-full gap-2">
+          <div className={`flex justify-between items-center gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+            <div className="flex items-center gap-2">
+              {/* Avatar before name for non-own messages, after for own messages on small screens */}
+              {!isOwn && (
+                <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+              )}
+              <div className="py-0.5 text-xs font-medium text-gray-900">
+                {name}
+              </div>
+              {isOwn && (
+                <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
+              )}
+              <time dateTime={timestamp} className="py-0.5 text-xs text-gray-500">
+                {timestamp}
+              </time>
             </div>
-            {isOwn && (
-              <Avatar className="sm:hidden" size="sm" name={name} src={avatarSrc} initial={avatarInitial} />
-            )}
-            <time dateTime={timestamp} className="py-0.5 text-xs text-gray-500">
-              {timestamp}
-            </time>
           </div>
-        </div>
-
-        <div className="flex items-start gap-2">
-          {isOwn && (
-            <div
-              className={`transition-opacity duration-200 flex-shrink-0 mt-2 ${
-                isHovered ? "opacity-100" : "opacity-0 group-hover/message:opacity-100"
-              }`}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <IconButton
-                    variant="ghost"
-                    icon={<MoreVertical size={16} className="text-gray-500" />}
-                    size="small"
-                    tooltip="Message options"
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white shadow-lg border">
-                  <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          <div className="w-full min-w-0">
-            {content && (
+          <div className="flex items-start gap-2">
+            {isOwn && (
               <div
-                className={`relative w-full mb-3 flex flex-col px-4 py-3   rounded-2xl ${
-                  isOwn ? "bg-[#202a37] text-white rounded-br-md " : " ring-1 ring-gray-200 text-gray-900 rounded-bl-md"
+                className={`transition-opacity duration-200 flex-shrink-0 mt-2 ${
+                  isHovered ? "opacity-100" : "opacity-0 group-hover/message:opacity-100"
                 }`}
               >
-                <MessageContent
-                  isEditing={isEditing}
-                  content={content}
-                  isOwn={isOwn}
-                  handleCancelEdit={handleCancelEdit}
-                  handleUpdateEdit={updateMessage}
-                  status={status}
-                  id={id}
-                  colorSettings={colorSettings}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <IconButton
+                      variant="ghost"
+                      icon={<MoreVertical size={16} className="text-gray-500" />}
+                      size="small"
+                      tooltip="Message options"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white shadow-lg border">
+                    <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
-
-            {renderMediaGrid(media)}
-            {renderOtherFiles(otherFiles)}
+            <div className="w-full min-w-0">
+              {content && (
+                <div
+                  className={`message-bubble relative w-full mb-3 flex flex-col px-4 py-3 rounded-2xl ${
+                    isOwn 
+                      ? "rounded-br-md" 
+                      : "ring-1 ring-gray-200 rounded-bl-md"
+                  }`}
+                  style={messageStyles}
+                >
+                  <MessageContent
+                    isEditing={isEditing}
+                    content={content}
+                    isOwn={isOwn}
+                    handleCancelEdit={handleCancelEdit}
+                    handleUpdateEdit={updateMessage}
+                    status={status}
+                    id={id}
+                    colorSettings={colorSettings}
+                  />
+                </div>
+              )}
+              {renderMediaGrid(media)}
+              {renderOtherFiles(otherFiles)}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

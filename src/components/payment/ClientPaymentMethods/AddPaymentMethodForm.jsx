@@ -20,6 +20,8 @@ const Form = ({
   const elements = useElements();
   const queryClient = useQueryClient();
 
+  const { primaryButtonColor, primaryButtonTextColor, primaryButtonHoverColor } = colorSettings
+
   const handleSubmit = async event => {
     event.preventDefault();
 
@@ -82,8 +84,8 @@ const Form = ({
           Cancel
         </Button>
         <Button style={{
-          backgroundColor: colorSettings?.sidebarBgColor || '#000',
-          color: colorSettings?.sidebarActiveTextColor || '#fff',
+          backgroundColor: primaryButtonColor || '#000',
+          color: primaryButtonTextColor || '#fff',
         }} disabled={isLoading} type="submit"  >
           {isLoading ? 'Saving...' : 'Save payment method'}
         </Button>
@@ -101,7 +103,7 @@ const AddPaymentMethodForm = ({
 }) => {
   const [clientSecret, setClientSecret] = useState('');
   const [stripe, setStripe] = useState(null);
-
+ 
   useEffect(() => {
     if (!customer_id || !stripe_connect_account_id) return;
 
@@ -149,7 +151,7 @@ const AddPaymentMethodForm = ({
     appearance: {
       theme: 'flat',
       variables: {
-        colorPrimary: colorSettings?.sidebarBgColor || '#0570de',
+        colorPrimary: 'black' || '#0570de',
       },
  
     },

@@ -7,3 +7,22 @@
     width: 1.25rem !important;
     height: 1.25rem !important;
 }
+
+
+.btn-dynamic {
+    border: none;
+    background-color: var(--btn-bg);
+    color:          var(--btn-text);
+    transition: background-color 0.2s;
+  }
+  .btn-dynamic:hover {
+    background-color: var(--btn-hover);
+  }
+
+  .conversation-list-item {
+    transition: background-color 0.2s ease;
+  }
+  
+  .conversation-list-item:not(.active):hover {
+    background-color: var(--hover-bg);
+  }

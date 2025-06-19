@@ -9,6 +9,8 @@ import { useInvoiceDetails } from '../../../../hooks/invoice/useInvoiceDetails';
 import InvoiceAttachments from '../../../../components/Invoice/InvoiceAttachments';
 import PageHeader from '../components/PageHeader';
 import PortalLoadingSkeleton from '../components/PortalLoadingSkeleton';
+import { defaultBrandSettings, getComputedColors } from '@/utils/colorUtils';
+import { useCallback } from 'react';
 
 const formateDate = (dateString) => {
  
@@ -53,6 +55,8 @@ const InvoiceDetails = () => {
     const stripeConnectAccountId = invoice?.portal?.stripe_connect_account_id  
     const customerId = getCustomerId(invoice);
     let portal = invoice?.portal || {}
+    let brandSettings = portal?.brand_settings || defaultBrandSettings;
+    const computedColors = useCallback(getComputedColors(brandSettings), [brandSettings]);
      if(!invoice && isLoading) return (
         <div>
                     <div className="h-[64px] border-b border-gray-200 px-6 flex flex-col justify-center">
@@ -87,7 +91,7 @@ const InvoiceDetails = () => {
 
                             <ContactInfo
                                 label="From"
-                                companyName={invoice?.portal?.brand_settings?.brandName}
+                                companyName={brandSettings?.brandName}
                                 address={formatAddress(invoice?.billing_addresses?.from)}
                             />
                         </div>
@@ -106,7 +110,7 @@ const InvoiceDetails = () => {
                         invoice={invoice}
                         stripeConnectAccountId={stripeConnectAccountId}
                         customerId={customerId}
-                        colorSettings={portal?.brand_settings} 
+                        colorSettings={computedColors} 
                     />
                     {
 

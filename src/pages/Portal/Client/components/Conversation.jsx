@@ -136,7 +136,11 @@ const Conversation = ({ conversationId, user, conversations, isClientExperience,
                     </div>
                 )}
                 <div>
-                    <MessageList colorSettings={colorSettings} observeLastElement={observeLastElement} messages={messages} user={user} />
+                    <MessageList 
+                    colorSettings={colorSettings} 
+                    observeLastElement={observeLastElement}
+                     messages={messages} user={user} 
+                     />
                     <div ref={messagesEndRef} />
                 </div>
             </div>

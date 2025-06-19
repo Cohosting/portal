@@ -1,111 +1,146 @@
-// Import necessary hooks and libraries
-import { useEffect, useState } from 'react';
+// useCustomizePortalLogic.js
+import { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { usePortalData } from './react-query/usePortalData';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
-
-let defaultBrandSettings = {
-    poweredByCopilot: false,
-    sidebarBgColor: '#000000',
-    sidebarTextColor: '#FFFFFF',
-    sidebarActiveTextColor: '#FFFFFF',
-    accentColor: '#000000',
-    loginFormTextColor: '#000000',
-    loginButtonColor: '#000000',
-    loginButtonTextColor: '#000000',
-    squareIcon: '',
-    fullLogo: '',
-    squareLoginImage: '',
-}   
+import { 
+  defaultBrandSettings, 
+  getComputedColors,
+  deriveColors 
+} from '../utils/colorUtils';
 
 export const useCustomizePortalLogic = () => {
-    const { user, currentSelectedPortal } = useSelector(state => state.auth);
-    const { data: portal } = usePortalData(currentSelectedPortal);
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false);
-    const [previousSetting, setPreviousSetting] = useState({});
-    const [brandSettings, setBrandSettings] = useState({});
-    console.log({
-        brandSettings
-    })
-    // Logic to handle state updates
-    const handleUpdateState = (key, value) => {
-        setBrandSettings({
-            ...brandSettings,
-            [key]: value,
-        });
-    };
+  const { currentSelectedPortal } = useSelector(s => s.auth);
+  const { data: portal } = usePortalData(currentSelectedPortal);
 
-    // Logic to handle portal brand update
-    const handleUpdatePortalBrand = async () => {
-        try {
-            setIsLoading(true);
-            const { error } = await supabase.from('portals').update({
-                brand_settings: brandSettings,
-            }).eq('id', portal.id);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [previousSetting, setPreviousSetting] = useState(null);
+  const [brandSettings, setBrandSettings] = useState(defaultBrandSettings);
 
-            if (error) {
-                throw error;
-            }
-            toast.success('Portal brand settings updated successfully', {
-                position: 'bottom-center',
-                style: {
-                    fontSize: '16px',
-                    width: '400px', // Increased width of the toast
-                    maxWidth: '90%', // Ensure it doesn't exceed screen width on smaller devices
-                },
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-            setPreviousSetting(brandSettings);
-            setHasChanges(false);
-            setIsLoading(false);
-        } catch (error) {
-            setIsLoading(false);
-            console.log(`Error while updating`, error);
-        }
-    };
+  // Computed colors for previews
+  const computedColors = useMemo(
+    () => getComputedColors(brandSettings),
+    [brandSettings]
+  );
+  const derivedColors = useMemo(
+    () => deriveColors(brandSettings.baseColors),
+    [brandSettings.baseColors]
+  );
 
-    useEffect(() => {
-        console.log({
-            portal
-        })
-        if (portal && portal.brand_settings) {
-            console.log(portal.brand_settings)
-            setBrandSettings({
-                ...defaultBrandSettings,
-                ...portal.brand_settings,
-            });
-            setPreviousSetting({
-                ...defaultBrandSettings,
-                ...portal.brand_settings,
-            })
-        }
-    }, [portal]);
-    useEffect(() => {
-        if (previousSetting !== null) {
-            console.log({
-                previousSetting,
-            })
-            const dataChanged = JSON.stringify(brandSettings) !== JSON.stringify(previousSetting);
-            setHasChanges(dataChanged);
-        }
-    }, [brandSettings, previousSetting]);
+  // Base color updates
+  const handleUpdateBaseColor = (colorKey, value) => {
+    setBrandSettings(bs => ({
+      ...bs,
+      baseColors: {
+        ...bs.baseColors,
+        [colorKey]: value,
+      }
+    }));
+  };
 
-    const resetBrandSettings = () => {
-        setBrandSettings(previousSetting);
+  // Advanced override updates (flat key)
+  const handleUpdateAdvancedColor = (tokenKey, value) => {
+    setBrandSettings(bs => ({
+      ...bs,
+      advancedColors: {
+        ...bs.advancedColors,
+        [tokenKey]: value || null,
+      }
+    }));
+  };
+
+  // Reset all overrides to “null”
+  const resetAdvancedColors = () => {
+    setBrandSettings(bs => ({
+      ...bs,
+      advancedColors: {
+        ...defaultBrandSettings.advancedColors
+      }
+    }));
+  };
+
+  // Other updates
+  const handleUpdateAsset = (assetKey, value) => {
+    setBrandSettings(bs => ({
+      ...bs,
+      assets: {
+        ...bs.assets,
+        [assetKey]: value,
+      }
+    }));
+  };
+  const toggleAdvancedOptions = () => {
+    setBrandSettings(bs => ({
+      ...bs,
+      showAdvancedOptions: !bs.showAdvancedOptions,
+    }));
+  };
+  const handleUpdateSetting = (key, value) => {
+    setBrandSettings(bs => ({
+      ...bs,
+      [key]: value,
+    }));
+  };
+
+  // Save to Supabase
+  const handleUpdatePortalBrand = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase
+        .from('portals')
+        .update({ brand_settings: brandSettings })
+        .eq('id', portal.id);
+
+      if (error) throw error;
+
+      toast.success('Portal brand settings updated successfully', { position:'bottom-center' });
+      setPreviousSetting(brandSettings);
+      setHasChanges(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update portal settings');
+    } finally {
+      setIsLoading(false);
     }
-    return {
-        isLoading,
-        hasChanges,
-        brandSettings,
-        handleUpdateState,
-        handleUpdatePortalBrand,
-        resetBrandSettings
-    };
+  };
+
+  // Init from DB
+  useEffect(() => {
+    if (portal) {
+      const settings = portal.brand_settings
+        ? { ...defaultBrandSettings, ...portal.brand_settings }
+        : { ...defaultBrandSettings, brandName: portal.name || '' };
+      setBrandSettings(settings);
+      setPreviousSetting(settings);
+    }
+  }, [portal]);
+
+  // Track dirty state
+  useEffect(() => {
+    if (previousSetting) {
+      setHasChanges(JSON.stringify(brandSettings) !== JSON.stringify(previousSetting));
+    }
+  }, [brandSettings, previousSetting]);
+
+  const resetBrandSettings = () => {
+    setBrandSettings(previousSetting);
+  };
+
+  return {
+    isLoading,
+    hasChanges,
+    brandSettings,
+    computedColors,
+    derivedColors,
+    handleUpdateBaseColor,
+    handleUpdateAdvancedColor,
+    handleUpdateAsset,
+    handleUpdateSetting,
+    toggleAdvancedOptions,
+    resetAdvancedColors,
+    handleUpdatePortalBrand,
+    resetBrandSettings,
+  };
 };

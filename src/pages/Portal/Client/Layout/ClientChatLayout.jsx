@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import Conversation from '../components/Conversation';
 import ConversationList from '../../../../components/Chat/Sidebar/ConversationList';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import PageHeader from '@/components/internal/PageHeader';
 import EmptyStateFeedback from '@/components/EmptyStateFeedback';
 import { Share2 } from 'lucide-react'; // Lucide replacement
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { defaultBrandSettings, deriveColors, getComputedColors } from '@/utils/colorUtils';
 
 const ClientChatLayout = ({
   conversations,
@@ -23,8 +24,14 @@ const ClientChatLayout = ({
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const conversationId = urlParams.get('conversation-id');
+  const brandSettings = portal?.brand_settings || defaultBrandSettings
 
-  useEffect(() => {
+  const computedColors = useMemo(() => {
+    return brandSettings.showAdvancedOptions 
+      ? getComputedColors(brandSettings)     // Use advanced colors
+      : deriveColors(brandSettings.baseColors); // Ignore advanced colors completely
+  }, [brandSettings]);
+   useEffect(() => {
     const conversationExists = conversations.find((conv) => conv.id === conversationId);
     if (conversationId && !conversationExists) {
       navigate('/portal/messages', { replace: true });
@@ -72,8 +79,8 @@ const ClientChatLayout = ({
             conversationId={conversationId}
             isClientExperience={true}
             conversations={conversations}
-            colorSettings={portal?.brand_settings}
-          />
+            colorSettings={computedColors}
+            />
         </div>
       </div>
     );
@@ -107,7 +114,7 @@ const ClientChatLayout = ({
                 isClientExperience={true}
                 userId={user?.id}
                 conversations={conversations}
-                colorSettings={portal?.brand_settings}
+                colorSettings={computedColors}
               />
             </nav>
           </div>
@@ -124,7 +131,7 @@ const ClientChatLayout = ({
             isClientExperience={true}
             conversationId={conversationId}
             user={user}
-            colorSettings={portal?.brand_settings}
+            colorSettings={computedColors}
           />
         </div>
       )}
