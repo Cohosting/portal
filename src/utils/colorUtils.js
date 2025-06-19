@@ -1,4 +1,5 @@
-// colorUtils.js
+
+// Updated colorUtils.js
 import Color from 'color';
 
 // Helper functions for color manipulation
@@ -43,6 +44,7 @@ export const deriveColors = (baseColors) => {
     // Sidebar colors
     sidebarBgColor:        darken(backgroundColor, 0.1),
     sidebarTextColor:      textColor,
+    sidebarPrimaryTextColor: textColor, // For logo, name, email - always readable
     sidebarHoverBgColor:   alpha(primaryColor, 0.1),
     sidebarActiveTextColor: primaryColor,
     sidebarActiveBgColor:   alpha(primaryColor, 0.15),
@@ -53,12 +55,14 @@ export const deriveColors = (baseColors) => {
     accentLightColor: alpha(primaryColor, 0.1),
 
     // Login page colors
-    loginFormTextColor:      textColor,
-    loginButtonColor:        primaryColor,
-    loginButtonTextColor:    getContrastColor(primaryColor),
-    loginButtonHoverColor:   darken(primaryColor, 0.1),
-    loginInputBorderColor:   lighten(textColor, 0.6),
+    loginFormTextColor:         textColor,
+    loginButtonColor:           primaryColor,
+    loginButtonTextColor:       getContrastColor(primaryColor),
+    loginButtonHoverColor:      darken(primaryColor, 0.1),
+    loginInputBorderColor:      lighten(textColor, 0.6),
     loginInputFocusBorderColor: primaryColor,
+    loginInputBgColor:          backgroundColor,
+    loginInputTextColor:        textColor,
 
     // Primary buttons (used throughout main content areas on white backgrounds)
     primaryButtonColor:      primaryColor,
@@ -75,7 +79,7 @@ export const deriveColors = (baseColors) => {
     messageActiveItemBg:     alpha(primaryColor, 0.08),
     messageActiveItemBorder: primaryColor,
     messageActiveItemText:   darken(primaryColor, 0.2),
-    messageHoverBg:          alpha(primaryColor, 0.05),
+    // Removed messageHoverBg
 
     // Additional UI elements
     borderColor:   lighten(textColor, 0.7),
@@ -107,6 +111,7 @@ export const defaultBrandSettings = {
     // sidebar
     sidebarBgColor:        null,
     sidebarTextColor:      null,
+    sidebarPrimaryTextColor: null,
     sidebarHoverBgColor:   null,
     sidebarActiveTextColor: null,
     sidebarActiveBgColor:   null,
@@ -117,12 +122,14 @@ export const defaultBrandSettings = {
     accentLightColor: null,
 
     // login
-    loginFormTextColor:      null,
-    loginButtonColor:        null,
-    loginButtonTextColor:    null,
-    loginButtonHoverColor:   null,
-    loginInputBorderColor:   null,
+    loginFormTextColor:         null,
+    loginButtonColor:           null,
+    loginButtonTextColor:       null,
+    loginButtonHoverColor:      null,
+    loginInputBorderColor:      null,
     loginInputFocusBorderColor: null,
+    loginInputBgColor:          null,
+    loginInputTextColor:        null,
 
     // primary buttons
     primaryButtonColor:      null,
@@ -139,7 +146,10 @@ export const defaultBrandSettings = {
     messageActiveItemBg:     null,
     messageActiveItemBorder: null,
     messageActiveItemText:   null,
-    messageHoverBg:          null,
+    // Removed messageHoverBg
+
+    // UI elements
+    dividerColor: null,
   },
 
   showAdvancedOptions: false,

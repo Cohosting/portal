@@ -10,7 +10,8 @@ export default function SearchWithFilter({
   onApplyFilters,
   onResetFilters,
   currentPortal,
-  isFilterLoading
+  isFilterLoading,
+  colorSettings
 }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -22,6 +23,7 @@ export default function SearchWithFilter({
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [isClientPopoverOpen, setIsClientPopoverOpen] = useState(false);
+  const { primaryColor } = colorSettings;
 
   // Sync local state with applied filters
   useEffect(() => {
@@ -154,6 +156,41 @@ export default function SearchWithFilter({
     return Boolean(value);
   }).length;
 
+  // Generate filter button styles based on primary color availability
+  const getFilterButtonStyles = () => {
+    if (activeFilterCount === 0) {
+      return 'border border-input bg-background hover:bg-accent hover:text-accent-foreground';
+    }
+    
+    if (primaryColor) {
+      // Use primary color with reduced opacity
+      return `border-2 hover:bg-accent hover:text-accent-foreground`;
+    } else {
+      // Fallback to current gray styling
+      return 'border-black bg-black/5 hover:bg-accent hover:text-accent-foreground';
+    }
+  };
+
+  const getFilterButtonStyle = () => {
+    if (activeFilterCount > 0 && primaryColor) {
+      return {
+        borderColor: primaryColor,
+        backgroundColor: `${primaryColor}15`, // 15 is roughly 8% opacity in hex
+      };
+    }
+    return {};
+  };
+
+  const getFilterBadgeStyle = () => {
+    if (primaryColor) {
+      return {
+        backgroundColor: primaryColor,
+        color: 'white'
+      };
+    }
+    return {};
+  };
+
   return (
     <div className="bg-background">
       <div className="max-w-4xl p-6 max-sm:px-4 pb-0">
@@ -181,9 +218,8 @@ export default function SearchWithFilter({
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               disabled={isFilterLoading}
-              className={`inline-flex items-center justify-center cursor-pointer rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2 relative ${
-                activeFilterCount > 0 ? 'border-black bg-black/5' : ''
-              }`}
+              className={`inline-flex items-center justify-center cursor-pointer rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 gap-2 relative ${getFilterButtonStyles()}`}
+              style={getFilterButtonStyle()}
             >
               {isFilterLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -192,7 +228,10 @@ export default function SearchWithFilter({
               )}
               Filter
               {activeFilterCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium">
+                <span 
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full text-xs flex items-center justify-center font-medium"
+                  style={primaryColor ? getFilterBadgeStyle() : { backgroundColor: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+                >
                   {activeFilterCount}
                 </span>
               )}

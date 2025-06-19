@@ -24,12 +24,12 @@ const PaymentMethodItem = ({
         flex items-center justify-between p-4 cursor-pointer transition-all duration-200
         border-l-4 shadow-sm
         ${isSelected 
-          ? `bg-gradient-to-r from-gray-50 to-white border-l-${colorSettings.sidebarBgColor || 'indigo-600'} shadow-md` 
+          ? `bg-gradient-to-r from-gray-50 to-white border-l-${colorSettings.primaryButtonColor || 'indigo-600'} shadow-md` 
           : 'bg-gradient-to-r from-white to-gray-25 border-l-gray-200 hover:from-gray-25 hover:to-gray-50 hover:border-l-gray-300 hover:shadow-md'
         }
       `}
       style={{
-        borderLeftColor: isSelected ? colorSettings.sidebarBgColor || '#4F46E5' : '#D1D5DB',
+        borderLeftColor: isSelected ? colorSettings.primaryButtonColor || '#4F46E5' : '#D1D5DB',
       }}
       onClick={onSelect}
     >

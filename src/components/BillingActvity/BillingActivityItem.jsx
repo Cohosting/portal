@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateTotal } from '../../utils/invoices';
 import { DateTime } from 'luxon';
+import { Button } from '@/components/ui/button';
 import {
     Clock,
     CheckCircle,
@@ -49,6 +50,12 @@ const capitalized = (word) => {
     return word.charAt(0).toUpperCase() + word.slice(1);
 };
 
+// Helper function to truncate text with ellipsis
+const truncateText = (text, maxLength = 100) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+};
+
   /**
    * A single item in the billing activity table.
    *
@@ -63,6 +70,11 @@ const capitalized = (word) => {
 const BillingActivityItem = React.forwardRef(({ invoice, colorSettings, isLastItem }, ref) => {
     const IconComponent = statusesIcons[invoice.status.toLowerCase()] || Clock;
     const navigate = useNavigate();
+    const {
+        primaryButtonColor,
+        primaryButtonTextColor,
+        primaryButtonHoverColor,
+    } = colorSettings;
 
     return (
         <tr ref={isLastItem ? ref : null}>
@@ -105,23 +117,29 @@ const BillingActivityItem = React.forwardRef(({ invoice, colorSettings, isLastIt
                 <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
             </td>
             <td className="hidden py-5 pr-6 sm:table-cell">
-                <div className="text-sm leading-6 text-gray-900">{invoice.title || 'Demo title'}</div>
-                <div className="mt-1 text-xs leading-5 text-gray-500">{invoice.description || 'Demo description'}</div>
+                <div className="text-sm leading-6 text-gray-900 break-words">
+                    {invoice.title || 'Demo title'}
+                </div>
+                <div className="mt-1 text-xs leading-5 text-gray-500 break-words max-w-xs">
+                    {truncateText(invoice.description || 'Demo description', 120)}
+                </div>
             </td>
             <td className="py-5 text-right">
                 <div className="flex justify-end">
-                    <button
-                        className="text-sm font-bold leading-6"
-                        style={{
-                            color: colorSettings?.sidebarBgColor,
-                        }}
+                    <Button
+                    style={{
+                        backgroundColor: primaryButtonColor,
+                        color: primaryButtonTextColor
+                    }}
                         onClick={() => navigate(`/portal/billings/${invoice.id}`)}
+                        size="sm"
+                        className="font-medium"
                     >
                         View<span className="hidden sm:inline"> transaction</span>
                         <span className="sr-only">
                             , invoice {invoice.invoice_number}, {invoice.client}
                         </span>
-                    </button>
+                    </Button>
                 </div>
                 <div className="mt-1 text-xs leading-5 text-gray-500">
                     Invoice <span className="text-gray-900">{invoice.invoice_number}</span>

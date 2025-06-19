@@ -10,11 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { AuthLayout } from './components/AuthLayout';
 import { toast } from 'react-toastify';
-import {
-  defaultBrandSettings,
-  deriveColors,
-  getComputedColors
-} from '@/utils/colorUtils';
+import { defaultBrandSettings, deriveColors, getComputedColors } from '@/utils/colorUtils';
 
 export const ClientLogin = ({ portal }) => {
   const navigate = useNavigate();
@@ -27,26 +23,25 @@ export const ClientLogin = ({ portal }) => {
   const [resetError, setResetError] = useState(null);
 
   // Decide where portal data comes from
-  // If portal prop is missing, you could fetch it here via usePortalData
   const brandSettings = portal?.brand_settings || defaultBrandSettings;
 
   // Compute colors based on advanced options toggle
   const colors = useMemo(() => {
     return brandSettings.showAdvancedOptions 
-      ? getComputedColors(brandSettings)     // Use advanced colors
-      : deriveColors(brandSettings.baseColors); // Ignore advanced colors completely
+      ? getComputedColors(brandSettings) 
+      : deriveColors(brandSettings.baseColors);
   }, [brandSettings]);
 
   const {
     loginButtonColor,
     loginButtonTextColor,
     loginButtonHoverColor,
-     
+    loginInputBorderColor,
+    loginInputFocusBorderColor,
   } = colors;
- 
-  const { authenticate, clientUser, authenticationError, isLoading } = useClientAuth(
-    portal?.id
-  );
+
+  const { authenticate, clientUser, authenticationError, isLoading } = useClientAuth(portal?.id);
+
   const { email, password } = credentials;
 
   // Redirect on successful login
@@ -66,6 +61,7 @@ export const ClientLogin = ({ portal }) => {
     e.preventDefault();
     setIsResetting(true);
     setResetError(null);
+
     try {
       await axiosInstance.post('/auth/forgot-password', {
         email: resetEmail,
@@ -90,12 +86,21 @@ export const ClientLogin = ({ portal }) => {
     setResetError(null);
   };
 
-  const title =
-    viewMode === 'login' ? 'Sign in to your account' : 'Reset your password';
-  const subtitle =
-    viewMode === 'forgotPassword'
-      ? "Enter your email address and we'll send you instructions to reset your password."
-      : null;
+  const title = viewMode === 'login' ? 'Sign in to your account' : 'Reset your password';
+  const subtitle = viewMode === 'forgotPassword'
+    ? "Enter your email address and we'll send you instructions to reset your password."
+    : null;
+
+  // Dynamic styles using CSS variables
+  const themeStyles = {
+    '--input-border-color': loginInputBorderColor || '#d1d5db',
+    '--input-focus-border-color': loginInputFocusBorderColor || '#3b82f6',
+    '--input-focus-ring-color': loginInputFocusBorderColor || '#3b82f6',
+    '--button-bg-color': loginButtonColor || '#1E40AF',
+    '--button-text-color': loginButtonTextColor || '#ffffff',
+    '--button-hover-color': loginButtonHoverColor || '#1e3a8a',
+    '--accent-color': loginButtonColor || '#1E40AF',
+  };
 
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className="space-y-6">
@@ -112,7 +117,7 @@ export const ClientLogin = ({ portal }) => {
           }
           placeholder="Enter your email"
           required
-          className="w-full bg-white text-black"
+          className="themed-input w-full bg-white text-black"
         />
       </div>
 
@@ -130,7 +135,7 @@ export const ClientLogin = ({ portal }) => {
             }
             placeholder="Enter your password"
             required
-            className="w-full pr-10 text-black bg-white"
+            className="themed-input w-full pr-10 text-black bg-white"
           />
           <button
             type="button"
@@ -149,10 +154,9 @@ export const ClientLogin = ({ portal }) => {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="remember-me" 
-            style={{ accentColor: loginButtonColor || '#1E40AF' }}
-            className="focus:ring-2"
+          <Checkbox
+            id="remember-me"
+            className="themed-checkbox focus:ring-2"
           />
           <Label htmlFor="remember-me" className="text-sm">
             Remember me
@@ -161,8 +165,7 @@ export const ClientLogin = ({ portal }) => {
         <div className="text-sm">
           <a
             href="#"
-            className="font-semibold hover:underline"
-            style={{ color: loginButtonColor || '#1E40AF' }}
+            className="themed-link font-semibold hover:underline"
             onClick={(e) => {
               e.preventDefault();
               setViewMode('forgotPassword');
@@ -184,18 +187,13 @@ export const ClientLogin = ({ portal }) => {
         </Alert>
       )}
 
-<Button
-      type="submit"
-      className="w-full btn-dynamic"
-      disabled={isLoading}
-      style={{
-        '--btn-bg':    loginButtonColor,
-        '--btn-hover': loginButtonHoverColor,
-        '--btn-text':  loginButtonTextColor,
-      }}
-    >
-      {isLoading ? 'Loading…' : 'Sign in'}
-    </Button>
+      <Button
+        type="submit"
+        className="themed-button w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? 'Loading…' : 'Sign in'}
+      </Button>
     </form>
   );
 
@@ -211,25 +209,20 @@ export const ClientLogin = ({ portal }) => {
               id="reset-email"
               type="email"
               value={resetEmail}
-              onChange={(e) =>
-                setResetEmail(e.target.value.trim())
-              }
+              onChange={(e) => setResetEmail(e.target.value.trim())}
               placeholder="Enter your email"
               required
-              className="w-full bg-white text-black"
+              className="themed-input w-full bg-white text-black"
             />
           </div>
+
           {resetError && (
             <p className="text-sm text-red-500">{resetError}</p>
           )}
+
           <Button
             type="submit"
-            className="w-full"
-            style={{
-              backgroundColor: loginButtonColor || '#1E40AF',
-              color: loginButtonTextColor || '#FFFFFF',
-              border: 'none'
-            }}
+            className="themed-button w-full"
             disabled={isResetting}
           >
             {isResetting ? 'Processing...' : 'Send reset instructions'}
@@ -242,6 +235,7 @@ export const ClientLogin = ({ portal }) => {
           </AlertDescription>
         </Alert>
       )}
+
       <Button
         type="button"
         variant="link"
@@ -255,11 +249,66 @@ export const ClientLogin = ({ portal }) => {
   );
 
   return (
-    <AuthLayout portal={portal} title={title} subtitle={subtitle} brandSettings={{
-      ...brandSettings,
-      colors
-    }}>
-      {viewMode === 'login' ? renderLoginForm() : renderForgotPasswordForm()}
-    </AuthLayout>
+    <>
+      <style>{`
+        .themed-input {
+          border-color: var(--input-border-color);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .themed-input:focus {
+          border-color: var(--input-focus-border-color) !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          outline: none;
+        }
+        
+        .themed-input:focus-visible {
+          ring: 2px solid var(--input-focus-ring-color);
+          ring-offset: 2px;
+        }
+        
+        .themed-button {
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
+          border: none;
+          transition: background-color 0.2s ease;
+        }
+        
+        .themed-button:hover:not(:disabled) {
+          background-color: var(--button-hover-color);
+        }
+        
+        .themed-button:focus {
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+          outline: none;
+        }
+        
+        .themed-checkbox {
+          accent-color: var(--accent-color);
+        }
+        
+        .themed-checkbox:focus {
+          box-shadow: 0 0 0 2px var(--accent-color);
+        }
+        
+        .themed-link {
+          color: var(--accent-color);
+        }
+        
+        .themed-link:hover {
+          opacity: 0.8;
+        }
+      `}</style>
+      <div style={themeStyles}>
+        <AuthLayout
+          portal={portal}
+          title={title}
+          subtitle={subtitle}
+          brandSettings={{ ...brandSettings, colors }}
+        >
+          {viewMode === 'login' ? renderLoginForm() : renderForgotPasswordForm()}
+        </AuthLayout>
+      </div>
+    </>
   );
 };

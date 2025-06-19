@@ -35,8 +35,8 @@ const PaymentMethodList = ({
           buttonText="Add Payment Method"
           onClick={() => setShowAddPaymentMethod(true)}
           styles={{
-            backgroundColor: colorSettings?.sidebarBgColor || '#000',
-            color: colorSettings?.sidebarActiveTextColor || '#fff'
+            backgroundColor: colorSettings?.primaryButtonColor || '#000',
+            color: colorSettings?.primaryButtonTextColor || '#fff'
           }}
         />
         <div className="divide-y-2 mt-5">
@@ -56,8 +56,8 @@ const PaymentMethodList = ({
           onClick={handlePayment}
           disabled={isProcessing}
           style={{
-            backgroundColor: colorSettings?.sidebarBgColor || '#000',
-            color: colorSettings?.sidebarActiveTextColor || '#fff',
+            backgroundColor: colorSettings?.primaryButtonColor || '#000',
+            color: colorSettings?.primaryButtonTextColor || '#fff',
             
           }}
         >

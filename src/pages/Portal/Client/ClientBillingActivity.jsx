@@ -6,6 +6,7 @@ import BillingActivity from '../../../components/BillingActvity/BillingActivity'
  import PageHeader from './components/PageHeader';
 import { supabase } from '../../../lib/supabase';
 import SearchWithFilter from '@/components/SearchWithFilter';
+import { defaultBrandSettings, deriveColors, getComputedColors } from '@/utils/colorUtils';
  
 // Custom hook for debounced value
 const useDebounce = (value, delay) => {
@@ -142,9 +143,9 @@ const ClientBillingActivity = () => {
           setInvoices(data);
         }
 
-        // Check if there are more items to load
-        const totalFetched = (pageNum + 1) * ITEMS_PER_PAGE;
-        setHasMore(totalFetched < count);
+        // FIXED: Check if there are more items to load based on actual data
+        const totalItemsFetched = isLoadMore ? invoices.length + data.length : data.length;
+        setHasMore(totalItemsFetched < count);
       }
     } catch (error) {
       console.error('Unexpected error fetching invoices:', error);
@@ -341,6 +342,13 @@ const ClientBillingActivity = () => {
 
   const isLoading = isInitialLoading || isFilterLoading;
 
+  const brandSettings = portal?.brand_settings || defaultBrandSettings;
+  const computedColors = useMemo(() => {
+    return brandSettings.showAdvancedOptions 
+      ? getComputedColors(brandSettings)     // Use advanced colors
+      : deriveColors(brandSettings.baseColors); // Ignore advanced colors completely
+  }, [brandSettings]);
+
   return (
     <div className="h-screen">
       <PageHeader
@@ -357,10 +365,11 @@ const ClientBillingActivity = () => {
         onResetFilters={handleResetFilters}
         currentPortal={portal?.id}
         isFilterLoading={isFilterLoading}
+        colorSettings={computedColors}
       />
 
       <BillingActivity
-        colorSettings={portal?.brand_settings}
+        colorSettings={computedColors}
         isLoading={isLoading}
         invoices={invoices}
         lastInvoiceElementRef={lastInvoiceElementRef}
@@ -368,8 +377,8 @@ const ClientBillingActivity = () => {
         hasMore={hasMore}
       />
       
-      {/* End of results indicator */}
-      {!hasMore && invoices.length > 0 && (
+      {/* End of results indicator - Only show if we actually loaded more than one page */}
+      {!hasMore && invoices.length > 0 && invoices.length >= ITEMS_PER_PAGE && (
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 py-6 px-6">
           <div className="flex justify-center items-center">
             <div className="text-center">

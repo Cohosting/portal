@@ -221,14 +221,17 @@ export const tiers = [
 ];
 
 
-export const COLOR_GROUPS = [ // Color groups configuration  
+
+// Updated COLOR_GROUPS configuration
+export const COLOR_GROUPS = [
   {
     key: 'sidebar',
     title: 'Sidebar Colors',
     description: 'Navigation area background, text, and active states',
     keys: [
       'sidebarBgColor',
-      'sidebarTextColor', 
+      'sidebarTextColor',
+      'sidebarPrimaryTextColor',
       'sidebarHoverBgColor',
       'sidebarActiveTextColor',
       'sidebarActiveBgColor'
@@ -244,7 +247,9 @@ export const COLOR_GROUPS = [ // Color groups configuration
       'loginButtonTextColor',
       'loginButtonHoverColor',
       'loginInputBorderColor',
-      'loginInputFocusBorderColor'
+      'loginInputFocusBorderColor',
+      'loginInputBgColor',
+      'loginInputTextColor'
     ]
   },
   {
@@ -271,12 +276,20 @@ export const COLOR_GROUPS = [ // Color groups configuration
   {
     key: 'content',
     title: 'Content Areas',
-    description: 'Message lists, active items, and hover states',
+    description: 'Message lists and active item states',
     keys: [
       'messageActiveItemBg',
       'messageActiveItemBorder',
-      'messageActiveItemText',
-      'messageHoverBg'
+      'messageActiveItemText'
+      // Removed 'messageHoverBg'
+    ]
+  },
+  {
+    key: 'ui',
+    title: 'UI Elements',
+    description: 'Borders, dividers, and other interface elements',
+    keys: [
+      'dividerColor'
     ]
   }
 ];
