@@ -219,3 +219,64 @@ export const tiers = [
     href: '#',
   },
 ];
+
+
+export const COLOR_GROUPS = [ // Color groups configuration  
+  {
+    key: 'sidebar',
+    title: 'Sidebar Colors',
+    description: 'Navigation area background, text, and active states',
+    keys: [
+      'sidebarBgColor',
+      'sidebarTextColor', 
+      'sidebarHoverBgColor',
+      'sidebarActiveTextColor',
+      'sidebarActiveBgColor'
+    ]
+  },
+  {
+    key: 'login',
+    title: 'Login Page',
+    description: 'Login form, buttons, and input styling',
+    keys: [
+      'loginFormTextColor',
+      'loginButtonColor',
+      'loginButtonTextColor',
+      'loginButtonHoverColor',
+      'loginInputBorderColor',
+      'loginInputFocusBorderColor'
+    ]
+  },
+  {
+    key: 'buttons',
+    title: 'Primary Buttons',
+    description: 'Main action buttons throughout the app',
+    keys: [
+      'primaryButtonColor',
+      'primaryButtonTextColor',
+      'primaryButtonHoverColor'
+    ]
+  },
+  {
+    key: 'messages',
+    title: 'Message Bubbles',
+    description: 'Chat bubbles for your messages and incoming messages',
+    keys: [
+      'myMessageBgColor',
+      'myMessageTextColor',
+      'oppositeMessageBgColor',
+      'oppositeMessageTextColor'
+    ]
+  },
+  {
+    key: 'content',
+    title: 'Content Areas',
+    description: 'Message lists, active items, and hover states',
+    keys: [
+      'messageActiveItemBg',
+      'messageActiveItemBorder',
+      'messageActiveItemText',
+      'messageHoverBg'
+    ]
+  }
+];

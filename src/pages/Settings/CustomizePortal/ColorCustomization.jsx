@@ -4,6 +4,15 @@ import { BrandColorPicker } from '@/components/internal/ColorPicker';
 import { Button } from '@/components/ui/button';
 import SwitchComponent from '@/components/SwitchComponent';
 import { RefreshCw, Palette, ChevronDown, ChevronRight } from 'lucide-react';
+import { COLOR_GROUPS } from '@/utils/constant';
+
+// Utility function to format camelCase to proper title case
+const getWellFormattedTitle = (title) => {
+  return title
+    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+    .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+    .trim(); // Remove any leading/trailing spaces
+};
 
 // Single color picker row
 const EnhancedColorPicker = ({ title, value, onChange, placeholder, showReset, onReset }) => (
@@ -66,7 +75,7 @@ const ColorGroup = ({ title, description, keys, advancedColors, derivedColors, o
   const overrideCount = keys.filter(key => advancedColors[key] != null).length;
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg ">
       {/* Group Header */}
       <button
         onClick={onToggle}
@@ -102,7 +111,7 @@ const ColorGroup = ({ title, description, keys, advancedColors, derivedColors, o
             {keys.map(key => (
               <EnhancedColorPicker
                 key={key}
-                title={key.replace(/([A-Z])/g, ' $1').trim()}
+                title={getWellFormattedTitle(key)}
                 value={advancedColors[key]}
                 placeholder={derivedColors[key]}
                 onChange={c => onChange(key, c)}
@@ -116,67 +125,6 @@ const ColorGroup = ({ title, description, keys, advancedColors, derivedColors, o
     </div>
   );
 };
-
-// Color groups configuration
-const COLOR_GROUPS = [
-  {
-    key: 'sidebar',
-    title: 'Sidebar Colors',
-    description: 'Navigation area background, text, and active states',
-    keys: [
-      'sidebarBgColor',
-      'sidebarTextColor', 
-      'sidebarHoverBgColor',
-      'sidebarActiveTextColor',
-      'sidebarActiveBgColor'
-    ]
-  },
-  {
-    key: 'login',
-    title: 'Login Page',
-    description: 'Login form, buttons, and input styling',
-    keys: [
-      'loginFormTextColor',
-      'loginButtonColor',
-      'loginButtonTextColor',
-      'loginButtonHoverColor',
-      'loginInputBorderColor',
-      'loginInputFocusBorderColor'
-    ]
-  },
-  {
-    key: 'buttons',
-    title: 'Primary Buttons',
-    description: 'Main action buttons throughout the app',
-    keys: [
-      'primaryButtonColor',
-      'primaryButtonTextColor',
-      'primaryButtonHoverColor'
-    ]
-  },
-  {
-    key: 'messages',
-    title: 'Message Bubbles',
-    description: 'Chat bubbles for your messages and incoming messages',
-    keys: [
-      'myMessageBgColor',
-      'myMessageTextColor',
-      'oppositeMessageBgColor',
-      'oppositeMessageTextColor'
-    ]
-  },
-  {
-    key: 'content',
-    title: 'Content Areas',
-    description: 'Message lists, active items, and hover states',
-    keys: [
-      'messageActiveItemBg',
-      'messageActiveItemBorder',
-      'messageActiveItemText',
-      'messageHoverBg'
-    ]
-  }
-];
 
 // Advanced overrides section with accordion
 export const AdvancedColorSection = (props) => {
