@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import {
   LogOut,
   HelpCircle,
-  MessageSquare,
-  FileText,
-  CreditCard,
+  Inbox,
+  Folders,
+  FileSpreadsheet,
   ChevronDown,
   MapPin,
   Camera
@@ -25,12 +25,12 @@ import { supabase } from '@/lib/supabase';
 // 1. Static fallback icon map
 // ----------------------------------------------
 const DEFAULT_ICONS = {
-  'Messages': MessageSquare,
-  'messages': MessageSquare,
-  'Files': FileText,
-  'files': FileText,
-  'Billings': CreditCard,
-  'billings': CreditCard
+  'Messages': Inbox,
+  'messages': Inbox,
+  'Files': Folders,
+  'files': Folders,
+  'Billings': FileSpreadsheet,
+  'billings': FileSpreadsheet
 };
 
 // ----------------------------------------------
