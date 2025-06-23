@@ -3,13 +3,14 @@ import { queryKeys } from "./queryKeys";
 import { useQuery } from "react-query";
  
 
-const fetchTeamMember = async (user_id) => {
+const fetchTeamMember = async (user_id, currentSelectedPortal) => {
     const { data, error } = await supabase
     .from('team_members')
     .select('*, user: user_id(name,avatar_url,email)')
     .eq('user_id', user_id)
+    .eq('portal_id', currentSelectedPortal)
     .single();
-    if (error) {
+    if (error) {    
         throw new Error(error.message);
     }
     return data;
@@ -17,12 +18,12 @@ const fetchTeamMember = async (user_id) => {
 
 
 
-const  useCurrentTeamMember = (user_id) => {
+const  useCurrentTeamMember = (user_id, currentSelectedPortal) => {
     return useQuery(
-        queryKeys.teamMember(user_id),
-        () => fetchTeamMember(user_id),
+        queryKeys.teamMember(user_id, currentSelectedPortal),
+        () => fetchTeamMember(user_id, currentSelectedPortal),
         {
-            enabled: !!user_id,
+            enabled: !!user_id && !!currentSelectedPortal,
         }
     );
  }

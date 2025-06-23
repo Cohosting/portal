@@ -45,13 +45,14 @@ function classNames(...classes) {
 
 export default function AppSidebar() {
     const { setSidebarOpen } = useConversationContext();
-    const { user} = useSelector(state => state.auth);
-    const { data: teamMember, isLoading  } = useCurrentTeamMember(user?.id);
+    const { currentSelectedPortal, user} = useSelector(state => state.auth);
+    const { data: teamMember, isLoading  } = useCurrentTeamMember(user?.id, currentSelectedPortal);
     const navigate = useNavigate();
     const location = useLocation();
     const { appId } = useParams();
     const isLessThan1024 = useMediaQuery({ query: '(max-width: 1024px)' });
-    
+
+     
 // Preference navigation array
 const preference = [
     { name: 'App', href: '/apps', icon: Monitor, current: false },
@@ -78,8 +79,7 @@ const preference = [
     };
 
     // Redux state access
-    const { currentSelectedPortal } = useSelector(state => state.auth);
-    const { data: portal } = usePortalData(currentSelectedPortal);
+     const { data: portal } = usePortalData(currentSelectedPortal);
 
     // Portal apps filtering
     let portal_apps = portal?.portal_apps?.filter(app => !app.is_default) || [];

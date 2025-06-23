@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ const Files = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [lastSelectedItem, setLastSelectedItem] = useState(null);
   const [currentFolder, setCurrentFolder] = useState(null);
-   const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
 
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
@@ -55,21 +55,12 @@ const Files = () => {
   const [pendingItems, setPendingItems] = useState([]);
   // New state to track if we should skip loading spinner
   const [skipNextLoading, setSkipNextLoading] = useState(false);
-  const { user, currentSelectedPortal} = useSelector((state) => state.auth);
+  const { user, currentSelectedPortal } = useSelector((state) => state.auth);
 
   const fileInputRef = useRef(null);
 
- 
-  useEffect(() => {
-    if (user) {
-      const shouldShowLoading = !skipNextLoading;
-      setSkipNextLoading(false); // Reset the flag
-      loadItems(shouldShowLoading);
-      loadAllFolders();
-    }
-  }, [currentFolder, user]);
- 
-  const loadItems = async (showLoading = true) => {
+  // Memoize loadItems to prevent infinite re-renders
+  const loadItems = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) {
         setLoadingStates(prev => ({ ...prev, loading: true }));
@@ -93,9 +84,10 @@ const Files = () => {
         setLoadingStates(prev => ({ ...prev, loading: false }));
       }
     }
-  };
+  }, [currentFolder, currentSelectedPortal]);
 
-  const loadAllFolders = async () => {
+  // Memoize loadAllFolders to prevent infinite re-renders
+  const loadAllFolders = useCallback(async () => {
     try {
       const { data, error } = await supabase
       .from('file_items')
@@ -110,7 +102,28 @@ const Files = () => {
     } catch (err) {
       console.error('Load all folders error:', err);
     }
-  };
+  }, [currentSelectedPortal]);
+
+  // Reset state when portal changes
+  useEffect(() => {
+    if (currentSelectedPortal) {
+      // Reset folder navigation to root when portal changes
+      setCurrentFolder(null);
+      setSelectedItems([]);
+      setLastSelectedItem(null);
+      setPendingItems([]);
+      setError(null);
+    }
+  }, [currentSelectedPortal]);
+ 
+  useEffect(() => {
+    if (user && currentSelectedPortal) {
+      const shouldShowLoading = !skipNextLoading;
+      setSkipNextLoading(false); // Reset the flag
+      loadItems(shouldShowLoading);
+      loadAllFolders();
+    }
+  }, [currentFolder, user, currentSelectedPortal, loadItems, loadAllFolders]);
 
   const createFolder = async (name, parentId) => {
     setLoadingStates(prev => ({ ...prev, creating: true }));
@@ -235,10 +248,10 @@ const Files = () => {
           .remove(filePaths);
       }
 
-const { error } = await supabase.from('file_items')
-  .delete()
-  .in('id', itemIds)
-  .eq('portal_id', currentSelectedPortal);
+      const { error } = await supabase.from('file_items')
+        .delete()
+        .in('id', itemIds)
+        .eq('portal_id', currentSelectedPortal);
 
       if (error) throw error;
 
@@ -459,28 +472,29 @@ const { error } = await supabase.from('file_items')
     setLastSelectedItem(null);
   };
 
-const navigateToFolder = (folderId) => {
-  // If navigating to root (null), allow it
-  if (folderId === null) {
+  const navigateToFolder = (folderId) => {
+    // If navigating to root (null), allow it
+    if (folderId === null) {
+      setCurrentFolder(folderId);
+      setSelectedItems([]);
+      setLastSelectedItem(null);
+      setPendingItems([]);
+      return;
+    }
+    
+    // Verify the target folder belongs to current portal
+    const targetFolder = allFolders.find(folder => folder.id === folderId);
+    if (!targetFolder) {
+      setError('Folder not found or access denied');
+      return;
+    }
+    
     setCurrentFolder(folderId);
     setSelectedItems([]);
     setLastSelectedItem(null);
     setPendingItems([]);
-    return;
-  }
-  
-  // Verify the target folder belongs to current portal
-  const targetFolder = allFolders.find(folder => folder.id === folderId);
-  if (!targetFolder) {
-    setError('Folder not found or access denied');
-    return;
-  }
-  
-  setCurrentFolder(folderId);
-  setSelectedItems([]);
-  setLastSelectedItem(null);
-  setPendingItems([]);
-};
+  };
+
   const handleCreateFolder = async () => {
     if (newFolderName.trim()) {
       try {
@@ -613,6 +627,7 @@ const navigateToFolder = (folderId) => {
       setLoadingStates(prev => ({ ...prev, downloading: null }));
     }
   };
+
   const currentPath = buildFolderPath(currentFolder);
   const currentItems = getCurrentItems();
 

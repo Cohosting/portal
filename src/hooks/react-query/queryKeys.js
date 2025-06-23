@@ -23,6 +23,6 @@ export const queryKeys = {
   openInvoices: portalId => ['openInvoices', portalId],
   recentActivities: portalId => ['recentActivities', portalId],
   teamMembers: portalId => ['teamMembers', portalId],
-  teamMember: userId => ['teamMember', userId],
+  teamMember: (userId, portalId) => ['teamMember', userId, portalId],
 };
 

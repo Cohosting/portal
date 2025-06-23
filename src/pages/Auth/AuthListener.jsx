@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setCurrentSelectedPortal, setError, setIsAuthenticated, setStatus, setUser } from '../../store/slices/authSlice';
 import { supabase } from '../../lib/supabase';
+import { useSelector } from 'react-redux';
 
 
 
@@ -11,6 +12,7 @@ const AuthListener = ({ children }) => {
     const dispatch = useDispatch();
     const [session, setSession] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { currentSelectedPortal } = useSelector(state => state.auth);
 
     useEffect(() => {
         const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -83,7 +85,7 @@ const AuthListener = ({ children }) => {
                         userData
                     })
                     dispatch(setUser(userData));
-                    dispatch(setCurrentSelectedPortal(userData?.default_portal));
+                    dispatch(setCurrentSelectedPortal(!currentSelectedPortal ? userData?.default_portal : currentSelectedPortal));
                     dispatch(setIsAuthenticated(true));
                     dispatch(setStatus('succeeded'));
                     setIsLoading(false)

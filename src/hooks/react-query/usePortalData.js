@@ -12,7 +12,7 @@ export const usePortalData = portal_id => {
     () => fetchPortalDataByIdOrUrl(portal_id),
     {
       enabled: !!portal_id,
-      refetchInterval: 60000,
+      refetchOnWindowFocus: false,
     }
   );
 };

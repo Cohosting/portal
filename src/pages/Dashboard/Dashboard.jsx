@@ -35,6 +35,7 @@ export const Dashboard = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    console.log('currentSelectedPortal', currentSelectedPortal);
     if (!currentSelectedPortal) return;
     supabase
       .rpc('generate_monthly_report', {

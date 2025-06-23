@@ -75,7 +75,15 @@ const SubscriptionPage = () => {
 )
 }
   if (subscription?.portal && subscription.portal.created_by !== user.id) {
-    return <RestrictedAccess />
+    return  (
+      <Layout>
+        <PageHeader
+          title="Restricted Access"
+          description="You do not have access to this subscription."
+        />
+        <RestrictedAccess />
+      </Layout>
+    )
   }
 
   let title = "Subscription";
