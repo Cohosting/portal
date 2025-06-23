@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Home,
@@ -9,14 +9,15 @@ import {
   Download,
   Loader2,
   AlertCircle,
-  User,
-  Calendar
+  MoreHorizontal
 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/lib/supabase';
 import FileViewer from '@/pages/Files/FileViewer';
 import { useClientAuth } from '@/hooks/useClientAuth';
 import { useDomainInfo } from '@/hooks/useDomainInfo';
 import { useClientPortalData } from '@/hooks/react-query/usePortalData';
+import { defaultBrandSettings, deriveColors, getComputedColors } from '@/utils/colorUtils';
 
 const STORAGE_BUCKET = 'file-storage';
 
@@ -26,15 +27,21 @@ const ClientFiles = () => {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const { domain } = useDomainInfo();
   const { data: portal } = useClientPortalData(domain);
   const { clientUser, isLoading: clientLoading } = useClientAuth(portal?.id);
-
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
   const [downloadingFile, setDownloadingFile] = useState(null);
 
+  const brandSettings = portal?.brand_settings || defaultBrandSettings;
+  const computedColors = useMemo(() => {
+    return brandSettings.showAdvancedOptions 
+      ? getComputedColors(brandSettings)     // Use advanced colors
+      : deriveColors(brandSettings.baseColors); // Ignore advanced colors completely
+  }, [brandSettings]);
+  const { primaryButtonColor } = computedColors;
+  
   useEffect(() => {
     if (clientUser?.email) {
       loadAllSharedFolders();
@@ -90,19 +97,9 @@ const ClientFiles = () => {
 
   function getItemIcon(item) {
     if (item.type === 'folder') {
-      return <Folder className="w-5 h-5 text-blue-600" />;
+      return <Folder className="w-5 h-5" style={{ color: primaryButtonColor }} />;
     }
-    const ext = item.name.split('.').pop()?.toLowerCase();
-    const colors = {
-      pdf: 'text-red-500',
-      doc: 'text-blue-500',
-      docx: 'text-blue-500',
-      xlsx: 'text-green-500',
-      jpg: 'text-purple-500',
-      png: 'text-purple-500',
-      txt: 'text-gray-500'
-    };
-    return <File className={`w-5 h-5 ${colors[ext] || 'text-gray-500'}`} />;
+    return <File className="w-5 h-5" style={{ color: primaryButtonColor }} />;
   }
 
   function formatFileSize(bytes) {
@@ -122,8 +119,7 @@ const ClientFiles = () => {
     if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
     return date.toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric',
-      year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+      day: 'numeric'
     });
   }
 
@@ -155,126 +151,170 @@ const ClientFiles = () => {
     }
   }
 
+  function handleItemNameClick(item, event) {
+    event.stopPropagation();
+    if (item.type === 'folder') {
+      setCurrentFolder(item.id);
+    }
+  }
+
   function openPreview(item) {
     if (item.type === 'file') {
       setPreviewFile(item);
       setShowPreviewDialog(true);
-    } else {
-      setCurrentFolder(item.id);
     }
   }
 
   const currentPath = buildFolderPath(currentFolder);
 
-  if (clientLoading) {
+  if (clientLoading || !clientUser?.email || loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
-  if (!clientUser?.email) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <AlertCircle className="w-8 h-8 text-red-500" />
-        <p className="ml-2">Unable to authenticate</p>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="ml-2">Loading shared files...</p>
-      </div>
+      <div className="flex items-center justify-center h-96">
+      <Loader2 className=" animate-spin w-12 h-12 text-primary" />
+  </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto bg-white min-h-screen">
+    <div className="w-full mx-auto bg-white min-h-screen">
       {error && (
-        <div className="bg-red-50 border border-red-200 p-4 m-6 rounded flex items-center">
+        <div className="bg-red-50 border border-red-200 px-4 py-3 mx-6 mt-4 rounded-lg flex items-center">
           <AlertCircle className="w-4 h-4 text-red-500 mr-2" />
-          <span className="text-red-700">{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto text-red-500">×</button>
+          <span className="text-red-700 text-sm">{error}</span>
+          <button 
+            onClick={() => setError(null)}
+            className="ml-auto text-red-500 hover:text-red-700"
+          >
+            ×
+          </button>
         </div>
       )}
 
-      {/* Sticky header with updated breadcrumb */}
-      <div className="sticky top-0 bg-white border-b">
-        <div className="flex items-center justify-between px-6 py-4">
-          <nav className="flex items-center text-gray-600 space-x-2">
-            <button onClick={() => setCurrentFolder(null)}>
-              <Home className="w-5 h-5" />
-            </button>
-            {currentPath.length === 0 ? (
-              <span className="ml-2 font-medium text-gray-800">Files Shared with You</span>
-            ) : (
-              currentPath.map(f => (
-                <React.Fragment key={f.id}>
-                  <ChevronRight className="w-4 h-4" />
-                  <button
-                    onClick={() => setCurrentFolder(f.id)}
-                    className="hover:underline truncate max-w-xs"
-                  >
-                    {f.name}
-                  </button>
-                </React.Fragment>
-              ))
-            )}
-          </nav>
-          <div className="text-sm text-gray-500">
-            {items.length} item{items.length !== 1 && 's'} shared with you
+      <div className="border-b bg-white sticky top-0 z-10">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-xl font-semibold text-gray-900">Shared Files</h1>
+              
+              <nav className="flex items-center space-x-1 text-sm text-gray-600">
+                <button
+                  onClick={() => setCurrentFolder(null)}
+                  className="flex items-center hover:text-gray-900 transition-colors"
+                >
+                  <Home className="w-4 h-4" />
+                </button>
+                
+                {currentPath.map((folder, index) => (
+                  <React.Fragment key={folder.id}>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <button
+                      onClick={() => setCurrentFolder(folder.id)}
+                      className="hover:text-gray-900 transition-colors max-w-32 truncate"
+                    >
+                      {folder.name}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </nav>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* File and folder list */}
       <div className="px-6 py-4">
-        {!items.length ? (
-          <div className="text-center py-16 text-gray-500">
-            <Folder className="w-16 h-16 mx-auto mb-4" />
-            <h3 className="text-lg font-medium">
+        {items.length === 0 ? (
+          <div className="text-center py-16">
+            <Folder className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               {currentFolder ? 'This folder is empty' : 'No files shared with you'}
             </h3>
+            <p className="text-gray-500">
+              {currentFolder ? 'This shared folder contains no items' : 'You don\'t have any shared files yet'}
+            </p>
           </div>
         ) : (
-          items.map(item => (
-            <div
-              key={item.id}
-              className="group flex items-center p-3 border-b hover:bg-gray-50"
-              onClick={() => openPreview(item)}
-            >
-              <div className="flex-1 flex items-center min-w-0">
-                <div className="mr-4">{getItemIcon(item)}</div>
-                <div className="truncate">
-                  <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                  <div className="flex text-xs text-gray-500 space-x-4 mt-1">
-                    <span className="flex items-center"><User className="w-3 h-3 mr-1" />{item.shared_by_email || 'Someone'}</span>
-                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" />{formatDate(item.share_created_at || item.created_at)}</span>
+          <div className="space-y-1">
+            {items.map(item => (
+              <div
+                key={item.id}
+                className="group flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center min-w-0 flex-1">
+                  <div className="flex-shrink-0 mr-3">
+                    {getItemIcon(item)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center">
+                      <p 
+                        className="text-sm font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600"
+                        onClick={(e) => handleItemNameClick(item, e)}
+                      >
+                        {item.name}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <span className="w-16 text-right">{formatFileSize(item.file_size)}</span>
-                <span className="w-20 text-right">{formatDate(item.created_at)}</span>
-                <div className="flex space-x-2 opacity-0 group-hover:opacity-100">
-                  {item.type === 'file' ? (
-                    <>
-                      <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); openPreview(item); }}><Eye className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); downloadFile(item); }} disabled={downloadingFile === item.id}>
-                        {downloadingFile === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+
+                <div className="flex items-center space-x-8 text-sm text-gray-500">
+                  <span className="w-16 text-right">
+                    {formatFileSize(item.file_size)}
+                  </span>
+                  <span className="w-20 text-right">
+                    {formatDate(item.created_at)}
+                  </span>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
                       </Button>
-                    </>
-                  ) : (
-                    <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); setCurrentFolder(item.id); }}><Folder className="w-4 h-4" /></Button>
-                  )}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-white">
+                      {item.type === 'file' && (
+                        <>
+                          <DropdownMenuItem 
+                            onClick={() => openPreview(item)}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => downloadFile(item)}
+                            disabled={downloadingFile === item.id}
+                          >
+                            {downloadingFile === item.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Downloading...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="w-4 h-4 mr-2" />
+                                Download
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {item.type === 'folder' && (
+                        <DropdownMenuItem 
+                          onClick={() => setCurrentFolder(item.id)}
+                        >
+                          <Folder className="w-4 h-4 mr-2" />
+                          Open Folder
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
@@ -286,7 +326,10 @@ const ClientFiles = () => {
         downloadFile={downloadFile}
         formatFileSize={formatFileSize}
         loadingStates={{ downloading: downloadingFile }}
-        onClose={() => setShowPreviewDialog(false)}
+        onClose={() => {
+          setShowPreviewDialog(false);
+          setPreviewFile(null);
+        }}
       />
     </div>
   );
