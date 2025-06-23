@@ -55,7 +55,7 @@ const Files = () => {
   const [pendingItems, setPendingItems] = useState([]);
   // New state to track if we should skip loading spinner
   const [skipNextLoading, setSkipNextLoading] = useState(false);
-  const { user} = useSelector((state) => state.auth);
+  const { user, currentSelectedPortal} = useSelector((state) => state.auth);
 
   const fileInputRef = useRef(null);
 
@@ -76,7 +76,8 @@ const Files = () => {
       }
       
       const { data, error } = await supabase.rpc('get_user_items', {
-        folder_id: currentFolder
+        folder_id: currentFolder,
+        p_portal_id: currentSelectedPortal
       });
 
       if (error) throw error;
@@ -97,11 +98,11 @@ const Files = () => {
   const loadAllFolders = async () => {
     try {
       const { data, error } = await supabase
-        .from('file_items')
-        .select('id, name, parent_id')
-        .eq('type', 'folder')
-        .eq('owner_id', user.id)
-        .order('name');
+      .from('file_items')
+      .select('id, name, parent_id')
+      .eq('type', 'folder')
+      .eq('portal_id', currentSelectedPortal)
+      .order('name');
 
       if (error) throw error;
 
@@ -121,7 +122,8 @@ const Files = () => {
       type: 'folder',
       parent_id: parentId,
       pending: true,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      portal_id: currentSelectedPortal,
     };
     
     setPendingItems(prev => [...prev, pendingFolder]);
@@ -131,7 +133,8 @@ const Files = () => {
         name,
         type: 'folder',
         parent_id: parentId,
-        owner_id: user.id
+        owner_id: user.id,
+        portal_id: currentSelectedPortal,
       }).select();
   
       if (error) throw error;
@@ -166,7 +169,8 @@ const Files = () => {
       pending: true,
       file_size: file.size,
       mime_type: file.type,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      portal_id: currentSelectedPortal,
     }));
     
     setPendingItems(prev => [...prev, ...pendingFiles]);
@@ -188,6 +192,7 @@ const Files = () => {
           type: 'file',
           parent_id: parentId,
           owner_id: user.id,
+          portal_id: currentSelectedPortal,
           file_path: uploadData.path,
           file_size: file.size,
           mime_type: file.type
@@ -230,9 +235,10 @@ const Files = () => {
           .remove(filePaths);
       }
 
-      const { error } = await supabase.from('file_items')
-        .delete()
-        .in('id', itemIds);
+const { error } = await supabase.from('file_items')
+  .delete()
+  .in('id', itemIds)
+  .eq('portal_id', currentSelectedPortal);
 
       if (error) throw error;
 
@@ -254,9 +260,9 @@ const Files = () => {
     
     try {
       const { error } = await supabase.from('file_items')
-        .update({ parent_id: newParentId })
-        .in('id', itemIds);
-
+      .update({ parent_id: newParentId })
+      .in('id', itemIds)
+      .eq('portal_id', currentSelectedPortal);
       if (error) throw error;
 
       // Update items without full loading spinner
@@ -280,7 +286,8 @@ const Files = () => {
           name: newName,
           updated_at: new Date().toISOString()
         })
-        .eq('id', itemId);
+        .eq('id', itemId)
+        .eq('portal_id', currentSelectedPortal);
 
       if (error) throw error;
 
@@ -305,7 +312,8 @@ const Files = () => {
     try {
       const { error } = await supabase.from('file_items')
         .update({ starred: !item.starred })
-        .eq('id', itemId);
+        .eq('id', itemId)
+        .eq('portal_id', currentSelectedPortal);
 
       if (error) throw error;
 
@@ -324,6 +332,12 @@ const Files = () => {
 
   // Add share functions
   const openShareDialog = (item) => {
+    // Verify item belongs to current portal
+    if (item.portal_id !== currentSelectedPortal) {
+      setError('Cannot share items from other portals');
+      return;
+    }
+    
     setShareItem(item);
     setShowShareDialog(true);
   };
@@ -445,13 +459,28 @@ const Files = () => {
     setLastSelectedItem(null);
   };
 
-  const navigateToFolder = (folderId) => {
+const navigateToFolder = (folderId) => {
+  // If navigating to root (null), allow it
+  if (folderId === null) {
     setCurrentFolder(folderId);
     setSelectedItems([]);
     setLastSelectedItem(null);
-    setPendingItems([]); // Clear pending items when navigating
-  };
-
+    setPendingItems([]);
+    return;
+  }
+  
+  // Verify the target folder belongs to current portal
+  const targetFolder = allFolders.find(folder => folder.id === folderId);
+  if (!targetFolder) {
+    setError('Folder not found or access denied');
+    return;
+  }
+  
+  setCurrentFolder(folderId);
+  setSelectedItems([]);
+  setLastSelectedItem(null);
+  setPendingItems([]);
+};
   const handleCreateFolder = async () => {
     if (newFolderName.trim()) {
       try {
@@ -534,9 +563,11 @@ const Files = () => {
   };
 
   const openPreviewDialog = (item) => {
-    if (item.type === 'file' && !item.pending) {
+    if (item.type === 'file' && !item.pending && item.portal_id === currentSelectedPortal) {
       setPreviewFile(item);
       setShowPreviewDialog(true);
+    } else if (item.portal_id !== currentSelectedPortal) {
+      setError('File access denied');
     }
   };
 
@@ -552,6 +583,12 @@ const Files = () => {
 
   const downloadFile = async (file) => {
     try {
+      // Verify file belongs to current portal
+      if (file.portal_id !== currentSelectedPortal) {
+        setError('File access denied');
+        return;
+      }
+      
       setLoadingStates(prev => ({ ...prev, downloading: file.id }));
       
       const { data, error } = await supabase.storage
@@ -576,7 +613,6 @@ const Files = () => {
       setLoadingStates(prev => ({ ...prev, downloading: null }));
     }
   };
-
   const currentPath = buildFolderPath(currentFolder);
   const currentItems = getCurrentItems();
 
