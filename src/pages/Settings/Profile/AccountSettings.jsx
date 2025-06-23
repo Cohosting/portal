@@ -10,6 +10,7 @@ import DashboardSkeleton, { CustomSkeleton } from '@/components/SkeletonLoading'
 import PageHeader from '@/components/internal/PageHeader';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
+import DefaultPortalSettings from '@/components/internal/DefaultPortalSettings';
 
 
 export const AccountSettings = () => {
@@ -54,6 +55,9 @@ export const AccountSettings = () => {
             <div className="max-w-7xl  px-6 pb-6 mt-4">
               <PersonalInformation user={user} updateProfile={updateProfile} />
               <ChangePassword changePassword={changePassword} />
+              <div className='max-w-sm'>
+                <DefaultPortalSettings />
+              </div>
               {/* <DeleteAccount deleteAccount={deleteAccount} /> */}
 
 

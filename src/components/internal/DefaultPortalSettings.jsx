@@ -16,6 +16,7 @@ const DefaultPortalSettings = () => {
   const [selectedPortal, setSelectedPortal] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [currentDefaultPortal, setCurrentDefaultPortal] = useState(null);
   const { user, currentSelectedPortal } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
@@ -24,12 +25,15 @@ const DefaultPortalSettings = () => {
     index === self.findIndex((t) => t.id === portal.id)
   );
 
+  // Initialize both selected and current default portal only once
   useEffect(() => {
-    if (portals.length > 0) {
-      const portal = portals.find(portal => portal.id === currentSelectedPortal);
-      setSelectedPortal(portal || portals[0]);
+    if (portals.length > 0 && !selectedPortal) {
+      const defaultPortalId = user?.default_portal || currentSelectedPortal;
+      const portal = portals.find(p => p.id === defaultPortalId) || portals[0];
+      setSelectedPortal(portal);
+      setCurrentDefaultPortal(portal.id);
     }
-  }, [currentSelectedPortal, user, portals]);
+  }, [portals, user?.default_portal, currentSelectedPortal, selectedPortal]);
 
   const handleSave = async () => {
     if (!selectedPortal) return;
@@ -42,6 +46,8 @@ const DefaultPortalSettings = () => {
       
       if (error) throw error;
       
+      // Update the current default portal to match what was saved
+      setCurrentDefaultPortal(selectedPortal.id);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
     } catch (error) {
@@ -51,7 +57,8 @@ const DefaultPortalSettings = () => {
     }
   };
 
-  const isDisabled = currentSelectedPortal === selectedPortal?.id || isSaving;
+  // Simple comparison: button is disabled if selected portal matches current default
+  const isDisabled = currentDefaultPortal === selectedPortal?.id || isSaving;
 
   const handleSelectChange = (value) => {
     const selected = portals.find(portal => portal.id === value);
@@ -69,7 +76,7 @@ const DefaultPortalSettings = () => {
       
       <div className="space-y-4">
         <Select 
-          value={selectedPortal?.id} 
+          value={selectedPortal?.id || ""} 
           onValueChange={handleSelectChange}
           disabled={portals.length === 0}
         >
@@ -83,8 +90,7 @@ const DefaultPortalSettings = () => {
               <SelectItem 
                 key={portal.id} 
                 value={portal.id}
-                className="focus:bg-gray-100"
-              >
+               >
                 <div className="flex items-center">
                   {selectedPortal?.id === portal.id && (
                     <Check className="mr-2 h-4 w-4 text-gray-500" />
@@ -100,7 +106,7 @@ const DefaultPortalSettings = () => {
           <Button
             onClick={handleSave}
             disabled={isDisabled}
-            className="  bg-black hover:bg-gray-800 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="bg-black hover:bg-gray-800 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : "Save Changes"}
           </Button>

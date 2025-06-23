@@ -199,7 +199,6 @@ export const Settings = () => {
         </div>
 
  
-        <DefaultPortalSettings />
  
         <CustomDomainForm 
           open={open} 
