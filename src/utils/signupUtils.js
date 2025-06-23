@@ -77,7 +77,7 @@ export const initializeOrganizationSetup = async (
       portal_url: personalInfoStep.portal_url,
       brand_settings: createBrandSettings({
         brandName: personalInfoStep.company_name,
-        ...brandPresets.professional  // Uses the professional theme
+      
       }),
       customer_id
     })

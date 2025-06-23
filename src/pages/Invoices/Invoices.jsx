@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase';
 import EmptyStateFeedback from '../../components/EmptyStateFeedback';
 import { Banknote, Loader, Search, FileX } from 'lucide-react';
 
- import BillingTable from './InvoiceTable';
+import BillingTable from './InvoiceTable';
 import { Button } from '@/components/ui/button';
 import SearchWithFilter from '@/components/SearchWithFilter';
 import PageHeader from '@/components/internal/PageHeader';
@@ -42,6 +42,7 @@ export const Invoices = () => {
   const [isOpen, toggleOpen] = useToggle(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,6 +106,9 @@ export const Invoices = () => {
   const fetchInvoices = async (pageNum = 0, isLoadMore = false, filters = appliedFilters, search = debouncedSearchTerm) => {
     if (!portal) return;
 
+    // Check if this is initial load (no filters/search applied)
+    const isInitialLoad = pageNum === 0 && !isLoadMore && !search && !hasActiveFilters(filters);
+
     if (!isLoadMore) {
       if (pageNum === 0 && (search || hasActiveFilters(filters))) {
         setIsFilterLoading(true);
@@ -154,6 +158,14 @@ export const Invoices = () => {
         // Check if there are more items to load
         const totalFetched = (pageNum + 1) * ITEMS_PER_PAGE;
         setHasMore(totalFetched < count);
+
+        // Only mark as initially loaded if this is initial load AND we have invoices
+        // OR if this is a filtered request (not initial load)
+        if (!hasInitiallyLoaded) {
+          if (!isInitialLoad || (isInitialLoad && mappedInvoices.length > 0)) {
+            setHasInitiallyLoaded(true);
+          }
+        }
       }
     } catch (error) {
       console.error('Unexpected error fetching invoices:', error);
@@ -248,6 +260,7 @@ export const Invoices = () => {
     setPage(0);
     setHasMore(true);
     setSearchTerm('');
+    setHasInitiallyLoaded(false); // Reset the initially loaded flag
     setAppliedFilters({
       status: '',
       fromDate: '',
@@ -324,9 +337,11 @@ export const Invoices = () => {
     };
   }, [portal]);
 
-  // Check if we have any data loaded (not initial loading)
-  const hasLoadedData = !isOpen || invoices.length > 0 || isFilterLoading;
+  // Check if filters are currently active
   const isFiltered = hasActiveFilters(appliedFilters) || debouncedSearchTerm;
+  
+  // Determine when to show the filter component
+  const shouldShowFilters = hasInitiallyLoaded && !isOpen;
 
   return (
     <Layout hideMobileNav headerName="Invoices">
@@ -344,8 +359,8 @@ export const Invoices = () => {
       />
    
       <div className="p-0">
-        {/* Search and Filter Component - Show when data is loaded or when filtering */}
-        {hasLoadedData && (
+        {/* Search and Filter Component - Show after initial load is complete */}
+        {shouldShowFilters && (
           <SearchWithFilter
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}

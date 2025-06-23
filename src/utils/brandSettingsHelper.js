@@ -1,9 +1,9 @@
 export const createBrandSettings = (options = {}) => {
   const {
     brandName = '',
-    primaryColor = '#3B82F6',
-    backgroundColor = '#FFFFFF',
-    textColor = '#1F2937',
+    primaryColor = '#009B77',
+    backgroundColor = '#1E1E2F',
+    textColor = '#FFFFFF',
     poweredByCopilot = false,
     assets = {},
     advancedOverrides = {}
