@@ -103,7 +103,7 @@ const BillingActivityItem = React.forwardRef(({ invoice, colorSettings, isLastIt
                                 {invoice?.tax} tax
                             </div>
                         )}
-                        <div className="mt-2 flex gap-4 text-xs text-gray-500">
+                        <div className="mt-2 flex flex-col gap-1 text-xs text-gray-500">
                             <div>
                                 <span className="font-medium">Created:</span> {formatDate(invoice.created_at)}
                             </div>

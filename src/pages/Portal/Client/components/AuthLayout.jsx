@@ -4,8 +4,11 @@ export const AuthLayout = memo(({ portal, title, subtitle, children, brandSettin
   const { colors, assets } = brandSettings || {};
 
   const { sidebarBgColor, loginFormTextColor } = colors || {};
-  const { fullLogo, squareLoginImage } = assets || {};
+  const { fullLogo, squareLoginImage, } = assets || {};
  
+  console.log({
+    assets
+  })
 
   // Default image URLs
   const defaultImageUrl = "https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80";

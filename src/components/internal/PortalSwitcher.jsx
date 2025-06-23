@@ -91,7 +91,7 @@ export default function PortalSwitcher() {
               <DropdownMenuItem
                 key={portal.id}
                 onClick={() => handleSelect(portal.id)}
-                className="gap-2 p-2"
+                className="gap-2 p-2 hover:bg-gray-800 hover:text-white"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Box className="size-4 shrink-0" />
@@ -108,12 +108,7 @@ export default function PortalSwitcher() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
-            </DropdownMenuItem>
+ 
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

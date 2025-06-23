@@ -29,7 +29,7 @@ const LayoutContent = ({ children }) => {
  
     return (
         <>
-            <Sidebar portal={portal} portal_apps={portal_apps} />
+            <Sidebar portal={portal} portal_apps={portal_apps} computedColors={computedColors} />
             {/* Static sidebar for desktop */}
             <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-60 lg:flex-col">
                 <Navigation brandSettings={brandSettings} computedColors={computedColors} portal={portal} portal_apps={portal_apps} />

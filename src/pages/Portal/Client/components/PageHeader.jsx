@@ -18,7 +18,7 @@ const PageHeader = ({ title, description, action, showSidebar = true }) => {
               {title}
             </h1>
             {description && (
-              <p className=" hidden lg:block  text-xs text-gray-500">{description}</p>
+              <p className=" hidden lg:block py-[6px]  text-xs text-gray-500">{description}</p>
             )}
           </div>
         </div>

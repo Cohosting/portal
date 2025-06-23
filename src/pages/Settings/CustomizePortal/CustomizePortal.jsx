@@ -1,5 +1,5 @@
 // src/pages/CustomizePortal.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
  import { Button } from '@/components/ui/button';
 import { useCustomizePortalLogic } from '@/hooks/useCustomizePortalLogic';
 import { useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ import { BaseColorSection, AdvancedColorSection } from './ColorCustomization';
 import { BrandNameSection, ImageAssetSection, PoweredBySection } from './PortalSections';
 import { PreviewModal, PreviewTabs, PreviewContent } from './PreviewModal';
 import { Layout } from '@/pages/Dashboard/Layout';
+import { deriveColors, getComputedColors } from '@/utils/colorUtils';
 
 // Reusable heading component (kept here as it's specific to this page)
 const Heading = ({ text, subText }) => (
@@ -48,7 +49,7 @@ const MainContent = ({
   toggleAdvancedOptions,
   resetAdvancedColors 
 }) => (
-  <div className="flex-1 px-6 py-8 max-w-full xl:max-w-[650px]">
+  <div className="flex-1  px-6 pb-8 max-w-full xl:max-w-[650px]">
     <BrandNameSection 
       brandName={brandSettings.brandName} 
       handleUpdateSetting={handleUpdateSetting}
@@ -104,6 +105,12 @@ export const CustomizePortal = () => {
     handleUpdatePortalBrand,
     resetBrandSettings
   } = useCustomizePortalLogic();
+  const colors = useMemo(() => {
+    return brandSettings.showAdvancedOptions 
+      ? getComputedColors(brandSettings) 
+      : deriveColors(brandSettings.baseColors);
+  }, [brandSettings]);
+
 
   const [previewTab, setPreviewTab] = useState('dashboard');
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -174,7 +181,7 @@ export const CustomizePortal = () => {
             previewTab={previewTab}
             setPreviewTab={setPreviewTab}
             brandSettings={brandSettings}
-            computedColors={computedColors}
+            computedColors={colors}
           />
         )}
       </div>

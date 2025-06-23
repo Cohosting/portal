@@ -23,7 +23,7 @@ export default function SearchWithFilter({
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [isClientPopoverOpen, setIsClientPopoverOpen] = useState(false);
-  const { primaryColor } = colorSettings;
+  const { primaryColor } = colorSettings || {};
 
   // Sync local state with applied filters
   useEffect(() => {
@@ -166,15 +166,16 @@ export default function SearchWithFilter({
       // Use primary color with reduced opacity
       return `border-2 hover:bg-accent hover:text-accent-foreground`;
     } else {
+      
       // Fallback to current gray styling
-      return 'border-black bg-black/5 hover:bg-accent hover:text-accent-foreground';
+      return 'border-2 border-black bg-black/5 hover:bg-accent hover:text-accent-foreground';
     }
   };
 
   const getFilterButtonStyle = () => {
     if (activeFilterCount > 0 && primaryColor) {
       return {
-        borderColor: primaryColor,
+        borderColor: primaryColor ,
         backgroundColor: `${primaryColor}15`, // 15 is roughly 8% opacity in hex
       };
     }

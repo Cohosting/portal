@@ -83,7 +83,7 @@ export const deriveColors = (baseColors) => {
 
     // Additional UI elements
     borderColor:   lighten(textColor, 0.7),
-    dividerColor:  lighten(textColor, 0.8),
+    dividerColor:  darken(primaryColor, 0.6),
     disabledColor: lighten(textColor, 0.5),
     successColor:  '#10B981',
     errorColor:    '#EF4444',

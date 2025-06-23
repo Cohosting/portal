@@ -88,7 +88,8 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
     sidebarHoverBgColor,
     sidebarActiveBgColor,
     sidebarActiveTextColor,
-    accentColor,
+    sidebarPrimaryTextColor,
+    dividerColor,
     loginButtonColor,
     loginButtonTextColor
   } = computedColors;
@@ -185,7 +186,7 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
         </ul>
 
         {/* User & Logout */}
-        <div className="border-t flex flex-col items-center pt-6 pb-4" style={{ borderColor: loginButtonColor + '44' }}>
+        <div className="border-t flex flex-col items-center pt-6 pb-4" style={{ borderColor: dividerColor }}>
           {clientUser ? (
             <div className="flex items-center mb-4 px-6 w-full relative" ref={dropdownRef}>
               <button onClick={handleAvatarClick} className="relative group" disabled={isUploadingImage}>
@@ -198,7 +199,7 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
                 </div>
               </button>
 
-              <button onClick={toggleDropdown} className="flex items-center ml-3 hover:opacity-80 transition-opacity min-w-0 flex-1" style={{ color: sidebarTextColor }}>
+              <button onClick={toggleDropdown} className="flex items-center ml-3 hover:opacity-80 transition-opacity min-w-0 flex-1" style={{ color: sidebarPrimaryTextColor }}>
                 <div className="text-left min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{clientUser.name}</p>
                   <p className="text-xs truncate opacity-75">{clientUser.email}</p>
@@ -207,7 +208,7 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 mx-3 rounded-md shadow-lg border z-50" style={{ backgroundColor: sidebarBgColor, borderColor: loginButtonColor + '44' }}>
+                <div className="absolute top-full left-0 right-0 mt-2 mx-3 rounded-md shadow-lg border z-50" style={{ backgroundColor: sidebarBgColor, borderColor: dividerColor }}>
                   <button onClick={handleAddressAction} className="w-full px-4 py-3 text-left text-sm hover:opacity-80 transition-opacity flex items-center" style={{ color: sidebarTextColor }}>
                     <MapPin className="mr-2 h-4 w-4" />
                     {addressActionText}

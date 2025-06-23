@@ -48,7 +48,7 @@ const WarningBanner = ({ message, onAction }) => (
 
 export const Client = () => {
   const navigate = useNavigate();
-  const { currentSelectedPortal } = useSelector((state) => state.auth);
+  const { currentSelectedPortal, user } = useSelector((state) => state.auth);
   const { data: portal, isLoading: portalLoading } = usePortalData(currentSelectedPortal);
 
   const {
@@ -78,6 +78,7 @@ export const Client = () => {
   // 4) incomplete (due fields)
   // 5) connected (else)
   const getStripeStatus = () => {
+    if(!portal?.stripe_connect_account_id && portal?.created_by !== user?.id) return 'not_connected_not_authorized';
     if (!portal?.stripe_connect_account_id) return 'not_connected';
     if (stripeUser?.details_submitted && stripeUser?.charges_enabled) return 'verified';
     if (
@@ -142,6 +143,8 @@ export const Client = () => {
         }
       />
 
+
+
       {stripeStatus === 'not_connected' ? (
         <div className="mt-16">
           <EmptyStateFeedback
@@ -154,9 +157,19 @@ export const Client = () => {
             buttonIcon={false}
           />
         </div>
-      ) : (
+      ) :         stripeStatus === 'not_connected_not_authorized' ? (
+        <div className="mt-16">
+<EmptyStateFeedback
+IconComponent={AlertTriangle}
+title="Owner Authorization Required"
+message="Only the account owner can connect and authorize the Stripe account. Please contact the owner to complete the setup."
+centered
+buttonIcon={false}
+/>
+        </div>
+      )   : (
         <>
-          {clientsLoading ? null : clients.length === 0 ? (
+          {(clientsLoading ? null : clients.length === 0) ? (
             <div className="mt-16">
               <EmptyStateFeedback
                 IconComponent={FilePlus}

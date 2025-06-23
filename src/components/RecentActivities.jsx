@@ -7,7 +7,6 @@ import { Clock, ChevronLeft, ChevronRight, FileText, Loader } from 'lucide-react
 const statusStyles = {
   draft:     'bg-amber-500 text-white',
   open:      'bg-amber-500 text-white',
-  finalized: 'bg-blue-500 text-white',
   paid:      'bg-green-500 text-white',
   default:   'bg-gray-200 text-gray-700',
 }
@@ -29,7 +28,7 @@ function StatusBadge({ status }) {
 }
 
 // --- Invoice title renderer using only Tailwind utilities ---
-export const getInvoiceTitle = ({ client, invoice }) => {
+export const getInvoiceTitle = ( client, invoice) => {
   const name = client?.name || 'Unknown Client'
   const deleted = Boolean(client?.is_deleted)
 
@@ -57,6 +56,9 @@ export default function RecentActivitiesList({ portal_id }) {
     isError,
     isFetching,
   } = useRecentActivities(portal_id, pageIndex, pageSize)
+  console.log({
+    recentActivities
+  })
 
   const hasMore = recentActivities.length === pageSize
 
@@ -102,7 +104,7 @@ export default function RecentActivitiesList({ portal_id }) {
 
                 <div className="flex-1 min-w-0">
                   <div className="mb-1">
-                    {getInvoiceTitle(activity)}
+                    {getInvoiceTitle(activity?.client,activity)}
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Clock className="mr-1.5 h-3.5 w-3.5" />

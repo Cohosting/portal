@@ -51,6 +51,10 @@ export const Invoices = () => {
     toDate: '',
     client: null
   });
+
+  console.log({
+    invoices
+  })
   
   // Configuration
   const ITEMS_PER_PAGE = 20;
