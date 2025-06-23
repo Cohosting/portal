@@ -86,7 +86,7 @@ export const Settings = () => {
   const { user, currentSelectedPortal } = useSelector((state) => state.auth);
   const { data: portal } = usePortalData(currentSelectedPortal);
   const [open, setOpen] = useState(false);
-      const { data: teamMember, isLoading: teamMemberLoading  } = useCurrentTeamMember(user?.id);
+      const { data: teamMember, isLoading: teamMemberLoading  } = useCurrentTeamMember(user?.id, currentSelectedPortal);
   
 
   const [isLoading, setIsLoading] = useState(false);
