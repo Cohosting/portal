@@ -291,6 +291,7 @@ const InviteTeamMemberModal = ({
     }
 
     await onSubmit(formData);
+    setFormData({ email: '', role: 'member', name: '' });
     onClose();
   };
 
@@ -321,7 +322,7 @@ const InviteTeamMemberModal = ({
       <div className="space-y-4">
         {!emailState.isExisting && (
           <div>
-            <Label className="mb-2" htmlFor="name">
+            <Label className="text-sm font-medium text-gray-900 mb-2 block" htmlFor="name">
               Name
             </Label>
             <Input
@@ -329,16 +330,13 @@ const InviteTeamMemberModal = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="
-                border border-black/30
-                focus:ring-0 focus:border-black focus:outline-none
-              "
+              className="border-gray-300 focus:ring-gray-500 focus:border-gray-500"
               required
             />
           </div>
         )}
         <div>
-          <Label className="mb-2" htmlFor="role">
+          <Label className="text-sm font-medium text-gray-900 mb-2 block" htmlFor="role">
             Access Level
           </Label>
           <Select
@@ -348,10 +346,7 @@ const InviteTeamMemberModal = ({
             <SelectTrigger
               id="role"
               name="role"
-              className="
-                w-full border border-black/30
-                focus:ring-0 focus:border-black focus:outline-none
-              "
+              className="border-gray-300 focus:ring-gray-500 focus:border-gray-500"
             >
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
@@ -372,7 +367,7 @@ const InviteTeamMemberModal = ({
       <DialogContent className="max-w-md p-6 bg-white">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center text-lg font-medium">
+            <DialogTitle className="flex items-center text-lg font-medium text-gray-900">
               <UserPlus className="mr-2 h-5 w-5" />
               {selectedSeat ? `Assign Member to Seat ${selectedSeat.seatNumber}` : 'Invite Team Member'}
             </DialogTitle>
@@ -381,7 +376,7 @@ const InviteTeamMemberModal = ({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <Label className="mb-2" htmlFor="email">
+            <Label className="text-sm font-medium text-gray-900 mb-2 block" htmlFor="email">
               Email
             </Label>
             <Input
@@ -393,8 +388,7 @@ const InviteTeamMemberModal = ({
               onKeyDown={preventSpace}
               onPaste={handlePaste}
               className={`
-                border border-black/30
-                focus:ring-0 focus:border-black focus:outline-none
+                border-gray-300 focus:ring-gray-500 focus:border-gray-500
                 ${
                   emailState.isValid && emailState.checkComplete && !emailState.isTeamMember
                     ? 'border-green-500'
@@ -415,7 +409,7 @@ const InviteTeamMemberModal = ({
             <Button
               type="submit"
               className={`
-                bg-black text-white hover:bg-gray-800
+                bg-gray-900 text-white hover:bg-gray-700
                 ${
                   (!emailState.isValid ||
                     emailState.isChecking ||

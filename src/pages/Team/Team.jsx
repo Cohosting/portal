@@ -9,6 +9,12 @@ import { Loader } from "lucide-react";
 import PageHeader from "@/components/internal/PageHeader";
 import { Layout } from "../Dashboard/Layout";
 import DashboardSkeleton, { CustomSkeleton } from "@/components/SkeletonLoading";
+import TeamManagementPage from "./Examle";
+import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
+import { Plus } from "lucide-react";
+import useTeamManagement from "@/hooks/useTeamManagement";
+import { useState } from "react";
  
 
 let headingText = "Subscription Required - Access Restricted"
@@ -19,6 +25,15 @@ export const Team = () => {
   const { data: portal, isLoading: portalLoading } = usePortalData(currentSelectedPortal);
   const { data: teamSeats, isLoading } = useTeamSeats(currentSelectedPortal);
   const { data: teamMembers, isLoading: teamMemberLoading } = useTeamMembers(currentSelectedPortal);
+  const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const {
+    invite,
+    removeTeamMember,
+    loading: removeLoading,
+    loadingCurrentTeamMember,
+    currentTeamMember,
+  } = useTeamManagement(portal, true)
+ 
 
   if (portalLoading || isLoading || teamMemberLoading)  return  (
     <Layout>
@@ -46,34 +61,36 @@ export const Team = () => {
 
   }
 
-
+  let canInvite = ['owner', 'admin'].includes(currentTeamMember?.role.toLowerCase())
   return (
     <Layout hideMobileNav headerName="Team">
       <PageHeader
-        title="Team Management"
-        description="Manage your team members and seats."
-      />
+         title={<div className="flex items-center gap-2">
+        <Users className="w-6 h-6 hidden lg:block" />
+        Team <span className="hidden lg:block">Management</span>
+        </div>}
+        description="Manage your team members and their account permissions here."
+        action={canInvite && <button onClick={() => setIsInviteOpen(true)} className=" inline-flex  items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800">
+          <Plus className="w-4 h-4 mr-2" />
+          Add <span className="hidden lg:block mx-1">team </span> member
+        </button>}
+       />
 
 
 
-      <div className="  ">
-        <div className="py-4">
-              
-            <div className="w-full  ">
-              <TeamOverview   
-            companyName={portal?.brand_settings?.brandName}
-            totalSeats={teamSeats?.length}
-            filledSeats={teamSeats?.filter(seat => seat.status === 'reserved').length}
-            freeSeatsLimit={5}
-            additionalSeatCost={20}
-                teamMembers={teamMembers}
-              />
-              <TeamMembers portal={portal} teamMembers={teamMembers} />
-
-            </div>
-            
-        </div>
-       </div>
+ 
+              <TeamMembers
+               portal={portal}
+               teamMembers={teamMembers}
+               invite={invite}
+               removeTeamMember={removeTeamMember}
+               loading={removeLoading}
+               loadingCurrentTeamMember={loadingCurrentTeamMember}
+               currentTeamMember={currentTeamMember}
+               isInviteOpen={isInviteOpen}
+               setIsInviteOpen={setIsInviteOpen}
+                 />
+ 
 
     </Layout>
 
