@@ -6,6 +6,7 @@ export default function InvoicePaymentSettings({
     settings,
     handleSettingUpdate
 }) {
+    console.log(settings)
     return (
         <>
             <fieldset className="border-b border-t border-gray-200 mt-3">
@@ -25,7 +26,7 @@ export default function InvoicePaymentSettings({
                             </p>
                         </div>
                         <div className="ml-3 flex h-6 items-center">
-                            <SwitchComponent enabled={settings.ach_debit} setEnabled={(e) => handleSettingUpdate('ach_debit', e)} />
+                            <SwitchComponent enabled={settings?.ach_debit} setEnabled={(e) => handleSettingUpdate('ach_debit', e)} />
                         </div>
                     </div>
                     <div className="relative flex items-start pb-4 pt-3.5">
@@ -42,7 +43,7 @@ export default function InvoicePaymentSettings({
                         </div>
                         <div className="ml-3 flex h-6 items-center">
 
-                            <SwitchComponent enabled={settings.card} setEnabled={(e) => handleSettingUpdate('card', e)} />
+                            <SwitchComponent enabled={settings?.card} setEnabled={(e) => handleSettingUpdate('card', e)} />
 
                         </div>
                     </div>

@@ -12,11 +12,11 @@ export const calculateTotal = (items) => {
 export const getPaymentMethodsType = (settings) => {
   let payment_methods = [];
 
-  if (settings.card) {
+  if (settings?.card) {
     payment_methods.push("card");
   }
 
-  if (settings.ach_debit) {
+  if (settings?.ach_debit) {
     payment_methods.push("us_bank_account");
   }
 
