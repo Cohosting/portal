@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import { useTeamSeats } from "../../hooks/react-query/useTeamSeats";
-import TeamOverview from "./components/TeamOverview";
 import { usePortalData } from "../../hooks/react-query/usePortalData";
 import PortalAccessUnavailable from "../../components/internal/PortalAccessUnavailable";
 import TeamMembers from "./components/TeamMembers";
