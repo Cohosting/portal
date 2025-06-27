@@ -65,6 +65,10 @@ const InvoiceDetails = () => {
         </div>
         </div>
     )
+
+    console.log({
+        invoice,
+    })
     return (
             <div>
                 <PageHeader
@@ -114,7 +118,7 @@ const InvoiceDetails = () => {
                     />
                     {
 
-                        invoice?.attachments && <InvoiceAttachments attachments={invoice.attachments} />
+                        invoice?.attachments && <InvoiceAttachments colorSettings={computedColors} attachments={invoice.attachments} />
                     }
 
 
