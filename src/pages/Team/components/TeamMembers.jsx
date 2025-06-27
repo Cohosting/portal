@@ -7,12 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import AlertDialog from '@/components/Modal/AlertDialog'
+ import AlertDialog from '@/components/Modal/AlertDialog'
 import InviteTeamMemberModal from './InviteTeamMemberModal'
-import useTeamManagement from '../../../hooks/useTeamManagement'
-import useRealtimeSeats from '../../../hooks/react-query/useRealtimeSeats'
+ import useRealtimeSeats from '../../../hooks/react-query/useRealtimeSeats'
 import { queryKeys } from '../../../hooks/react-query/queryKeys'
+import { capitalize } from '@/utils'
 
 const TeamMembersTable = ({ 
   teamMembers = [],
@@ -162,7 +161,7 @@ const TeamMembersTable = ({
           </td>
           <td className="px-6 py-4">
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}>
-              {member?.role}
+              {capitalize(member?.role)}
             </span>
           </td>
           <td className="px-6 py-4 text-sm text-gray-500">
@@ -217,7 +216,7 @@ const TeamMembersTable = ({
                     <div className="text-sm text-gray-500 truncate">{displayEmail}</div>
                     <div className="mt-1">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}>
-                        {member.role}
+                        {capitalize(member.role)}
                       </span>
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
