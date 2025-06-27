@@ -73,6 +73,16 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
   const location = useLocation();
   const { setOpen } = useSidebar();
 
+console.log({
+  portal_apps
+})
+  let filteredApps = portal_apps
+                    .sort((a, b) => a.index - b.index)
+                    .filter(app =>{
+                      if(app?.settings?.setupType !== 'manual') return app;
+                      return app?.settings?.clientsSettings?.some(setting => setting.clientId === clientUser?.id);
+                    });
+
   // State
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -164,7 +174,7 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
       {/* Apps List */}
       <nav className="flex-1 flex flex-col">
         <ul className="flex flex-1 flex-col gap-y-1">
-          {portal_apps.map(item => {
+          {filteredApps.map(item => {
             const decoded = decodeURIComponent(location.pathname.split('/')[2] || '');
             const active = item.name.toLowerCase() === decoded.toLowerCase();
             const iconName = getResolvedIconName(item, clientUser?.id);
@@ -242,6 +252,7 @@ const Navigation = ({ portal_apps, portal, brandSettings, computedColors }) => {
         clientUser={clientUser}
         portal={portal}
         defaultAddress={clientUser?.billing_address}
+        colorSettings={computedColors}
       />
     </div>
   );

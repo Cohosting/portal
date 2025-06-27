@@ -89,7 +89,7 @@ const ClientChatLayout = ({
   return (
     <div className="flex h-screen">
       <div
-        className={`chat-layout fixed lg:inset-y-0 lg:z-50 h-screen ${
+        className={`chat-layout fixed lg:inset-y-0  h-screen ${
           isLessThan768 ? 'w-full' : 'w-72'
         } flex lg:flex-col`}
       >

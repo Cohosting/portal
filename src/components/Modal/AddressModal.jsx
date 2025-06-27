@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { useClientAuth } from '@/hooks/useClientAuth';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from '../ui/button';
 
 // Address Input Component
 const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
@@ -161,9 +162,10 @@ const AddressInput = ({ onAddressSelect, selectedAddress, defaultAddress }) => {
 };
 
 // Address Modal Component
-const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddress }) => {
+const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddress, colorSettings }) => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(false);
+  const {  primaryButtonColor, primaryButtonTextColor } = colorSettings || {};
 
   console.log({
     clientUser,
@@ -261,12 +263,13 @@ const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddr
             </h2>
             <p className="text-sm text-gray-500 mt-1">The address will appear in invoices</p>
           </div>
-          <button
+          <Button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            variant="ghost"
           >
             <X className="h-5 w-5 text-gray-400" />
-          </button>
+          </Button>
         </div>
 
         <div className="p-6 space-y-6 overflow-y-auto" style={{ minHeight: '400px', maxHeight: '500px' }}>
@@ -313,19 +316,20 @@ const AddressModal = ({ isOpen, onClose, onSave, clientUser, portal, defaultAddr
         </div>
 
         <div className="flex space-x-3 p-6 border-t border-gray-200 bg-gray-50">
-          <button
+          <Button
             onClick={handleClose}
             className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={!selectedAddress || loading}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
+            className="flex-1  rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            style={{ backgroundColor: primaryButtonColor, color: primaryButtonTextColor }}
+         >
             {loading ?  (defaultAddress ? 'Updating...' : 'Saving...') : (defaultAddress ? 'Update Address' : 'Save Address')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
