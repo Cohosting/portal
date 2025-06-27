@@ -42,6 +42,31 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
 
+let isCurrent = (href) => {
+    const currentPath = location.pathname;
+    
+    // Exact match for home
+    if (href === '/') {
+        return currentPath === '/';
+    }
+    
+    // Exact match for apps page
+    if (href === '/apps') {
+        return currentPath === '/apps' || currentPath === '/apps/';
+    }
+    
+    // For app-configurations, we want exact segment matching
+    if (href.includes('/app-configurations')) {
+        return currentPath.includes('/app-configurations');
+    }
+    
+    // For other paths, check if current path starts with href
+    return currentPath.startsWith(href) && (
+        currentPath.length === href.length || 
+        currentPath[href.length] === '/'
+    );
+};
+
 
 export default function AppSidebar() {
     const { setSidebarOpen } = useConversationContext();
@@ -70,13 +95,6 @@ const preference = [
     },
 ];
 
-    // Route matching function
-    let isCurrent = (href) => {
-        if (href === '/') {
-            return location.pathname === '/';
-        }
-        return location.pathname.includes(href);
-    };
 
     // Redux state access
      const { data: portal } = usePortalData(currentSelectedPortal);
