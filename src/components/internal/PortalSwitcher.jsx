@@ -69,9 +69,9 @@ export default function PortalSwitcher() {
                   >
                     {portalName}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  {/* <div className="text-xs text-muted-foreground">
                     {user?.default_portal === selectedPortal.id ? 'Default' : 'Enterprise'}
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Chevron */}

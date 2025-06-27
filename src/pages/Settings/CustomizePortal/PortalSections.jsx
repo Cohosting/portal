@@ -29,7 +29,7 @@ export const PoweredBySection = ({ poweredByCopilot, handleUpdateSetting, Headin
   <div className="my-6 text-sm">
     <Heading text={portalTexts.poweredBy.heading} subText={portalTexts.poweredBy.subText} />
     <div className="flex items-center justify-between">
-      <span>Powered by Copilot</span>
+      <span>Powered by HueHQ</span>
       <SwitchComponent enabled={poweredByCopilot} setEnabled={v => handleUpdateSetting('poweredByCopilot', v)} />
     </div>
   </div>

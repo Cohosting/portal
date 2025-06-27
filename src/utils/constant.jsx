@@ -164,9 +164,9 @@ export const portalTexts = {
  
   },
   poweredBy: {
-    heading: 'Powered by Copilot badge',
+    heading: 'Powered by HueHQ badge',
     subText:
-      'The Powered by Copilot badge shows on the sign in and sign up pages of your portal.',
+      'The Powered by HueHQ badge shows on the sign in and sign up pages of your portal.',
   },
   // Add more text constants here
 };
