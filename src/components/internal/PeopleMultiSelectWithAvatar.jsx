@@ -132,7 +132,7 @@ const PeopleMultiSelectWithAvatar = ({
                   >
                     <div className="flex items-center space-x-2">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={person.avatar} alt={person.name} />
+                        <AvatarImage src={person.avatar_url} alt={person.name} />
                         <AvatarFallback>{person.name[0]}</AvatarFallback>
                       </Avatar>
                       <span className={checked ? "font-semibold" : "font-normal"}>
