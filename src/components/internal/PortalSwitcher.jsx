@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 
 // Maximum characters before truncation (including ellipsis)
-const MAX_NAME_LENGTH = 10;
+const MAX_NAME_LENGTH = 16;
 
 export default function PortalSwitcher() {
   const dispatch = useDispatch();
@@ -50,12 +50,12 @@ export default function PortalSwitcher() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger className='pl-0' asChild>
             <SidebarMenuButton
               size="lg"
               className="w-full max-w-full overflow-hidden data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex items-center gap-3 w-full overflow-hidden">
+              <div className="flex items-center gap-0 w-full overflow-hidden">
                 {/* Icon */}
                 <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Box className="size-4" />
@@ -69,9 +69,9 @@ export default function PortalSwitcher() {
                   >
                     {portalName}
                   </div>
-                  {/* <div className="text-xs text-muted-foreground">
-                    {user?.default_portal === selectedPortal.id ? 'Default' : 'Enterprise'}
-                  </div> */}
+                  <div className="text-xs text-muted-foreground">
+                    {user?.default_portal === selectedPortal.id ? 'Default' : ''}
+                  </div>
                 </div>
 
                 {/* Chevron */}
