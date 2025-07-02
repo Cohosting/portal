@@ -50,7 +50,7 @@ export const Dashboard = () => {
 
   const formatChange = (change, isPct = false) => {
     const prefix = change >= 0 ? '+' : '';
-    return `${prefix}${change}${isPct ? '%' : ''} from last month`;
+    return `${prefix}${isPct ? '$' : ''}${change} from last month`;
   };
 
   const cardStyles = {
