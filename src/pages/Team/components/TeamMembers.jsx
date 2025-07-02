@@ -32,31 +32,26 @@ const TeamMembersTable = ({
   const [isLoading, setIsLoading] = useState(false)
 
   const handleInvite = async (data) => {
-    if (isLoading) return
-    setIsLoading(true)
-
-    let { seat, ...restData } = data
+    if (isLoading) return;
+    setIsLoading(true);
+  
+    const { seat, ...restData } = data;
     const teamMemberData = {
       portal_id: portal?.id,
       status: 'invited',
       ...restData,
-    }
-
+    };
+  
     try {
-      const availableSeat = seats.find((s) => s.status === 'available')
-      if (availableSeat) {
-        await invite(availableSeat.id, teamMemberData)
-      } else {
-        await invite(null, teamMemberData)
-      }
-      await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id))
+      // Always create a new seat, so seatId is null
+      await invite(null, teamMemberData);
+      await queryClient.invalidateQueries(queryKeys.teamMembers(portal?.id));
     } catch (error) {
-      console.error('Error inviting team member:', error)
+      console.error('Error inviting team member:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
+  };
   const openRemoveDialog = (member) => {
     setSelectedMember(member)
     setIsAlertOpen(true)

@@ -212,7 +212,7 @@ const PlanSelectionModal = ({ currentPlan = { name: "Pro", interval: "monthly" }
         </DialogContent>
       </Dialog>
 
-      <ToastContainer position="bottom-right" autoClose={3000} />
+      {/* <ToastContainer position="bottom-right" autoClose={3000} /> */}
     </>
   );
 };

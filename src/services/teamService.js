@@ -21,14 +21,14 @@ export const fetchTeamSeats = async portalId => {
 };
 
 export const inviteMemberToTeam = async (
-  seatId,
+  _seatId, // no longer used
   memberData,
   subscriptionId
 ) => {
-  console.log(seatId);
+  // Step 1: Call Supabase RPC to create a new seat + team member + invitation
   const { data, error } = await supabase.rpc('invite_team_member', {
     p_member_data: memberData,
-    p_seat_id: seatId,
+    p_seat_id: null, // Always null – we no longer reuse seats
   });
 
   if (error) {
@@ -36,24 +36,14 @@ export const inviteMemberToTeam = async (
     throw error;
   }
 
-  if (!seatId) {
-    // stripe sync
-    const { data: seats, error: seatsError } = await supabase
-      .from('seats')
-      .select('*')
-      .eq('portal_id', memberData.portal_id);
-
-    if (seatsError) {
-      console.error('Error fetching seats:', seatsError);
-      throw seatsError;
-    }
-
-    const { data } = await axiosInstance.patch(
-      `/subscription/${subscriptionId}/seats`,
-      {
-        newSeatCount: seats.length,
-      }
-    );
+  // Step 2: Trigger Stripe to increment the seat count by +1
+  // This endpoint internally retrieves the Stripe seat item and increases quantity by 1
+  try {
+    await axiosInstance.patch(`/subscription/${subscriptionId}/seats`);
+  } catch (stripeError) {
+    console.error('Stripe seat sync failed:', stripeError);
+    // Optional: send to a logging table or error tracker for reconciliation
+    // await supabase.from('stripe_update_errors').insert([...])
   }
 
   return { success: true, data };

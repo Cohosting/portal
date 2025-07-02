@@ -7,12 +7,14 @@ import store from './store/store';
 import AuthListener from './pages/Auth/AuthListener';
 import { QueryClientProvider } from 'react-query';
 import queryClient from './hooks/react-query/queryClient';
-
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
 root.render(
   <Provider store={store}>
+    <ToastContainer />
     <QueryClientProvider client={queryClient}>
       <AuthListener>
         <ClientPortalContextComponent>
