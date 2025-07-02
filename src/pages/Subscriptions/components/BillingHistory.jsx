@@ -1,6 +1,7 @@
 import React from 'react';
 import useSubscriptionBillingHistory from '../../../hooks/react-query/useSubscriptionBillingHistory';
 import { Download } from 'lucide-react';
+import { capitalize } from '@/utils';
 
 const StatusBadge = ({ status }) => {
     const statusStyles = {
@@ -8,6 +9,7 @@ const StatusBadge = ({ status }) => {
         pending: "text-yellow-600 bg-yellow-100",
         failed: "text-red-600 bg-red-100",
         refunded: "text-blue-600 bg-blue-100",
+        credited: "text-blue-600 bg-blue-100",
         default: "text-gray-600 bg-gray-100"
     };
 
@@ -22,7 +24,9 @@ const StatusBadge = ({ status }) => {
 
 const BillingHistory = ({ subscription }) => {
     const { data: invoices, isLoading } = useSubscriptionBillingHistory(subscription?.stripe_subscription_id);
-
+    console.log({
+        invoices,
+     })
     return (
         <div className="py-6 rounded-lg">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Billing History</h2>
@@ -34,6 +38,8 @@ const BillingHistory = ({ subscription }) => {
                         <tr>
                             <th className="py-3 px-4 text-left font-medium">Invoice</th>
                             <th className="py-3 px-4 text-left font-medium hidden md:table-cell">Date</th>
+                            <th className="py-3 px-4 text-left font-medium hidden lg:table-cell">Type</th>
+                            <th className="py-3 px-4 text-left font-medium hidden xl:table-cell">Description</th>
                             <th className="py-3 px-4 text-left font-medium hidden sm:table-cell">Status</th>
                             <th className="py-3 px-4 text-right font-medium">Amount</th>
                             <th className="py-3 px-4"></th>
@@ -42,14 +48,14 @@ const BillingHistory = ({ subscription }) => {
                     <tbody>
                         {isLoading && (
                             <tr>
-                                <td colSpan="5" className="text-center py-4">
+                                <td colSpan="7" className="text-center py-4">
                                     Loading...
                                 </td>
                             </tr>
                         )}
                         {!isLoading && invoices.length === 0 && (
                             <tr>
-                                <td colSpan="5" className="text-center py-4">
+                                <td colSpan="7" className="text-center py-4">
                                     No invoices found
                                 </td>
                             </tr>
@@ -57,17 +63,21 @@ const BillingHistory = ({ subscription }) => {
                         {invoices?.map((invoice) => (
                             <tr key={invoice.invoiceId} className="border-t hover:bg-gray-50 transition">
                                 <td className="py-4 px-4">
-                                    <div className="flex flex-col space-y-3 md:space-y-0">
+                                    <div className="flex flex-col space-y-2 md:space-y-0">
                                         <div className="text-gray-700 font-medium">{invoice.invoiceNumber}</div>
                                         <div className="text-gray-500 text-xs md:hidden">Date: {invoice.date}</div>
+                                        <div className="text-gray-500 text-xs lg:hidden">Type: {invoice.type}</div>
+                                        <div className="text-gray-500 text-xs xl:hidden">Desc: {invoice.description}</div>
                                         <div className="sm:hidden">
-                                            Status: <StatusBadge status={invoice.status} />
+                                            Status: <StatusBadge status={ capitalize(invoice.status)} />
                                         </div>
                                     </div>
                                 </td>
                                 <td className="py-4 px-4 hidden md:table-cell text-gray-600">{invoice.date}</td>
+                                <td className="py-4 px-4 hidden lg:table-cell text-gray-600">{invoice.type}</td>
+                                <td className="py-4 px-4 hidden xl:table-cell text-gray-600">{invoice.description}</td>
                                 <td className="py-4 px-4 hidden sm:table-cell">
-                                    <StatusBadge status={invoice.status} />
+                                    <StatusBadge status={ capitalize(invoice.status)} />
                                 </td>
                                 <td className="py-4 px-4 text-right text-gray-700 font-medium">${invoice.amount}</td>
                                 <td className="py-4 px-4 text-right">
