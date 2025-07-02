@@ -68,6 +68,7 @@ let isCurrent = (href) => {
 };
 
 
+
 export default function AppSidebar() {
     const { setSidebarOpen } = useConversationContext();
     const { currentSelectedPortal, user} = useSelector(state => state.auth);
@@ -124,6 +125,9 @@ const preference = [
         setSidebarOpen(false);
     };
     console.log({teamMember});
+
+    let portal_redirect_url =  window.location.href.replace('dashboard', portal?.portal_url)  
+ 
 
     return (
         <Sidebar className="border-r bg-gray-50">
@@ -249,12 +253,12 @@ const preference = [
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             as="a"
-                            href={`http://${portal?.portal_url}.localhost:3000/login`}
+                            href={portal_redirect_url}
                             className="text-gray-600 hover:bg-gray-100"
                         >
                             <LogOut className="mr-2 h-4 w-4 text-sm  font-medium text-gray-500" />
                             <a
-                            href={`http://${portal?.portal_url}.localhost:3000/login`} >
+                            href={portal_redirect_url} >
                              Portal View
                              </a>
 
