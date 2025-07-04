@@ -32,6 +32,7 @@ import { SetPasswordPage } from '@/pages/Portal/Client/SetPasswordPage';
 import { ForgetPassword } from '@/pages/Portal/Client/ForgetPassword';
 import MainForgotPassword from '@/pages/Auth/ForgotPassword';
 import MainSetPassword from '@/pages/Auth/SetPassword';
+import StripeError from '@/pages/Settings/StripeError';
 
 
 
@@ -116,6 +117,11 @@ const router = createBrowserRouter([
       {
         path: 'return',
         element: <StripeReturn />,
+      },
+      {
+        path: 'stripe-error',
+        element: <StripeError />,
+        
       },
 
       {

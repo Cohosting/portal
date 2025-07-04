@@ -118,19 +118,27 @@ export const Settings = () => {
     [portal]
   );
 
-  const createStripeAccount = async () => {
+  const redirectToStripeOAuth = async () => {
     if (!navigator.onLine) {
       toast.error("You appear to be offline. Please connect to the internet and try again.");
       return;
     }
   
     try {
-      await createStripeConnectAccount(
-        portal.created_by,
-        portal.stripe_connect_account_id,
-        portal.id,
-        setIsLoading
-      );
+
+        const params = new URLSearchParams({
+          response_type: 'code',
+  client_id: import.meta.env.VITE_STRIPE_CLIENT_ID,  
+  scope: 'read_write',
+  redirect_uri:  import.meta.env.VITE_STRIPE_CONNECT_REDIRECT_URL,
+  state: portal.id,  
+  'stripe_user[email]': user.email,
+
+});
+
+window.location.href = `https://connect.stripe.com/oauth/authorize?${params.toString()}`;
+
+
     } catch (err) {
       console.error('Error connecting to Stripe:', err);
   
@@ -182,13 +190,21 @@ export const Settings = () => {
           stripeUser={stripeUser}
           isLoading={isLoading}
           portal={portal}
-          createStripeAccount={createStripeAccount}
+          createStripeAccount={() => {
+            setIsLoading(true);
+            createStripeConnectAccount(
+              portal.created_by,
+              portal.stripe_connect_account_id,
+              portal.id,
+              setIsLoading
+            )
+          }}
         />
 
         <ConnectStripeAccount
           portal={portal}
           isLoading={isLoading}
-          createStripeAccount={createStripeAccount}
+          createStripeAccount={redirectToStripeOAuth}
         />
 
         <div className="mt-4 text-sm sm:text-base">

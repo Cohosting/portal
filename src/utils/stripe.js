@@ -20,7 +20,7 @@ export const createStripeConnectAccount = async (
     return { success: true };
   } catch (err) {
     cb && cb(false);
-    throw err; // Properly propagate the error to be caught in the component
+    throw err; 
   }
 };
 export const fetchStripeUser = async stripeConnectAccountId => {
