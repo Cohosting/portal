@@ -97,8 +97,7 @@ export const Client = () => {
   };
 
   const stripeStatus = getStripeStatus();
-  const canAddClients = stripeStatus === 'verified';
-  const bannerMessage = getWarningMessage(stripeStatus);
+   const bannerMessage = getWarningMessage(stripeStatus);
   const showBanner = Boolean(bannerMessage);
 
   const toggleInvite = () => setIsInviteOpen((o) => !o);
@@ -110,10 +109,10 @@ export const Client = () => {
           title="Clients"
           description="A list of all the clients in your portal including their name, email and status."
         />
-        <div className="flex items-center justify-center mt-12">
-          <Loader className="h-10 w-10 text-gray-500 animate-spin" />
-          <span className="ml-2 text-gray-500">Loading...</span>
-        </div>
+            <div className="flex items-center justify-center mt-12">
+              <Loader className="h-6 w-6 text-gray-500 animate-spin" />
+              <span className="ml-2 text-gray-500">Loading clients...</span>
+            </div>
       </Layout>
     );
   }
@@ -131,7 +130,7 @@ export const Client = () => {
         title="Clients"
         description="A list of all the clients in your portal including their name, email and status."
         action={
-          canAddClients && (
+        
             <Button
               variant="primary"
               onClick={toggleInvite}
@@ -139,47 +138,39 @@ export const Client = () => {
             >
               Add client
             </Button>
-          )
+          
         }
       />
 
-
-
-      {stripeStatus === 'not_connected' ? (
+      {stripeStatus === 'not_connected_not_authorized' ? (
         <div className="mt-16">
           <EmptyStateFeedback
             IconComponent={AlertTriangle}
-            title="Stripe Account Required"
-            message="You need to connect your Stripe account to add clients. Please complete the setup in the settings."
-            buttonText="Go To Settings"
-            onButtonClick={() => navigate('/settings/portal')}
+            title="Owner Authorization Required"
+            message="Only the account owner can connect and authorize the Stripe account. Please contact the owner to complete the setup."
             centered
             buttonIcon={false}
           />
         </div>
-      ) :         stripeStatus === 'not_connected_not_authorized' ? (
-        <div className="mt-16">
-<EmptyStateFeedback
-IconComponent={AlertTriangle}
-title="Owner Authorization Required"
-message="Only the account owner can connect and authorize the Stripe account. Please contact the owner to complete the setup."
-centered
-buttonIcon={false}
-/>
-        </div>
-      )   : (
+      ) : (
         <>
-          {(clientsLoading ? null : clients.length === 0) ? (
+          {/* Show loading state for clients */}
+          {clientsLoading ? (
+            <div className="flex items-center justify-center mt-12">
+              <Loader className="h-6 w-6 text-gray-500 animate-spin" />
+              <span className="ml-2 text-gray-500">Loading clients...</span>
+            </div>
+          ) : clients.length === 0 ? (
             <div className="mt-16">
               <EmptyStateFeedback
                 IconComponent={FilePlus}
                 title="Add Your First Client"
-                message="It looks like you haven’t added any clients yet. Add a new client to get started!"
+                message="It looks like you haven't added any clients yet. Add a new client to get started!"
                 centered
               />
             </div>
           ) : (
-            <ClientTable refetch={refetchClients} clients={clients} />
+            <ClientTable refetch={refetchClients} clients={clients} portal={portal} />
           )}
 
           <InviteForm
@@ -199,8 +190,6 @@ buttonIcon={false}
           />
         </>
       )}
-
- 
     </Layout>
   );
 };
