@@ -9,6 +9,8 @@ import { QueryClientProvider } from 'react-query';
 import queryClient from './hooks/react-query/queryClient';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { Toaster } from 'sonner';
+
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
@@ -22,5 +24,15 @@ root.render(
         </ClientPortalContextComponent>
       </AuthListener>
     </QueryClientProvider>
+    {/* Sonner Toaster for ClientSyncStatus */}
+    <Toaster 
+      position="top-right"
+      expand={true}
+      richColors
+      closeButton
+      toastOptions={{
+        className: 'min-w-[400px]',
+      }}
+    />
   </Provider>
 );

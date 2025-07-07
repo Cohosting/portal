@@ -54,7 +54,7 @@ const StripeError = () => {
   const nonRetryableErrors = ['already_connected', 'portal_not_found'];
 
   const handleTryAgain = () => {
-   // implement this
+   // implement
   };
 
   return (

@@ -36,7 +36,7 @@ const usePortalClientData = (portal) => {
                 setLoading(false);
             }
         })()
-    }, [portal]);
+    }, [portal?.id]); // Only depend on portal ID, not the entire portal object
 
     const refetch = async () => {
         try {

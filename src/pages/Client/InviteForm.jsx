@@ -154,18 +154,21 @@ export const InviteForm = ({
         return;
       }
  
-      const stripeCustomer = await registerClientWithStripe(
-        email,
-        null,
-        portal.stripe_connect_account_id
+      let stripeCustomer = null;
+
+      if (portal.stripe_connect_account_id) {
+        stripeCustomer = await registerClientWithStripe(
+          email,
+          null,
+          portal.stripe_connect_account_id
       );
-  
+    }
       const { data: insertedClient, error: insertError } = await supabase
         .rpc('register_client_in_portal', {
           p_email: email,
           p_name: inviteState.name,
           p_portal_id: portal.id,
-          p_stripe_customer_id: stripeCustomer.id
+          p_stripe_customer_id: stripeCustomer?.id || null
         });
   
       if (insertError) throw insertError;

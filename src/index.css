@@ -26,3 +26,11 @@
   .conversation-list-item:not(.active):hover {
     background-color: var(--hover-bg);
   }
+
+
+/* Fix Sonner toast width by targeting the data-content container */
+[data-sonner-toast] [data-content] {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 350px !important;
+}
