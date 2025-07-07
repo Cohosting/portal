@@ -1,0 +1,30 @@
+feat: add real-time Stripe sync monitoring with manual client connection
+
+Frontend integration for enhanced Stripe sync service with comprehensive UX improvements:
+
+Real-time Sync Monitoring:
+- Add ClientSyncStatus component with live progress tracking and toast notifications
+- Implement usePortalRealtimeData hook for Supabase real-time portal updates
+- Show detailed sync progress (created/synced/failed counts) with visual progress bar
+- Persist toast notifications across page refreshes until user dismisses
+- Store dismissal state in database to prevent notification reappearance
+
+Manual Client Connection:
+- Add "Connect to Stripe" button in ClientTable dropdown for individual client sync
+- Enable manual connection for failed syncs to avoid full re-sync
+- Hide manual connection option during active bulk sync operations
+
+UX/Performance Improvements:
+- Fix usePortalClientData flickering by preventing unnecessary refetches on portal changes
+- Add new Stripe connection status column to client table
+- Integrate Sonner toast library for better notification management
+- Add responsive styling for sync status indicators and progress components
+
+Technical Changes:
+- Implement real-time subscription management for portal data
+- Add toast container styling and configuration
+- Update Client.jsx to use real-time portal data integration
+- Add sonner dependency for enhanced toast notifications
+
+This provides users with full visibility into sync operations and recovery options
+for partial sync failures without disrupting existing workflows.

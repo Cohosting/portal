@@ -20,6 +20,7 @@ import { useQueryClient } from "react-query";
 import { useSendEmail } from '../../hooks/useEmailApi';
 import { ClientInviteSuccessModal } from '../../pages/Client/ClientInviteSuccessModal';
 import { Cable } from "lucide-react";
+import axiosInstance from "@/api/axiosConfig";
 
 const ClientTable = ({ clients, portal, refetch }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,6 +28,7 @@ const ClientTable = ({ clients, portal, refetch }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [clientToDelete, setClientToDelete] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [connectingToStripe, setConnectingToStripe] = useState({}); // Track individual client connection states
     const queryClient = useQueryClient();
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [clientToInvite, setClientToInvite] = useState(null);
@@ -41,7 +43,7 @@ const ClientTable = ({ clients, portal, refetch }) => {
       setIsEditModalOpen(false);
       setClientToEdit(null);
       setClientToInvite(client);
-  };
+    };
 
     const handleDeleteClick = (client) => {
         setClientToDelete(client);
@@ -71,7 +73,58 @@ const ClientTable = ({ clients, portal, refetch }) => {
               setLoading(false);
           }
       }
-  };
+    };
+
+    const handleConnectToStripe = async (client) => {
+        // Show loading toast
+        const toastId = toast.loading(`Connecting ${client.name} to Stripe...`);
+        
+        try {
+            // Set loading state for this specific client
+            setConnectingToStripe(prev => ({ ...prev, [client.id]: true }));
+            
+            // Make API call to sync/create Stripe customer
+            const response = await axiosInstance.post('/stripe/connect/client-sync-or-create', {
+                email: client.email,
+                id: client.id,
+                stripeConnectAccountId: portal.stripe_connect_account_id
+            });
+
+            if (response.data.success) {
+                // Update toast to success
+                toast.update(toastId, {
+                    render: `${client.name} successfully connected to Stripe!`,
+                    type: "success",
+                    isLoading: false,
+                    autoClose: 3000,
+                });
+
+                // Refetch clients to update the UI
+                await refetch();
+                
+                // Optionally invalidate related queries
+                queryClient.invalidateQueries(['clients']);
+                
+            } else {
+                throw new Error(response.data.details || 'Failed to connect to Stripe');
+            }
+            
+        } catch (error) {
+            console.error('Error connecting to Stripe:', error);
+            
+            // Update toast to error
+            toast.update(toastId, {
+                render: `Failed to connect ${client.name} to Stripe: ${error.response?.data?.details || error.message}`,
+                type: "error",
+                isLoading: false,
+                autoClose: 5000,
+            });
+            
+        } finally {
+            // Clear loading state for this client
+            setConnectingToStripe(prev => ({ ...prev, [client.id]: false }));
+        }
+    };
 
     const handleSendEmail = (client) => {
         setClientToInvite(client);
@@ -79,25 +132,40 @@ const ClientTable = ({ clients, portal, refetch }) => {
     };
 
     const StatusBadge = ({ status }) => {
-        let bgColor = 'bg-green-100';
-        let textColor = 'text-green-800';
+        let bgColor, textColor;
 
         switch (status) {
             case 'pending':
                 bgColor = 'bg-amber-100';
                 textColor = 'text-amber-800';
                 break;
-            case 'inactive':
-                bgColor = 'bg-gray-100';
-                textColor = 'text-gray-800';
-                break;
             case 'active':
                 bgColor = 'bg-green-100';
                 textColor = 'text-green-800';
                 break;
+            case 'completed':
+                bgColor = 'bg-blue-100';
+                textColor = 'text-blue-800';
+                break;
+            case 'inactive':
+                bgColor = 'bg-gray-100';
+                textColor = 'text-gray-800';
+                break;
             case 'restricted':
                 bgColor = 'bg-red-100';
                 textColor = 'text-red-800';
+                break;
+            case 'failed':
+                bgColor = 'bg-red-100';
+                textColor = 'text-red-800';
+                break;
+            case 'cancelled':
+                bgColor = 'bg-gray-100';
+                textColor = 'text-gray-800';
+                break;
+            case 'archived':
+                bgColor = 'bg-gray-100';
+                textColor = 'text-gray-600';
                 break;
             default:
                 bgColor = 'bg-gray-100';
@@ -122,6 +190,11 @@ const ClientTable = ({ clients, portal, refetch }) => {
             </div>
         );
     };
+
+
+    console.log({
+        clients
+    })
 
     return (
         <>
@@ -167,7 +240,7 @@ const ClientTable = ({ clients, portal, refetch }) => {
                               <div className="md:hidden mt-1">
                                   <dt className="sr-only">Stripe Connection</dt>
                          <div className="flex items-center">
-                         <p className="text-md font-semibold"> Stripe:</p> <StripeConnectionBadge customerId={client.customer_id} />
+                         <p className="text-md font-semibold"> Stripe:</p> <StripeConnectionBadge customerId={client?.customer_id} />
 
                          </div>
                                   
@@ -184,24 +257,28 @@ const ClientTable = ({ clients, portal, refetch }) => {
                           <StatusBadge status={client.status} />
                       </td>
                       <td className="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">
-                       <StripeConnectionBadge customerId={client.customer_id} />
+                       <StripeConnectionBadge customerId={client?.customer_id} />
                       </td>
                       <td className="py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                           <DropdownMenu>
-                              <DropdownMenuTrigger className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+                              <DropdownMenuTrigger 
+                                  className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900"
+                                  disabled={connectingToStripe[client.id]}
+                              >
                                   <span className="sr-only">Open options</span>
                                   <MoreVertical className="h-5 w-5" />
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-42 bg-white p-0">
                                 {
-                                   portal.stripe_connect_account_id && !client.customer_id && (
+                                   portal.stripe_connect_account_id && !client.customer_id && portal.sync_status !== 'syncing' && (
                                         <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0 focus:outline-none">
                                         <button
-                                            onClick={() => handleDeleteClick(client)}
-                                            className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                            onClick={() => handleConnectToStripe(client)}
+                                            disabled={connectingToStripe[client.id]}
+                                            className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <Cable className="h-5 w-5 text-green-500 mr-2" />
-                                            Connect to stripe
+                                            {connectingToStripe[client.id] ? 'Connecting...' : 'Connect to stripe'}
                                         </button>
                                     </DropdownMenuItem>
                                     ) 
