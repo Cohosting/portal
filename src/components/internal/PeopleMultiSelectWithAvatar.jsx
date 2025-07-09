@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 
 const PeopleMultiSelectWithAvatar = ({
-  people,
+  people = [], // Default to empty array
   onChange,
   label = "Assigned to",
   value = [], // Accept controlled value
@@ -13,8 +13,13 @@ const PeopleMultiSelectWithAvatar = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
+  // Ensure people is an array and filter out invalid entries
+  const validPeople = Array.isArray(people) 
+    ? people.filter(person => person && person.id && person.name) 
+    : [];
+
   // Use value prop if provided, otherwise use internal state
-  const selected = value;
+  const selected = Array.isArray(value) ? value : [];
 
   // Close dropdown if clicking outside
   useEffect(() => {
@@ -30,13 +35,15 @@ const PeopleMultiSelectWithAvatar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const isAllSelected = selected.length === people.length && people.length > 0;
+  const isAllSelected = selected.length === validPeople.length && validPeople.length > 0;
   
   const handleSelectAll = useCallback((e) => {
     e.stopPropagation(); // Prevent button click from toggling dropdown
-    const newSelected = isAllSelected ? [] : [...people];
-    onChange(newSelected);
-  }, [isAllSelected, people, onChange]);
+    const newSelected = isAllSelected ? [] : [...validPeople];
+    if (onChange) {
+      onChange(newSelected);
+    }
+  }, [isAllSelected, validPeople, onChange]);
 
   const togglePerson = useCallback((person, e) => {
     // Prevent event bubbling
@@ -45,12 +52,14 @@ const PeopleMultiSelectWithAvatar = ({
     }
     
     let newSelected;
-    if (selected.find((p) => p.id === person.id)) {
-      newSelected = selected.filter((p) => p.id !== person.id);
+    if (selected.find((p) => p && p.id === person.id)) {
+      newSelected = selected.filter((p) => p && p.id !== person.id);
     } else {
       newSelected = [...selected, person];
     }
-    onChange(newSelected);
+    if (onChange) {
+      onChange(newSelected);
+    }
   }, [selected, onChange]);
 
   const handleRowClick = useCallback((person, e) => {
@@ -68,6 +77,18 @@ const PeopleMultiSelectWithAvatar = ({
     };
   }, [togglePerson]);
 
+  // Helper function to get safe name display
+  const getDisplayName = (person) => {
+    if (!person || !person.name) return "Unknown";
+    return person.name;
+  };
+
+  // Helper function to get safe avatar fallback
+  const getAvatarFallback = (person) => {
+    if (!person || !person.name || typeof person.name !== 'string') return "?";
+    return person.name.charAt(0).toUpperCase();
+  };
+
   return (
     <div ref={containerRef} className="relative w-full">
       <label className="block text-sm font-medium text-black">{label}</label>
@@ -82,7 +103,7 @@ const PeopleMultiSelectWithAvatar = ({
           <span className="text-gray-500">Select people...</span>
         ) : (
           <span>
-            {selected.map((p) => p.name).join(", ")} <span className="text-gray-500">({selected.length})</span>
+            {selected.map((p) => getDisplayName(p)).join(", ")} <span className="text-gray-500">({selected.length})</span>
           </span>
         )}
         <svg
@@ -118,12 +139,12 @@ const PeopleMultiSelectWithAvatar = ({
 
       {isOpen && (
         <div className="absolute top-16 z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border border-gray-400 bg-white p-2 shadow-lg">
-          {people.length === 0 ? (
+          {validPeople.length === 0 ? (
             <p className="px-4 text-sm text-gray-500">No people available</p>
           ) : (
             <div className="space-y-1">
-              {people.map((person) => {
-                const checked = !!selected.find((p) => p.id === person.id);
+              {validPeople.map((person) => {
+                const checked = !!selected.find((p) => p && p.id === person.id);
                 return (
                   <div
                     key={person.id}
@@ -132,11 +153,11 @@ const PeopleMultiSelectWithAvatar = ({
                   >
                     <div className="flex items-center space-x-2">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={person?.avatar_url} alt={person.name} />
-                        <AvatarFallback>{person.name[0]}</AvatarFallback>
+                        <AvatarImage src={person?.avatar_url} alt={getDisplayName(person)} />
+                        <AvatarFallback>{getAvatarFallback(person)}</AvatarFallback>
                       </Avatar>
                       <span className={checked ? "font-semibold" : "font-normal"}>
-                        {person.name}
+                        {getDisplayName(person)}
                       </span>
                     </div>
                     <div 
