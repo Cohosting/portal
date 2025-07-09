@@ -8,9 +8,11 @@ import { usePortalClients, usePortalData } from "../../../hooks/react-query/useP
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useTeamMembers } from "@/hooks/react-query/useTeamMembers";
  
 const NewConversationForm = ({ onClose }) => {
-  const [selectedPeople, setSelectedPeople] = useState([]);
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [conversationName, setConversationName] = useState("");
 
@@ -20,10 +22,24 @@ const NewConversationForm = ({ onClose }) => {
 
   const { data: portal, isLoading: portalLoading } = usePortalData(currentSelectedPortal);
   const { data: clients, isLoading: clientsLoading } = usePortalClients(currentSelectedPortal);
+  const { data: teamMembers, isLoading: teamMembersLoading } = useTeamMembers(currentSelectedPortal, {
+    status: 'active'
+  });
+  console.log({
+    teamMembers,
+    currentUserId
+  })
+
+  // Filter out current user from team members to avoid duplicates
+  const availableTeamMembers = teamMembers?.filter(member => member?.id !== currentUserId) || [];
 
   // Memoized handlers
-  const handlePeopleChange = useCallback((selected) => {
-    setSelectedPeople(selected);
+  const handleClientsChange = useCallback((selected) => {
+    setSelectedClients(selected);
+  }, []);
+
+  const handleTeamMembersChange = useCallback((selected) => {
+    setSelectedTeamMembers(selected);
   }, []);
 
   const handleNameChange = useCallback((e) => {
@@ -31,11 +47,14 @@ const NewConversationForm = ({ onClose }) => {
   }, []);
 
   const handleCreateConversation = async () => {
-    if (!selectedPeople.length) {
-      toast.error("Please select at least one client.");
+    const totalParticipants = selectedClients.length + selectedTeamMembers.length;
+    
+    if (totalParticipants === 0) {
+      toast.error("Please select at least one client or team member.");
       return;
     }
-    if (!conversationName.trim() && selectedPeople.length > 1) {
+    
+    if (!conversationName.trim() && totalParticipants > 1) {
       toast.error("Please enter a conversation name.");
       return;
     }
@@ -43,16 +62,30 @@ const NewConversationForm = ({ onClose }) => {
     setIsCreating(true);
     try {
       const name =
-        selectedPeople.length > 1
+        totalParticipants > 1
           ? `${conversationName.trim()}`
           : portal.brand_settings.brandName;
 
-      // 1) map clients
-      const participants = selectedPeople.map((p) => ({
-        type: "clients",
-        id: p.id,
-      }));
-      // 2) add the current user
+      // Build participants array with correct type mapping
+      const participants = [];
+      
+      // 1) Add selected clients with type "clients"
+      selectedClients.forEach((client) => {
+        participants.push({
+          type: "clients",
+          id: client.id,
+        });
+      });
+
+      // 2) Add selected team members with type "users"
+      selectedTeamMembers.forEach((teamMember) => {
+        participants.push({
+          type: "users",
+          id: teamMember.user_id
+        });
+      });
+
+      // 3) Add the current user
       participants.push({
         type: "users",
         id: currentUserId,
@@ -78,7 +111,7 @@ const NewConversationForm = ({ onClose }) => {
     }
   };
 
-  if (portalLoading || clientsLoading) {
+  if (portalLoading || clientsLoading || teamMembersLoading) {
     return (
       <div className="flex items-center justify-center py-2 text-black">
         Loading...
@@ -87,8 +120,9 @@ const NewConversationForm = ({ onClose }) => {
   }
 
   // Determine if conversation name is required
-  const isNameRequired = selectedPeople.length > 1;
-  const isFormValid = selectedPeople.length > 0 && (!isNameRequired || conversationName.trim());
+  const totalParticipants = selectedClients.length + selectedTeamMembers.length;
+  const isNameRequired = totalParticipants > 1;
+  const isFormValid = totalParticipants > 0 && (!isNameRequired || conversationName.trim());
 
   return (
     <>
@@ -98,18 +132,27 @@ const NewConversationForm = ({ onClose }) => {
             New Conversation
           </h3>
           <p className="text-sm text-gray-500">
-            Create a conversation including yourself and the selected client(s)
+            Create a conversation including yourself and the selected participants
           </p>
         </div>
 
         <PeopleMultiSelectWithAvatar
           people={clients || []}
-          onChange={handlePeopleChange}
-          value={selectedPeople}
+          onChange={handleClientsChange}
+          value={selectedClients}
           label="Select client(s)"
         />
 
-        {selectedPeople.length > 1 && (
+        <div className="mt-4">
+          <PeopleMultiSelectWithAvatar
+            people={availableTeamMembers || []}
+            onChange={handleTeamMembersChange}
+            value={selectedTeamMembers}
+            label="Select team member(s)"
+          />
+        </div>
+
+        {totalParticipants > 1 && (
           <div className="mt-4">
             <Label htmlFor="conversation-name" className="block text-sm font-medium text-gray-700">
               Conversation Name <span className="text-red-500">*</span>
