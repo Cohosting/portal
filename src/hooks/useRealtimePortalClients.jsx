@@ -12,7 +12,6 @@ export const useRealtimePortalClients = (user, portal) => {
                 .from('clients')
                 .select('*')
                 .eq('is_deleted', false)
-                .eq('status', 'active')
                 .eq('portal_id', portal.id);
 
             if (error) {

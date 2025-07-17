@@ -6,7 +6,7 @@ import { calculateTotal } from '../utils/invoices';
 
 export const createInvoice = async (invoiceState, portal) => {
   let { client, isLoading, ...rest } = invoiceState;
-  const invoice_number = generateInvoiceNumber();
+  const invoice_number = generateInvoiceNumber(invoiceState.is_external);
 
   try {
     const created_at = DateTime.utc().toISO();
@@ -14,7 +14,6 @@ export const createInvoice = async (invoiceState, portal) => {
     const { data, error } = await supabase.from("invoices").insert([
       {
         ...rest,
-        status: "draft",
         invoice_number,
         portal_id: portal.id,
         created_at,

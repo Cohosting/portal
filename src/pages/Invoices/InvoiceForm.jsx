@@ -45,13 +45,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from 'react-toastify';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Info } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
  
 // Error display component
 const ErrorMessage = ({ error, className = "" }) => {
@@ -223,6 +222,7 @@ export const InvoiceForm = () => {
   Preview
 </Button>
             </div>
+
           <div className="space-y-4 mb-4">
 
             <div className="space-y-2">
@@ -248,6 +248,7 @@ export const InvoiceForm = () => {
               <ErrorMessage error={validationErrors.description} />
             </div>
           </div>
+ 
 
           <div className="space-y-2 my-4">
             <Label htmlFor="client-select">Select Client</Label>
@@ -328,6 +329,18 @@ export const InvoiceForm = () => {
             </Popover>
             <ErrorMessage error={validationErrors.due_date} />
           </div>
+          <div className="space-y-0 my-1">
+            <div onClick={() => handleInputChange('is_external', !invoiceState.is_external)} className="cursor-pointer flex items-center justify-end gap-2">
+            <Checkbox
+            className='b-1 border-gray-300'
+                            checked={invoiceState.is_external}
+                          
+                          />
+              <Label htmlFor="is_external" className='text-sm cursor-pointer'>This is an external invoice</Label>
+            </div>
+
+          </div>
+          
 
           <InvoiceLineItemsTable
             lineItems={invoiceState.line_items}
@@ -346,13 +359,35 @@ export const InvoiceForm = () => {
             />
             <ErrorMessage error={validationErrors.memo} />
           </div>
-
+          {
+            invoiceState.is_external && (  
+          <div className="space-y-3 mt-6">
+            
+          <Select defaultValue={invoiceState.status} onValueChange={(value) => handleInputChange('status', value)}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Select a status" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {/* <SelectLabel>Status</SelectLabel> */}
+          <SelectItem value="draft">Draft</SelectItem>
+          <SelectItem value="open">Open</SelectItem>
+          <SelectItem value="paid">Paid</SelectItem>
+          <SelectItem value="past_due">Past Due</SelectItem>
+          <SelectItem value="void">Void</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+            </div>
+            )
+          }
           <UploadAttachmentComponent
             attachments={invoiceState.attachments}
             setAttachments={val => handleInputChange('attachments', val)}
           />
-
-          <Disclosure defaultOpen={true}>
+               {
+          !invoiceState.is_external  ? (
+            <Disclosure defaultOpen={true}>
             <DisclosureButton className="py-2 mt-6 group flex items-center space-x-2">
               <p className="font-semibold">Advanced Settings</p>
               <ChevronDown className="w-5 group-data-[open]:rotate-180" />
@@ -364,7 +399,20 @@ export const InvoiceForm = () => {
               />
             </DisclosurePanel>
           </Disclosure>
+          ) :  (
+            // Payment is managed outside the platform. You can record payment manually after it's been received.
+            <div className='flex items-center gap-2 mt-6'>
+              <Info className="w-5 h-5" />
+              <p className="text-gray-500 text-sm">Payment is managed outside the platform. You can record payment manually after it's been received.</p>
+
+            </div>
+          )
+        }
+
+
         </div>
+
+   
 
         <div className="hidden lg:block w-full lg:w-1/2 mt-8 lg:mt-0 lg:sticky lg:top-4 lg:self-start">
           <div className="bg-white rounded-md shadow-sm border border-gray-100">

@@ -165,7 +165,9 @@ export function InvoicePreview({ invoiceData, billingAddress }
           {/* Header section */}
           <div className="flex justify-between items-start mb-4 sm:mb-6 md:mb-8">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">{invoiceData.title || "Invoice"}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">{invoiceData.title || "Invoice"} {
+                invoiceData.is_external ? "(External Invoice)" : ""
+                }</h1>
               <p className="text-gray-600 text-xs sm:text-sm">Invoice Number #{invoiceNumber}</p>
             </div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-600 rounded flex items-center justify-center">

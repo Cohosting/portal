@@ -32,6 +32,8 @@ const defaultInvoiceState = {
   client: null,     // UI-only
   client_id: null,  // DB column
   due_date: null,
+  is_external: false,
+  status: 'draft',
 };
 
 function deepEqual(a, b) {
@@ -56,7 +58,8 @@ const validateInvoiceData = (invoiceState) => {
   // Due date validation
   if (!invoiceState.due_date) {
     errors.due_date = 'Due date is required';
-  } else {
+  } else if (!invoiceState.is_external) {
+    // Only validate past dates for internal invoices
     const due = new Date(invoiceState.due_date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -90,7 +93,6 @@ const validateInvoiceData = (invoiceState) => {
 
   return { isValid: Object.keys(errors).length === 0, errors };
 };
-
 const useInvoice = (defaultValue = {}) => {
   const [invoiceState, setInvoiceState] = useState(defaultInvoiceState);
   const [validationErrors, setValidationErrors] = useState({});
@@ -152,7 +154,17 @@ const useInvoice = (defaultValue = {}) => {
       }
 
       setInvoiceState((p) => ({ ...p, isLoading: true }));
+      if (!invoiceState.is_external) {
+      await createInvoice({
+        ...invoiceState,
+        status: "draft"
+      }, portal);
+
+      } else {
       await createInvoice(invoiceState, portal);
+
+      }
+      
       return { success: true, message: 'Invoice created successfully!' };
     } catch (err) {
       console.error('Error saving invoice:', err);

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { returnStyleBasedOnStatus } from './../../utils/statusStyles';
 import { calculateTotal } from '../../utils/invoices';
 import axiosInstance from '../../api/axiosConfig';
@@ -35,9 +36,99 @@ const InvoiceTable = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isVoidOpen, setIsVoidOpen] = useState(false);
 
+  const showStripeConnectionToast = () => {
+    return toast.custom(
+      (t) => (
+        <div className="flex items-start gap-3 p-4 bg-white border border-red-200 rounded-lg shadow-lg w-full max-w-md">
+          <X className="w-5 h-5 text-red-500 mt-0.5" />
+          <div className="flex-1">
+            <div className="font-medium text-gray-900">Stripe Account Required</div>
+            <div className="text-sm text-gray-600 mt-1">
+              Connect your Stripe account to finalize invoices
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Button
+                className='bg-gray-800 text-white'
+                size="sm"
+                onClick={() => {
+                  navigate('/settings/portal');
+                  toast.dismiss(t.id);
+                }}
+              >
+                Go to Settings
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.dismiss(t.id)}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        dismissible: true,
+      }
+    );
+  };
+
+  const showClientSyncToast = (clientId, clientName) => {
+    return toast.custom(
+      (t) => (
+        <div className="flex items-start gap-3 p-4 bg-white border border-red-200 rounded-lg shadow-lg w-full max-w-md">
+          <X className="w-5 h-5 text-red-500 mt-0.5" />
+          <div className="flex-1">
+            <div className="font-medium text-gray-900">Client Not Synced</div>
+            <div className="text-sm text-gray-600 mt-1">
+              {clientName} is not synced with your Stripe account
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Button
+                size="sm"
+                className='bg-gray-800 text-white'
+                onClick={() => {
+                  navigate(`/clients`);
+                  toast.dismiss(t.id);
+                }}
+              >
+                Go to Clients
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.dismiss(t.id)}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        dismissible: true,
+      }
+    );
+  };
+
   const handleInvoiceFinalized = async (invoice) => {
     const { line_items, settings, id, memo, client } = invoice;
     const { customer_id } = client;
+
+    // First check if portal has Stripe account connected
+    if (!stripe_connect_account_id) {
+      showStripeConnectionToast();
+      return;
+    }
+
+    // Then check if customer is synced with Stripe
+    if (!customer_id) {
+      showClientSyncToast(client.id, client.name);
+      return;
+    }
 
     const invoiceFinalizedPromise = axiosInstance.post('/stripe/connect/invoice', {
       line_items,
@@ -179,6 +270,7 @@ const InvoiceTable = ({
               {invoices.map((invoice, index) => {
                 const client = invoice?.client;
                 const isLastInvoice = index === invoices.length - 1;
+                const isExternal = invoice.is_external;
                 
                 return (
                   <tr 
@@ -221,41 +313,47 @@ const InvoiceTable = ({
                             <EllipsisVerticalIcon className="h-5 w-5" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-32 bg-white p-0">
-                            {invoice.status === 'draft' && (
-                              <>
-                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
-                                  <button 
-                                    onClick={() => navigate(`edit?id=${invoice.id}`)} 
-                                    className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
-                                  >
-                                    <Pencil className="h-5 w-5 text-blue-500 mr-2" />
-                                    Edit
-                                  </button>
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
-                                  <button 
-                                    onClick={() => handleDeleteInvoice(invoice)} 
-                                    className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
-                                  >
-                                    <Trash2 className="h-5 w-5 text-red-500 mr-2" />
-                                    Delete
-                                  </button>
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
-                                  <button 
-                                    onClick={() => handleInvoiceFinalized(invoice)} 
-                                    className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
-                                  >
-                                    <BadgeCheck className="h-5 w-5 text-green-500 mr-2" />
-                                    Finalize
-                                  </button>
-                                </DropdownMenuItem>
-                              </>
+                            {/* Edit button - show for external invoices regardless of status, or for draft non-external invoices */}
+                            {(isExternal || invoice.status === 'draft') && (
+                              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
+                                <button 
+                                  onClick={() => navigate(`edit?id=${invoice.id}`)} 
+                                  className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                >
+                                  <Pencil className="h-5 w-5 text-blue-500 mr-2" />
+                                  Edit
+                                </button>
+                              </DropdownMenuItem>
                             )}
                             
-                            {invoice.status === 'open' && (
+                            {/* Delete button - only for draft status */}
+                            {/* {invoice.status === 'draft' && (
+                              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
+                                <button 
+                                  onClick={() => handleDeleteInvoice(invoice)} 
+                                  className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                >
+                                  <Trash2 className="h-5 w-5 text-red-500 mr-2" />
+                                  Delete
+                                </button>
+                              </DropdownMenuItem>
+                            )}
+                             */}
+                            {/* Finalize button - only for draft status and non-external invoices */}
+                            {invoice.status === 'draft' && !isExternal && (
+                              <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
+                                <button 
+                                  onClick={() => handleInvoiceFinalized(invoice)} 
+                                  className="w-full text-left flex items-center px-3 text-sm leading-6 text-gray-900"
+                                >
+                                  <BadgeCheck className="h-5 w-5 text-green-500 mr-2" />
+                                  Finalize
+                                </button>
+                              </DropdownMenuItem>
+                            )}
+                            
+                            {/* Void button - only for open status and non-external invoices */}
+                            {invoice.status === 'open' && !isExternal && (
                               <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
                                 <button 
                                   onClick={() => handleVoidInvoice(invoice)} 
@@ -267,6 +365,7 @@ const InvoiceTable = ({
                               </DropdownMenuItem>
                             )}
                             
+                            {/* Download button - only for paid status */}
                             {invoice.status === 'paid' && (
                               <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 w-full px-0">
                                 <button 

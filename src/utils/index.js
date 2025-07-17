@@ -1,8 +1,11 @@
 import { nanoid } from 'nanoid';
 
-export const generateInvoiceNumber = () => {
+export const generateInvoiceNumber = (isExternal) => {
   const year = new Date().getFullYear().toString().slice(-2); // e.g., '25' for 2025
   const id = nanoid(8).toUpperCase(); // 8-character unique ID (alphanumeric)
+  if (isExternal) {
+    return `INV-${year}-${id}-EXT`;
+  }
 
   return `INV-${year}-${id}`;
 };
