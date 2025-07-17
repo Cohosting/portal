@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 /tasks.txt
 /src/build
+/src/test
