@@ -1,4 +1,8 @@
-CREATE OR REPLACE FUNCTION public.fetch_conversations_with_participants(
+-- Drop and recreate the function to ensure search_path is properly set
+DROP FUNCTION IF EXISTS public.fetch_conversations_by_client(UUID, UUID);
+
+CREATE FUNCTION public.fetch_conversations_by_client(
+  _client_id UUID,
   _portal_id UUID
 )
 RETURNS TABLE (
@@ -15,7 +19,16 @@ LANGUAGE SQL
 SECURITY DEFINER
 SET search_path = ''
 AS $$
-WITH last_msgs AS (
+WITH client_conversations AS (
+  -- Get all conversation IDs where the client is a participant AND belongs to the specified portal
+  SELECT DISTINCT cp.conversation_id
+  FROM public.conversation_participants cp
+  INNER JOIN public.conversations conv ON cp.conversation_id = conv.id
+  WHERE cp.participant_type = 'clients' 
+    AND cp.participant_id = _client_id
+    AND conv.portal_id = _portal_id
+),
+last_msgs AS (
   SELECT
     m.conversation_id,
     jsonb_build_object(
@@ -25,9 +38,7 @@ WITH last_msgs AS (
       'created_at', m.created_at
     ) AS last_msg
   FROM public.messages m
-  WHERE m.conversation_id IN (
-    SELECT id FROM public.conversations WHERE portal_id = _portal_id
-  )
+  WHERE m.conversation_id IN (SELECT conversation_id FROM client_conversations)
   ORDER BY m.created_at DESC
 ),
 agg_participants AS (
@@ -36,7 +47,7 @@ agg_participants AS (
     jsonb_agg(
       jsonb_build_object(
         'id',             cp.id,
-        'type',           cp.participant_type,
+        'participant_type', cp.participant_type,
         'participant_id', cp.participant_id,
         'name',
           CASE
@@ -53,9 +64,7 @@ agg_participants AS (
   FROM public.conversation_participants cp
   LEFT JOIN public.users   u ON cp.participant_type = 'users'   AND cp.participant_id = u.id
   LEFT JOIN public.clients c ON cp.participant_type = 'clients' AND cp.participant_id = c.id
-  WHERE cp.conversation_id IN (
-    SELECT id FROM public.conversations WHERE portal_id = _portal_id
-  )
+  WHERE cp.conversation_id IN (SELECT conversation_id FROM client_conversations)
   GROUP BY cp.conversation_id
 )
 SELECT
@@ -76,6 +85,6 @@ LEFT JOIN LATERAL (
 ) lm ON TRUE
 LEFT JOIN agg_participants ap
   ON ap.conversation_id = c.id
-WHERE c.portal_id = _portal_id
+WHERE c.id IN (SELECT conversation_id FROM client_conversations)
 ORDER BY c.updated_at DESC;
 $$;

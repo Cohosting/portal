@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.sign_up_user_with_portal_and_seat(
+CREATE FUNCTION public.sign_up_user_with_portal_and_seat(
   user_id    UUID,
   user_email TEXT
 ) RETURNS JSON AS $$
@@ -96,4 +96,6 @@ BEGIN
 
   RETURN result;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = '';
