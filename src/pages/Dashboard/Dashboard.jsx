@@ -19,7 +19,7 @@ import PageHeader from '@/components/internal/PageHeader';
 import DashboardSkeleton from '@/components/SkeletonLoading';
 import RecentActivitiesList from '@/components/RecentActivities';
 import { Button } from '@/components/ui/button';
-
+ 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { currentSelectedPortal, user } = useSelector(state => state.auth);
@@ -93,7 +93,7 @@ export const Dashboard = () => {
   ];
 
   if (isPortalLoading) return <DashboardSkeleton />;
-
+ 
   return (
     <Layout hideMobileNav user={user}>
       <PageHeader

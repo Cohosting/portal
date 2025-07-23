@@ -153,7 +153,7 @@ export function LoginForm({ className, ...props }) {
 
                 {/* Redirect to Signup */}
                 <div className="text-center text-sm">
-                  New to copilot?{" "}
+                  New to HueHQ?{" "}
                   <a
                     href="#"
                     className="text-primary underline underline-offset-4 hover:text-gray-800"

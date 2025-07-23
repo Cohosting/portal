@@ -178,7 +178,7 @@ const ClientPreview = ({ brandSettings, computedColors }) => {
               className="p-4 text-xs text-center opacity-60"
               style={{ color: sidebarTextColor }}
             >
-              Powered by Copilot
+              Powered by HueHQ
             </div>
           )}
         </div>
