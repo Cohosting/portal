@@ -103,6 +103,10 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
       {setupType !== 'manual' && (
         <>
 
+
+{/* Connet input */}
+
+
 <div className="my-4 space-y-2">
   <Label className="text-sm font-medium">
     Connection type
@@ -174,7 +178,22 @@ export const AppFormFields = ({ mode, appState, setAppState }) => {
               />
             </div>
           )}
+                    <div className="my-4 space-y-2">
+            <Label htmlFor="content" className="text-sm font-medium">
+              Content - can be public url
+            </Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={(e) => handleSettingsChange('content', e.target.value)}
+              rows={4}
+              className="resize-none"
+            />
+          </div>
         </>
+
+
+
       )}
     </div>
   );

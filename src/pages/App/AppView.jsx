@@ -44,7 +44,7 @@ export const renderAppContent = (settings, isLoading, setIsLoading) => {
           )}
           <iframe
             title="app-iframe"
-            className={`w-full h-full ${isLoading ? 'hidden' : ''}`}
+            className={`w-full h-[calc(100vh-80px)] ${isLoading ? 'hidden' : ''}`}
             src={settings.content.startsWith('http') ? settings.content : `https://${settings.content}`}
             onLoad={() => setIsLoading(false)}
             allowFullScreen

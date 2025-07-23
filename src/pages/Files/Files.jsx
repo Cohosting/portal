@@ -13,6 +13,7 @@ import FileViewer from './FileViewer';
 import ShareModal from './ShareModal'; // Import the ShareModal component
 import { useSelector } from 'react-redux';
 import { CustomSkeleton } from '@/components/SkeletonLoading';
+import { Move } from 'lucide-react';
 
 const STORAGE_BUCKET = 'file-storage';
 
@@ -916,6 +917,8 @@ const Files = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 bg-white">
                             <DropdownMenuItem onClick={() => openMoveDialog([item.id])}>
+                             
+                             <Move className="w-4 h-4 mr-2" />
                               Move
                             </DropdownMenuItem>
                             <DropdownMenuItem 
@@ -975,6 +978,7 @@ const Files = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 bg-white">
                             <DropdownMenuItem onClick={() => openMoveDialog([item.id])}>
+                              <Move className="w-4 h-4 mr-2" />
                               Move
                             </DropdownMenuItem>
                             <DropdownMenuItem 
@@ -1041,7 +1045,7 @@ const Files = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="folderName">Folder Name</Label>
+              <Label htmlFor="folderName" className='mb-2'>Folder Name</Label>
               <Input
                 id="folderName"
                 value={newFolderName}

@@ -19,6 +19,7 @@ const FileViewer = ({ file, fileUrl, downloadFile, loadingStates, isOpen, onClos
   const [error, setError] = useState(null);
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
+  const [textContent, setTextContent] = useState('');
   
   console.log({fileUrl})
 
@@ -28,22 +29,44 @@ const FileViewer = ({ file, fileUrl, downloadFile, loadingStates, isOpen, onClos
       setError(null);
       setZoom(100);
       setRotation(0);
+      setTextContent('');
       
-      // Simulate loading time
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 500);
-      
-      return () => clearTimeout(timer);
+      // For text/CSV files, attempt to fetch content
+      const fileType = getFileType(file.mime_type, file.name);
+      if (fileType === 'text' && fileUrl) {
+        fetch(fileUrl)
+          .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch file');
+            return response.text();
+          })
+          .then(text => {
+            // Limit preview to first 1000 characters for performance
+            const preview = text.length > 1000 ? text.substring(0, 1000) + '\n\n... (preview truncated)' : text;
+            setTextContent(preview);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Error fetching text content:', err);
+            setError('Unable to load file preview');
+            setLoading(false);
+          });
+      } else {
+        // For other file types, just simulate loading
+        const timer = setTimeout(() => {
+          setLoading(false);
+        }, 500);
+        
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isOpen, file]);
+  }, [isOpen, file, fileUrl]);
 
   if (!isOpen || !file) return null;
 
   const getFileType = (mimeType, fileName) => {
     if (mimeType?.startsWith('image/')) return 'image';
     if (mimeType === 'application/pdf') return 'pdf';
-    if (mimeType?.includes('text/') || fileName?.endsWith('.txt')) return 'text';
+    if (mimeType?.includes('text/') || fileName?.endsWith('.txt') || fileName?.endsWith('.csv')) return 'text';
     if (mimeType?.includes('video/')) return 'video';
     if (mimeType?.includes('audio/')) return 'audio';
     return 'unsupported';
@@ -125,23 +148,38 @@ const FileViewer = ({ file, fileUrl, downloadFile, loadingStates, isOpen, onClos
         );
 
       case 'text':
-        return (
-          <div className="bg-white p-6 rounded-lg border max-h-96 overflow-y-auto">
-            <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
-              {`This is a sample text file preview.
-              
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-laboris nisi ut aliquip ex ea commodo consequat.
-
-Duis aute irure dolor in reprehenderit in voluptate velit 
-esse cillum dolore eu fugiat nulla pariatur. Excepteur sint 
-occaecat cupidatat non proident, sunt in culpa qui officia 
-deserunt mollit anim id est laborum.`}
-            </pre>
-          </div>
-        );
+        // If we have text content, show it; otherwise show "cannot preview" message
+        if (textContent) {
+          return (
+            <div className="bg-white p-6 rounded-lg border max-h-96 overflow-y-auto">
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+                {textContent}
+              </pre>
+            </div>
+          );
+        } else {
+          // Fallback for when content couldn't be loaded
+          return (
+            <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+              <div className="text-center">
+                <File className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-700 font-medium mb-2">
+                  {file.name.endsWith('.csv') ? 'CSV File' : 'Text File'}
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  This file cannot be previewed
+                </p>
+                <Button
+                  onClick={() => downloadFile(file)}
+                  variant="outline"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download to View
+                </Button>
+              </div>
+            </div>
+          );
+        }
 
       case 'video':
         return (
