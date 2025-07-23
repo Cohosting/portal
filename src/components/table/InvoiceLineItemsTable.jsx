@@ -44,7 +44,8 @@ const InvoiceLineItemsTable = ({
                     if (name === 'quantity') {
                         newValue = Math.max(0, Math.round(value)); // Ensure integer and non-negative
                     } else if (name === 'unit_amount') {
-                        newValue = Math.max(0, parseFloat(value) || 0); // Ensure non-negative
+                        // Convert empty string to 0, otherwise ensure non-negative number
+                        newValue = value === '' ? 0 : Math.max(0, parseFloat(value) || 0);
                     }
                     return {
                         ...item,
@@ -96,8 +97,8 @@ const InvoiceLineItemsTable = ({
             <div className="mt-0">
                 <table className="min-w-full">
                     <colgroup>
-                        <col className="w-full sm:w-1/2" />
-                        <col className="sm:w-1/6" />
+                        <col className="w-full sm:w-2/5" />
+                        <col className="sm:w-1/5" />
                         <col className="sm:w-1/6" />
                         <col className="sm:w-1/6" />
                         <col className="sm:w-12" />
@@ -108,7 +109,7 @@ const InvoiceLineItemsTable = ({
                                 Project
                             </th>
                             <th scope="col" className="hidden px-3 py-3.5 text-right text-sm font-semibold text-gray-900 sm:table-cell">
-                                Unit amount
+                                Unit Price
                             </th>
                             <th scope="col" className="hidden px-3 py-3.5 text-right text-sm font-semibold text-gray-900 sm:table-cell">
                                 Quantity
@@ -148,17 +149,17 @@ const InvoiceLineItemsTable = ({
                                         
                                         <div className="sm:hidden mt-1 space-y-1">
                                             <div className='my-3 space-y-2'>
-                                                <MobileLabel>Unit amount</MobileLabel>
+                                                <MobileLabel>Unit Price</MobileLabel>
                                                 <Input
                                                     type="number"
                                                     name="unit_amount"
-                                                    value={item.unit_amount}
+                                                    value={item.unit_amount === 0 ? '' : item.unit_amount}
                                                     onChange={(e) => handleInputChange(item.id, e)}
                                                     className={cn(
                                                         "w-full text-xs",
                                                         unitAmountError && "border-red-500 focus:border-red-500"
                                                     )}
-                                                    placeholder="Unit amount"
+                                                    placeholder="$0.00"
                                                     min="0"
                                                     step="0.01"
                                                 />
@@ -189,13 +190,13 @@ const InvoiceLineItemsTable = ({
                                             <Input
                                                 type="number"
                                                 name="unit_amount"
-                                                value={item.unit_amount}
+                                                value={item.unit_amount === 0 ? '' : item.unit_amount}
                                                 onChange={(e) => handleInputChange(item.id, e)}
                                                 className={cn(
                                                     "w-full text-xs text-right",
                                                     unitAmountError && "border-red-500 focus:border-red-500"
                                                 )}
-                                                placeholder="Unit amount"
+                                                placeholder="$0.00"
                                                 min="0"
                                                 step="0.01"
                                             />
