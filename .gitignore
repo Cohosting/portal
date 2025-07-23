@@ -25,3 +25,5 @@ dist-ssr
 /tasks.txt
 /src/build
 /src/test
+
+changelog.md
