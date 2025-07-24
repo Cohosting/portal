@@ -6,6 +6,8 @@ import { SetPassword } from './components/SetPassword';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { defaultBrandSettings, deriveColors, getComputedColors } from '@/utils/colorUtils';
+import { useMemo } from 'react';
    
 export const SetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +19,18 @@ export const SetPasswordPage = () => {
   const [tokenStatus, setTokenStatus] = useState('validating'); // validating, valid, invalid, expired, used, no_portal
   const [clientData, setClientData] = useState(null);
   const [portal, setPortal] = useState(null);
+
+    // Decide where portal data comes from
+    const brandSettings = portal?.brand_settings || defaultBrandSettings;
+  
+    // Compute colors based on advanced options toggle
+    const colors = useMemo(() => {
+      return brandSettings.showAdvancedOptions 
+        ? getComputedColors(brandSettings) 
+        : deriveColors(brandSettings.baseColors);
+    }, [brandSettings]);
+  
+
 
   // Validate token and fetch related data when component mounts
   useEffect(() => {
@@ -222,7 +236,8 @@ export const SetPasswordPage = () => {
       portal={portal}
       title="Complete Your Registration"
       subtitle={<>Welcome <b>{clientData?.name}</b>. Please set your password to access the portal.</>}
-    >
+      brandSettings={{ ...brandSettings, colors }}
+      >
       <SetPassword
         buttonText="Complete Registration"
         isLoading={isLoading}
