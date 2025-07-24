@@ -78,7 +78,7 @@ export function LoginForm({ className, ...props }) {
         <Card className="border bg-white">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Sign in to your account</CardTitle>
-            <CardDescription>Welcome back to our service</CardDescription>
+            <CardDescription>Welcome back!</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleEmailPasswordLogin}>

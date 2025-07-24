@@ -78,7 +78,7 @@ export const Dashboard = () => {
     },
     {
       title: 'Total Revenue',
-      value: `${summary.total_revenue.value}$`,
+      value: `$${summary.total_revenue.value}`,
       icon: TrendingUp,
       delta: summary.total_revenue.change,
       label: formatChange(summary.total_revenue.change, true),
