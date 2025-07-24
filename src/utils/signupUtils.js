@@ -77,6 +77,11 @@ export const initializeOrganizationSetup = async (
       portal_url: personalInfoStep.portal_url,
       brand_settings: createBrandSettings({
         brandName: personalInfoStep.company_name,
+        advancedOverrides: {
+          messages:{
+            oppositeMessageTextColor: '#000000'
+          }
+        }
       
       }),
       customer_id

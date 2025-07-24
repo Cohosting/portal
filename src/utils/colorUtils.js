@@ -154,8 +154,49 @@ export const defaultBrandSettings = {
 
   showAdvancedOptions: false,
 };
+// Helper function to recursively filter out null values
+const filterNullValues = (obj) => {
+  if (obj === null || obj === undefined) return null;
+  
+  if (typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj;
+  }
+  
+  const filtered = {};
+  let hasNonNullValues = false;
+  
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        const nestedFiltered = filterNullValues(value);
+        if (nestedFiltered !== null && Object.keys(nestedFiltered).length > 0) {
+          filtered[key] = nestedFiltered;
+          hasNonNullValues = true;
+        }
+      } else {
+        filtered[key] = value;
+        hasNonNullValues = true;
+      }
+    }
+  }
+  
+  return hasNonNullValues ? filtered : null;
+};
 
-// Merge derived + any non-null overrides in one go
+// Helper function to flatten nested overrides
+const flattenOverrides = (obj, prefix = '', result = {}) => {
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+      flattenOverrides(value, prefix, result);
+    } else {
+      const flatKey = prefix + key;
+      result[flatKey] = value;
+    }
+  }
+  
+  return result;
+};
+
 export const getComputedColors = (brandSettings) => {
   // 1) Generate full derived palette from baseColors
   const derived = deriveColors(brandSettings.baseColors);
@@ -163,15 +204,16 @@ export const getComputedColors = (brandSettings) => {
   // 2) Grab overrides (may be all-null by default)
   const overrides = brandSettings.advancedColors || {};
 
-  // 3) Filter to only those overrides that are non-null
-  const filteredOverrides = Object.fromEntries(
-    Object.entries(overrides).filter(([_, value]) => value != null)
-  );
+  // 3) Recursively filter to only those overrides that are non-null
+  const filteredOverrides = filterNullValues(overrides) || {};
 
-  // 4) Merge overrides on top of derived
-  const merged = { ...derived, ...filteredOverrides };
+  // 4) Flatten the filtered overrides to match derived structure
+  const flattenedOverrides = flattenOverrides(filteredOverrides);
 
-  // 5) Return full computed map including raw bases
+  // 5) Simple merge since both are now flat
+  const merged = { ...derived, ...flattenedOverrides };
+
+  // 6) Return full computed map including raw bases
   return {
     backgroundColor: brandSettings.baseColors.backgroundColor,
     primaryColor:    brandSettings.baseColors.primaryColor,

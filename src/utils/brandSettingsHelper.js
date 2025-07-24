@@ -43,6 +43,7 @@ export const createBrandSettings = (options = {}) => {
         activeItemBorder: advancedOverrides.messages?.activeItemBorder || null,
         activeItemText: advancedOverrides.messages?.activeItemText || null,
         hoverBg: advancedOverrides.messages?.hoverBg || null,
+        oppositeMessageTextColor: advancedOverrides.messages?.oppositeMessageTextColor || null,
       },
       accent: {
         color: advancedOverrides.accent?.color || null,
@@ -50,7 +51,7 @@ export const createBrandSettings = (options = {}) => {
         lightColor: advancedOverrides.accent?.lightColor || null,
       }
     },
-    showAdvancedOptions: false,
+    showAdvancedOptions: true,
   };
 };
 
