@@ -13,30 +13,47 @@ export const AssetItem = ({
   const [downloadURL, setDownloadURL] = useState(initialDownloadUrl || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef(null);
+
+  // Validate file type
+  const isValidImageType = (file) => {
+    const validTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+    return validTypes.includes(file.type);
+  };
 
   const handleUpload = async (selectedImage) => {
     if (selectedImage) {
+      // Clear any previous errors
+      setUploadError('');
+      
+      // Validate file type
+      if (!isValidImageType(selectedImage)) {
+        setUploadError('Please select a PNG or JPG image file.');
+        return;
+      }
+
       setIsUploading(true);
-      const randomId = uuidv4()
+      const randomId = uuidv4();
       const fileExt = selectedImage.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `public/${fileName}-${randomId}.${fileExt}`;
 
       let { error } = await supabase.storage
         .from('portal_bucket')
-        .upload(`${filePath}`, selectedImage, {
+        .upload(filePath, selectedImage, {
           cacheControl: '3600',
           upsert: false
-        })
+        });
 
       if (error) {
         console.error('Upload error', error.message);
+        setUploadError('Upload failed. Please try again.');
       } else {
         const { data: { publicUrl } } = supabase
           .storage
           .from('portal_bucket')
-          .getPublicUrl(filePath)
+          .getPublicUrl(filePath);
         setDownloadURL(publicUrl);
         onUpload(field, publicUrl);
       }
@@ -50,12 +67,15 @@ export const AssetItem = ({
 
   const handleFileChange = event => {
     const file = event.target.files[0];
-    handleUpload(file);
+    if (file) {
+      handleUpload(file);
+    }
   };
 
   const handleRemove = (e) => {
     e.stopPropagation();
     setDownloadURL('');
+    setUploadError('');
     onUpload(field, '');
   };
 
@@ -73,6 +93,9 @@ export const AssetItem = ({
         <p className="text-sm font-semibold leading-6 text-gray-900">{text}</p>
         <div className="mt-1 flex items-center gap-x-2 text-xs leading-5 text-gray-500">
           <p className="truncate">{subText}</p>
+          {uploadError && (
+            <p className="text-red-500 text-xs mt-1">{uploadError}</p>
+          )}
         </div>
       </div>
       <div className="relative">
@@ -85,6 +108,7 @@ export const AssetItem = ({
             className="hidden"
             ref={fileInputRef}
             onChange={handleFileChange}
+            accept="image/png,image/jpg,image/jpeg"
           />
           {isUploading ? (
             <div className="flex items-center justify-center w-full h-full bg-gray-100">
@@ -94,7 +118,7 @@ export const AssetItem = ({
             <img src={downloadURL} className="w-full rounded-md h-full object-cover" alt="Uploaded asset" />
           ) : (
             <div className="flex items-center justify-center border-2 rounded-full w-[38px] h-[38px]">
-                  <Plus className="h-4 w-4 text-gray-400" />
+              <Plus className="h-4 w-4 text-gray-400" />
             </div>
           )}
         </div>

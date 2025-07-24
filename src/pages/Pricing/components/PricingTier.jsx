@@ -24,7 +24,7 @@ const PricingTier = ({ tier, tierIdx, frequency, onSelectTier }) => {
             </h3>
             <p className="mt-4 flex items-baseline gap-x-2">
                 <span className={classNames(tier.featured ? 'text-white' : 'text-black', 'text-5xl font-bold tracking-tight')}>
-                    {price}$
+                ${price}
                 </span>
                 <span className="text-gray-500 text-base">
                     /{frequency === 'monthly' ? 'month' : 'year'}

@@ -8,8 +8,7 @@ const PricingHeader = () => {
                 </p>
             </div>
             <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600">
-                Distinctio et nulla eum soluta et neque labore quibusdam. Saepe et quasi iusto modi velit ut non voluptas in. Explicabo id ut laborum.
-            </p>
+            Whether you're a solo founder or a growing team, our flexible pricing scales with your needs. Simple plans designed to grow with you, with clear and transparent pricing.             </p>
         </>
     );
 }
